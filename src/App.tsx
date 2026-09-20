@@ -333,6 +333,8 @@ export const App: React.FC = () => {
         <ImperivmProModal
           isOpen={isProModalOpen}
           onClose={() => setIsProModalOpen(false)}
+          currentUser={null}
+          isProSubscriber={false}
         />
       </>
     );
@@ -506,6 +508,8 @@ export const App: React.FC = () => {
       <ImperivmProModal
         isOpen={isProModalOpen}
         onClose={() => setIsProModalOpen(false)}
+        currentUser={appState.userAccount}
+        isProSubscriber={appState.isProSubscriber}
         onUpgradeSuccess={() => {
           setAppState(prev => ({ ...prev, isProSubscriber: true }));
         }}

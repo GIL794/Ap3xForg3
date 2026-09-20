@@ -42,11 +42,66 @@ export const GABRIELE_PROFILE_TEMPLATE: UserProfile = {
 export const DEFAULT_GABRIELE_ACCOUNT: UserAccount = {
   id: 'athlete_gabriele_founder',
   name: 'Gabriele',
-  email: 'gabriele@homodevs.app',
+  email: 'gella94@gmail.com',
   avatarUrl: '/logo.png',
   createdAt: '2026-09-20T17:00:00.000Z',
   isGuest: false,
 };
+
+export const DEFAULT_LIFETIME_VIP_EMAILS = [
+  'gella94@gmail.com',
+  'gabriele@homodevs.app',
+  'athlete_gabriele_founder',
+];
+
+/**
+ * Checks whether an account has permanent Lifetime Emperor Pro access
+ * (via founder whitelist or VITE_LIFETIME_PRO_EMAILS environment variable)
+ */
+export function isLifetimeVipUser(account?: UserAccount | null): boolean {
+  if (!account) return false;
+
+  const email = (account.email || '').trim().toLowerCase();
+  const id = (account.id || '').trim().toLowerCase();
+  const name = (account.name || '').trim().toLowerCase();
+
+  // Founder accounts
+  if (
+    DEFAULT_LIFETIME_VIP_EMAILS.includes(email) || 
+    DEFAULT_LIFETIME_VIP_EMAILS.includes(id) ||
+    email === 'gella94@gmail.com' ||
+    name === 'gabriele'
+  ) {
+    return true;
+  }
+
+  // Environment variable configured accounts (comma-separated list of emails or names)
+  const envVipList = (import.meta.env.VITE_LIFETIME_PRO_EMAILS || '')
+    .split(',')
+    .map((e: string) => e.trim().toLowerCase())
+    .filter(Boolean);
+
+  if (envVipList.some((vip: string) => vip === email || vip === id || vip === name)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Validates Emperor secret passcodes for instant VIP unlock
+ */
+export function verifyEmperorPasscode(code: string): boolean {
+  if (!code) return false;
+  const clean = code.toUpperCase().trim();
+  const validCodes = [
+    'IMPERATOR2026',
+    'OLYMPIAN',
+    (import.meta.env.VITE_LIFETIME_PRO_CODE || '').toUpperCase().trim(),
+  ].filter(Boolean);
+
+  return validCodes.includes(clean);
+}
 
 /**
  * Retrieves list of all user accounts on this device
@@ -145,7 +200,7 @@ export function createInitialStateForUser(account: UserAccount): AppState {
     lastGeneratedAt: new Date().toISOString(),
     onboardingCompleted: isGabriele, // New users will see onboarding
     loreRead: false,
-    isProSubscriber: false,
+    isProSubscriber: isLifetimeVipUser(account),
   };
 }
 
@@ -169,11 +224,13 @@ export function loadUserState(userId: string): AppState {
       const parsed = JSON.parse(raw);
       if (parsed.profile && parsed.weeklyPlan) {
         const todayWorkout = resolveTodayWorkout(parsed.weeklyPlan, parsed.profile);
+        const isVip = isLifetimeVipUser(account);
         return {
           ...parsed,
           userId,
           userAccount: account,
           todayWorkout,
+          isProSubscriber: isVip ? true : Boolean(parsed.isProSubscriber),
         };
       }
     }
