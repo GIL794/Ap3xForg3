@@ -9,7 +9,7 @@ export interface AiCoachRecommendation {
   isAiGenerated: boolean;
 }
 
-const GEMINI_KEY_STORAGE = 'apex_gemini_api_key';
+const GEMINI_KEY_STORAGE = 'homodevs_gemini_api_key';
 
 export function getSavedGeminiKey(): string {
   return localStorage.getItem(GEMINI_KEY_STORAGE) || import.meta.env.VITE_GEMINI_API_KEY || '';

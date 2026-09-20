@@ -28,6 +28,7 @@ import { TermsModal } from './components/TermsModal';
 import { EvolutionRoadmapModal } from './components/EvolutionRoadmapModal';
 import { ImperivmProModal } from './components/ImperivmProModal';
 import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export const App: React.FC = () => {
   // Check direct URL parameters for Google OAuth verification compliance (?page=privacy, ?page=terms, ?page=creed)
@@ -73,6 +74,7 @@ export const App: React.FC = () => {
 
   const [variationSeed, setVariationSeed] = useState<number>(0);
   const [regenNotification, setRegenNotification] = useState<string | null>(null);
+  const [proWelcomeNotice, setProWelcomeNotice] = useState<string | null>(null);
 
   // Modals state
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
@@ -93,6 +95,30 @@ export const App: React.FC = () => {
     return () => {
       if (unsubscribe) unsubscribe();
     };
+  }, []);
+
+  // Listen for Stripe Checkout return (?payment=success&tier=...)
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('payment') === 'success') {
+        const tier = params.get('tier') || 'pro';
+        setAppState(prev => ({ ...prev, isProSubscriber: true }));
+        setProWelcomeNotice(`🏛️ IMPERIVM PRO ACTIVATED: Welcome to the Divine Pantheon! (${tier.toUpperCase()})`);
+        confetti({
+          particleCount: 140,
+          spread: 90,
+          origin: { y: 0.5 },
+          colors: ['#d4af37', '#ffd700', '#f59e0b', '#ffffff']
+        });
+        window.history.replaceState({}, '', window.location.pathname);
+        setTimeout(() => {
+          setProWelcomeNotice(null);
+        }, 8000);
+      }
+    } catch {
+      // ignore
+    }
   }, []);
 
   // Auto-persist changes strictly to the active user's partition when authenticated
@@ -252,7 +278,7 @@ export const App: React.FC = () => {
 
   // Handle completing onboarding
   const handleOnboardingComplete = (completedProfile: UserProfile) => {
-    setLoadingMessage('FORGING YOUR PERSONAL APEX SPLIT');
+    setLoadingMessage('FORGING YOUR PERSONAL OLYMPIAN SPLIT');
     setIsLoading(true);
     setTimeout(() => {
       const weeklyPlan = generateWeeklyPlan(completedProfile);
@@ -328,6 +354,14 @@ export const App: React.FC = () => {
         onOpenPro={() => setIsProModalOpen(true)}
         onSignOut={handleSignOut}
       />
+
+      {/* Stripe Checkout Success Banner */}
+      {proWelcomeNotice && (
+        <div className="sticky top-16 sm:top-20 z-30 w-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 px-4 py-2.5 text-center text-xs sm:text-sm font-black font-roman flex items-center justify-center gap-2 shadow-xl animate-in slide-in-from-top duration-300">
+          <Crown className="w-4 h-4 fill-slate-950" />
+          <span>{proWelcomeNotice}</span>
+        </div>
+      )}
 
       {/* Regeneration Toast Banner */}
       {regenNotification && (

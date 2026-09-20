@@ -37,7 +37,7 @@ export const LoreIntroModal: React.FC<LoreIntroModalProps> = ({
                   Romanvm Impervm
                 </span>
               </div>
-              <p className="text-xs text-slate-400 font-roman">The Silverback Paradox & The Path to Divine Ascension</p>
+              <p className="text-xs text-slate-400 font-roman">The Colosseum Crucible & The Path to Divine Ascension</p>
             </div>
           </div>
 
@@ -57,23 +57,23 @@ export const LoreIntroModal: React.FC<LoreIntroModalProps> = ({
               <span>🏛️</span> Act I: The Fragile Mortal (Tiro)
             </div>
             <p>
-              Mortals enter the gym unconditioned, sedentary, and disconnected from raw Olympian power. They swing weights aimlessly, mimic fleeting trends, and struggle against biological inertia.
+              Mortals step into the gymnasium unconditioned, fatigued by modern sedentary life, and bound by biological limits. They lift without structure, chasing fleeting trends and stalling against plateaus.
             </p>
           </div>
 
           {/* Act II */}
           <div className="p-4 rounded-2xl bg-slate-950/70 border border-amber-500/20 space-y-2">
             <div className="flex items-center gap-2 font-bold text-amber-300 font-roman uppercase tracking-wider text-xs">
-              <span>🦍</span> Act II: The Silverback Paradox
+              <span>⚔️</span> Act II: The Colosseum Crucible
             </div>
             <p>
-              They lift, eat in surplus, and add raw muscle. Soon they feel like a <strong className="text-white">Silverback Gorilla</strong> — 400 pounds of muscle capable of snapping branches and moving iron.
+              In the Roman arena, victory is not given—it is forged in iron and sweat. By applying rigorous progressive overload, mechanical tension, and autoregulated bio-recovery, the recruit rises.
             </p>
             <p className="text-amber-200 font-medium italic border-l-2 border-amber-400 pl-3 my-2 font-roman">
-              "Yet in the wild savannah, a gorilla is still prey. When night falls, the solitary leopard and the lion pride strike without mercy. Raw mass without predatory tactical speed, cardiovascular fortitude, and strategic intelligence will always be hunted down."
+              "From Hastatus spearman to battlefield Centurion and Colosseum champion, every repetition hammers the musculature into resilient armor. Yet ordinary mortal strength reaches a ceiling unless guided by divine vision."
             </p>
             <p>
-              Most gym lifters plateau at this stage: heavy, breathless tying their shoes, and vulnerable to fatigue and plateaus.
+              Most lifters surrender at the mortal ceiling: joint fatigue, burnout, and stagnant numbers.
             </p>
           </div>
 
@@ -83,13 +83,13 @@ export const LoreIntroModal: React.FC<LoreIntroModalProps> = ({
               <span>👑</span> Act III: The Ascension to HOMO DEVS
             </div>
             <p>
-              <strong className="text-white font-roman">HOMO DEVS</strong> shatters that ceiling. We synthesize progressive overload compound science, autoregulated bio-recovery, and relentless mechanical tension.
+              <strong className="text-white font-roman">HOMO DEVS</strong> shatters that ceiling. We unite the precision of modern sport science with the divine physical ideals of Greco-Roman antiquity.
             </p>
             <p className="text-slate-200 font-semibold font-roman">
-              We do not stop at the beast. We unite human intelligence with the eternal aesthetics and power of Roman champions and Olympian gods: <strong className="text-amber-400 font-roman">HOMO DEVS — A God Among Mortals</strong>.
+              Embody the colossal power of Hercules, the golden symmetry of Adonis and Apollo, and the athletic grace of Artemis and Athena: <strong className="text-amber-400 font-roman">HOMO DEVS — A God Among Mortals</strong>.
             </p>
-            <p className="text-xs text-slate-400 italic">
-              Beaten by no predator. Beaten by no barbell. Beaten by no obstacle.
+            <p className="text-xs text-slate-400 italic font-roman">
+              Vanquished by no barbell. Bound by no mortal limit.
             </p>
           </div>
         </div>

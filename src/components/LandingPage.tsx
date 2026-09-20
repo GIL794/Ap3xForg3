@@ -400,7 +400,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="w-9 h-9 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
                 <Timer className="w-5 h-5" />
               </div>
-              <h4 className="text-sm font-bold font-roman text-white">Primal Rest Stopwatch</h4>
+              <h4 className="text-sm font-bold font-roman text-white">Imperial Rest Stopwatch</h4>
               <p className="text-xs text-slate-400">
                 Web Audio 4-note ascending power fanfare and psychological focus quotes to ignite your next set.
               </p>
@@ -453,7 +453,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </button>
             <span>•</span>
             <a
-              href="https://github.com/GIL794/Ap3xForg3"
+              href="https://github.com/GIL794/HomoDevs"
               target="_blank"
               rel="noreferrer"
               className="hover:text-amber-300 transition-colors"

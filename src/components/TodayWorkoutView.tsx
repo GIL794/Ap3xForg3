@@ -3,7 +3,7 @@ import { WorkoutDay, TodayWorkout, UserProfile } from '../types';
 import { ExerciseCard } from './ExerciseCard';
 import { RestTimerModal } from './RestTimerModal';
 import { GymToolsModal } from './GymToolsModal';
-import { ApexEvolutionCard } from './ApexEvolutionCard';
+import { OlympianEvolutionCard } from './OlympianEvolutionCard';
 import { MuscleRecoveryGauge } from './MuscleRecoveryGauge';
 import { copyWorkoutToClipboard } from '../logic/storage';
 import confetti from 'canvas-confetti';
@@ -329,8 +329,8 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         </div>
       </div>
 
-      {/* APEX PREDATOR EVOLUTION CARD (Pantheon & 13 Tiers of Ascension) */}
-      <ApexEvolutionCard
+      {/* OLYMPIAN ASCENSION CARD (Pantheon & 13 Tiers of Ascension) */}
+      <OlympianEvolutionCard
         totalTonnageKg={totalTonnageKg}
         completedSetsCount={completedSetsCount}
         totalSetsCount={totalSetsCount}

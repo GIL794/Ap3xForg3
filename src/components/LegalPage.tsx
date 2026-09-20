@@ -162,7 +162,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-black font-roman text-white tracking-wide">
-                  The HOMO DEVS Mythos: The Silverback Paradox & Divine Ascension
+                  The HOMO DEVS Mythos: The Colosseum Crucible & Divine Ascension
                 </h2>
                 <p className="text-xs text-slate-400">The Philosophy of the Romanvm Impervm Engine</p>
               </div>
@@ -170,23 +170,19 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
 
             <div className="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
               <p className="text-amber-200 font-roman italic text-sm">
-                "In nature, an adult male gorilla possesses colossal mass, terrifying muscle fibers, and the raw strength to snap saplings like twigs. Yet in the African night, even the mighty silverback can fall prey to the swift, calculated ambush of a solitary leopard or the coordinated strike of lions."
+                "In ancient Rome, mortals entered the Colosseum arena bound by human fragility, fatigue, and self-doubt. The Caesars knew that glory is not inherited—it is carved into stone and sinew through relentless discipline, mathematical precision, and the sacred law of progressive overload."
               </p>
 
               <p>
-                Why? Because <strong>raw primal muscle without adaptive intelligence is limited</strong>.
+                Mortal flesh was never destined to remain stagnant. While brute physical force without methodology crumbles under exhaustion, the human intellect commands the ultimate transformative power: <strong>strategic sport science, calculated mechanical tension, structured recovery, and the disciplined forge of iron</strong>.
               </p>
 
               <p>
-                Human beings were not gifted with the natural fangs of tigers or the natural bone density of apes. Instead, humans were endowed with the ultimate biological weapon: <strong>the prefrontal cortex</strong> — the capacity for strategic thought, science, progressive overload, mathematics, and iron forging.
-              </p>
-
-              <p>
-                When a human athlete applies systematic exercise physiology — calculated mechanical tension, recovery autoregulation, structured nutrition, and disciplined compound lifting — they do not merely equal the animal kingdom. They surpass it.
+                When an athlete dedicates their daily training to systematic progressive overload and autoregulated recovery, they do not merely build muscle. They transcend mortal limits to embody the eternal Olympian archetypes: Hercules, Adonis, Athena, Artemis, and Ares.
               </p>
 
               <p className="text-white font-roman font-bold text-base">
-                They become the only true living god on Earth: <span className="text-amber-400">HOMO DEVS</span>.
+                They ascend to stand as the living sovereign of their own body: <span className="text-amber-400">HOMO DEVS</span>.
               </p>
             </div>
           </div>

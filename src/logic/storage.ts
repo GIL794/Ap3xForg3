@@ -5,7 +5,7 @@ import { resolveTodayWorkout } from './todayDetector';
 
 import { DEFAULT_GABRIELE_ACCOUNT } from './auth';
 
-const STORAGE_KEY = 'apex_exercise_planner_v1';
+const STORAGE_KEY = 'homo_devs_planner_v1';
 
 export function loadSavedState(): AppState {
   try {
@@ -68,7 +68,7 @@ export function clearSavedState(): AppState {
  */
 export function exportPlanAsJson(profile: UserProfile, weeklyPlan: WorkoutDay[], todayWorkout: TodayWorkout): void {
   const exportData = {
-    app: 'ApexForge Exercise Planner',
+    app: 'HOMO DEVS Romanvm Impervm',
     exportedAt: new Date().toISOString(),
     profile,
     weeklyPlan,

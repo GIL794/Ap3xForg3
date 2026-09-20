@@ -67,7 +67,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="Ap3xF0rg3" className="w-10 h-10 rounded-2xl object-cover" />
+            <img src="/logo.png" alt="HOMO DEVS" className="w-10 h-10 rounded-2xl object-cover" />
             <div>
               <h3 className="text-base font-black text-white">Athlete Account Portal</h3>
               <p className="text-[11px] text-slate-400">Isolated workouts, tonnage & state</p>

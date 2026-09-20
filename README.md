@@ -19,11 +19,11 @@
 
 ---
 
-## 🏛️ The HOMO DEVS Mythos: The Silverback Paradox
+## 🏛️ The HOMO DEVS Mythos: The Colosseum Crucible & Divine Ascension
 
-> *"In nature, an adult male gorilla possesses colossal mass, terrifying muscle fibers, and the raw strength to snap saplings like twigs. Yet in the African night, even the mighty silverback can fall prey to the swift, calculated ambush of a solitary leopard or the coordinated strike of lions. Why? Because raw muscle without adaptive predatory intelligence is limited.*
+> *"In ancient Rome, mortals entered the Colosseum arena bound by human fragility, fatigue, and self-doubt. The Caesars knew that glory is not inherited—it is carved into stone and sinew through relentless discipline, mathematical precision, and the sacred law of progressive overload.*
 >
-> *Human beings were endowed with the ultimate biological weapon: the prefrontal cortex — strategic intelligence, progressive overload, mathematics, and iron forging. When a human athlete applies systematic exercise physiology, they do not merely equal the animal kingdom. They surpass it to become a living god: **HOMO DEVS**."*
+> *Mortal flesh was never destined to remain stagnant. While brute physical force without methodology crumbles under exhaustion, the human intellect commands the ultimate transformative power: strategic sport science, calculated mechanical tension, structured recovery, and the disciplined forge of iron. When an athlete dedicates their daily training to systematic progressive overload and autoregulated recovery, they do not merely build muscle. They transcend mortal limits to become the living sovereign of their own body: **HOMO DEVS**."*
 
 ---
 
@@ -77,7 +77,7 @@ Open **`http://localhost:3000`** in your browser.
 - Interactive plate stack visualizer with standard Olympic bumpers (`25kg Red`, `20kg Blue`, `15kg Yellow`, `10kg Green`, `5kg White`, `2.5kg Black`, `1.25kg Chrome`).
 - Dynamic percentage tables (65% to 95% 1RM) across Brzycki and Epley equations.
 
-### 5. ⏱️ Primal Victory Fanfare Rest Stopwatch
+### 5. ⏱️ Imperial Fanfare Rest Stopwatch
 - Web Audio 4-note ascending imperial fanfare (`C5 -> E5 -> G5 -> C6`) and motivational quotes when rest intervals conclude.
 
 ### 6. 🤖 Oracle AI Coach

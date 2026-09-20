@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, RotateCcw, X, Plus, Minus, Volume2, Bell, Zap } from 'lucide-react';
+import { Play, Pause, RotateCcw, X, Plus, Minus, Volume2, Bell, Crown, Sparkles } from 'lucide-react';
 
 interface RestTimerModalProps {
   initialSeconds: number;
@@ -17,15 +17,15 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
   const [totalSeconds, setTotalSeconds] = useState(initialSeconds);
   const [remaining, setRemaining] = useState(initialSeconds);
   const [isRunning, setIsRunning] = useState(false);
-  const [gorillaHype, setGorillaHype] = useState(true);
+  const [imperialHype, setImperialHype] = useState(true);
   const [hypeQuote, setHypeQuote] = useState('');
 
   const hypeQuotes = [
-    '🦍 UNLEASH THE SILVERBACK! Time to move the iron!',
-    '👑 LIONS DON\'T WAIT IN THE SAVANNAH. Step up to the rack!',
-    '🔥 PURE PRIMAL FOCUS. Leave zero reps in the tank!',
-    '⚡ APEX PREDATOR DOMINANCE. Own this set!',
-    '🐅 FEAR NO LOAD. The food chain starts with your work ethic!'
+    '🏛️ VIRTUS ET GLORIA. Step into the arena!',
+    '⚡ BY THE THUNDER OF JUPITER. Shatter this set!',
+    '🦁 HERCULEAN STRENGTH. Leave zero reps in reserve!',
+    '⚔️ SPARTAN DISCIPLINE. Pain is fleeting, glory is eternal!',
+    '👑 STAND AMONG THE GODS. Own the barbell!'
   ];
 
   // Sync when initialSeconds changes
@@ -46,7 +46,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
       const ctx = new AudioContextClass();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
-      osc.type = gorillaHype ? 'triangle' : 'sine';
+      osc.type = imperialHype ? 'triangle' : 'sine';
       osc.frequency.setValueAtTime(freq, ctx.currentTime);
       gain.gain.setValueAtTime(0.25, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
@@ -59,8 +59,8 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
     }
   };
 
-  const playApexFanfare = () => {
-    // 4-note ascending power fanfare
+  const playImperialFanfare = () => {
+    // 4-note ascending imperial victory fanfare
     playTone(523, 0.2); // C5
     setTimeout(() => playTone(659, 0.2), 120); // E5
     setTimeout(() => playTone(784, 0.25), 240); // G5
@@ -75,8 +75,8 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
         if (prev <= 1) {
           clearInterval(interval);
           setIsRunning(false);
-          if (gorillaHype) {
-            playApexFanfare();
+          if (imperialHype) {
+            playImperialFanfare();
           } else {
             playTone(880, 0.5);
             setTimeout(() => playTone(1174, 0.6), 200);
@@ -92,7 +92,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [isRunning, isOpen, gorillaHype]);
+  }, [isRunning, isOpen, imperialHype]);
 
   if (!isOpen) return null;
 
@@ -112,10 +112,10 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className={`relative w-full max-w-sm rounded-3xl bg-slate-900 border p-6 shadow-2xl text-center transition-all ${
-        gorillaHype 
-          ? 'border-emerald-500/40 glow-emerald shadow-emerald-500/10' 
-          : 'border-slate-700/60 glow-cyan'
+      <div className={`relative w-full max-w-sm rounded-3xl bg-[#0c0e17] border-2 p-6 shadow-2xl text-center transition-all ${
+        imperialHype 
+          ? 'border-amber-500/40 glow-gold shadow-amber-500/10' 
+          : 'border-slate-800'
       }`}>
         {/* Close Button */}
         <button
@@ -127,13 +127,13 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
         </button>
 
         {/* Top Header */}
-        <div className="flex items-center justify-center gap-2 mb-1 text-xs font-black uppercase tracking-wider">
-          {gorillaHype ? (
-            <span className="text-emerald-400 flex items-center gap-1.5">
-              <span>🦍</span> Apex Rest Stopwatch
+        <div className="flex items-center justify-center gap-2 mb-1 text-xs font-roman font-black uppercase tracking-wider">
+          {imperialHype ? (
+            <span className="text-amber-400 flex items-center gap-1.5">
+              <Crown className="w-4 h-4 text-amber-400" /> Olympian Rest Stopwatch
             </span>
           ) : (
-            <span className="text-cyan-400 flex items-center gap-1.5">
+            <span className="text-slate-400 flex items-center gap-1.5">
               <Bell className="w-4 h-4" /> Standard Rest Stopwatch
             </span>
           )}
@@ -141,7 +141,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
 
         {exerciseName && (
           <p className="text-xs text-slate-400 truncate px-4 mb-3 font-medium">
-            Next set: <span className="text-slate-100 font-bold">{exerciseName}</span>
+            Next set: <span className="text-amber-200 font-bold font-roman">{exerciseName}</span>
           </p>
         )}
 
@@ -152,7 +152,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
               cx="50"
               cy="50"
               r="44"
-              className="stroke-slate-800"
+              className="stroke-slate-900"
               strokeWidth="7"
               fill="transparent"
             />
@@ -161,7 +161,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
               cy="50"
               r="44"
               className={`transition-all duration-1000 ease-linear ${
-                gorillaHype ? 'stroke-emerald-400' : 'stroke-cyan-500'
+                imperialHype ? 'stroke-amber-400' : 'stroke-cyan-500'
               }`}
               strokeWidth="7"
               strokeDasharray="276.46"
@@ -174,7 +174,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
             <span className="text-4xl font-black mono-font tracking-tight text-white">
               {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
             </span>
-            <span className="text-[11px] font-bold mt-1 tracking-wider uppercase text-slate-400">
+            <span className="text-[11px] font-bold mt-1 tracking-wider uppercase text-amber-400 font-roman">
               {remaining === 0 ? 'GO TIME! 🔥' : 'REST INTERVAL'}
             </span>
           </div>
@@ -182,7 +182,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
 
         {/* Hype Quote Alert */}
         {remaining === 0 && (
-          <div className="my-2 p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold animate-bounce">
+          <div className="my-2 p-3 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-roman font-bold animate-bounce">
             {hypeQuote}
           </div>
         )}
@@ -192,7 +192,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
           <button
             onClick={() => addSeconds(-15)}
             disabled={remaining <= 15}
-            className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1 disabled:opacity-30"
+            className="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center gap-1 disabled:opacity-30 border border-slate-800"
           >
             <Minus className="w-3 h-3" /> 15s
           </button>
@@ -204,10 +204,10 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
                 setRemaining(preset);
                 setIsRunning(true);
               }}
-              className={`px-2.5 py-1 text-xs rounded-lg font-bold transition-colors ${
+              className={`px-2.5 py-1 text-xs rounded-lg font-bold font-roman transition-colors ${
                 totalSeconds === preset
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-white'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : 'bg-slate-900 text-slate-400 hover:bg-slate-800 hover:text-white border border-slate-800'
               }`}
             >
               {preset}s
@@ -215,7 +215,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
           ))}
           <button
             onClick={() => addSeconds(15)}
-            className="px-2.5 py-1 text-xs rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center gap-1"
+            className="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 flex items-center gap-1 border border-slate-800"
           >
             <Plus className="w-3 h-3" /> 15s
           </button>
@@ -225,7 +225,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
         <div className="flex items-center justify-center gap-3 mb-4">
           <button
             onClick={resetTimer}
-            className="p-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors"
+            className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 transition-colors border border-slate-800"
             title="Reset timer"
           >
             <RotateCcw className="w-5 h-5" />
@@ -233,10 +233,10 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
 
           <button
             onClick={() => setIsRunning(!isRunning)}
-            className={`px-8 py-3 rounded-2xl font-black flex items-center gap-2 shadow-lg transition-all ${
+            className={`px-8 py-3 rounded-2xl font-black font-roman flex items-center gap-2 shadow-lg transition-all ${
               isRunning
-                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950'
-                : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950'
+                ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-500/20'
+                : 'bg-amber-400 hover:bg-amber-300 text-slate-950 shadow-amber-500/20'
             }`}
           >
             {isRunning ? (
@@ -252,28 +252,28 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
 
           <button
             onClick={onClose}
-            className="px-4 py-3 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-colors"
+            className="px-4 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-roman font-bold transition-colors border border-slate-800"
           >
             Done
           </button>
         </div>
 
-        {/* Primal Gorilla Mode Toggle */}
+        {/* Imperial Horn Mode Toggle */}
         <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
           <button
-            onClick={() => setGorillaHype(!gorillaHype)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all text-xs font-bold ${
-              gorillaHype
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                : 'bg-slate-800 text-slate-500'
+            onClick={() => setImperialHype(!imperialHype)}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-all text-xs font-roman font-bold ${
+              imperialHype
+                ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                : 'bg-slate-900 text-slate-500'
             }`}
           >
-            <span>🦍</span>
-            <span>Primal Fanfare {gorillaHype ? 'ON' : 'OFF'}</span>
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>Imperial Fanfare {imperialHype ? 'ON' : 'OFF'}</span>
           </button>
 
-          <span className="flex items-center gap-1 text-slate-500">
-            <Volume2 className="w-3.5 h-3.5" /> Audio Chimes
+          <span className="flex items-center gap-1 text-slate-500 font-roman">
+            <Volume2 className="w-3.5 h-3.5" /> Chimes Active
           </span>
         </div>
       </div>

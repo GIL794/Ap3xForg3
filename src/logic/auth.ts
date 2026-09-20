@@ -4,8 +4,8 @@ import { DEFAULT_PROFILE } from '../data/defaultProfile';
 import { generateWeeklyPlan } from './planGenerator';
 import { resolveTodayWorkout } from './todayDetector';
 
-const ACTIVE_USER_KEY = 'ap3x_active_user_id';
-const USERS_LIST_KEY = 'ap3x_user_accounts_list';
+const ACTIVE_USER_KEY = 'homodevs_active_user_id';
+const USERS_LIST_KEY = 'homodevs_user_accounts_list';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
@@ -53,7 +53,7 @@ export const DEFAULT_GABRIELE_ACCOUNT: UserAccount = {
  */
 export function getAllUserAccounts(): UserAccount[] {
   try {
-    const raw = localStorage.getItem(USERS_LIST_KEY);
+    const raw = localStorage.getItem(USERS_LIST_KEY) || localStorage.getItem('ap3x_user_accounts_list');
     if (raw) {
       const list = JSON.parse(raw);
       if (Array.isArray(list)) {
@@ -78,13 +78,14 @@ export function saveUserAccount(account: UserAccount): void {
     users.push(account);
   }
   localStorage.setItem(USERS_LIST_KEY, JSON.stringify(users));
+  localStorage.removeItem('ap3x_user_accounts_list');
 }
 
 /**
  * Gets currently active user ID (returns null if visitor is unauthenticated)
  */
 export function getActiveUserId(): string | null {
-  return localStorage.getItem(ACTIVE_USER_KEY);
+  return localStorage.getItem(ACTIVE_USER_KEY) || localStorage.getItem('ap3x_active_user_id');
 }
 
 /**
@@ -93,8 +94,10 @@ export function getActiveUserId(): string | null {
 export function setActiveUserId(userId: string | null): void {
   if (userId) {
     localStorage.setItem(ACTIVE_USER_KEY, userId);
+    localStorage.removeItem('ap3x_active_user_id');
   } else {
     localStorage.removeItem(ACTIVE_USER_KEY);
+    localStorage.removeItem('ap3x_active_user_id');
   }
 }
 
@@ -150,7 +153,8 @@ export function createInitialStateForUser(account: UserAccount): AppState {
  * Loads the user-specific state partitioned by userId
  */
 export function loadUserState(userId: string): AppState {
-  const storageKey = `ap3x_user_state_${userId}`;
+  const storageKey = `homodevs_user_state_${userId}`;
+  const legacyKey = `ap3x_user_state_${userId}`;
   const accounts = getAllUserAccounts();
   const account = accounts.find(u => u.id === userId) || {
     id: userId,
@@ -160,7 +164,7 @@ export function loadUserState(userId: string): AppState {
   };
 
   try {
-    const raw = localStorage.getItem(storageKey);
+    const raw = localStorage.getItem(storageKey) || localStorage.getItem(legacyKey);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed.profile && parsed.weeklyPlan) {
@@ -187,8 +191,9 @@ export function loadUserState(userId: string): AppState {
  */
 export function saveUserState(userId: string, state: AppState): void {
   try {
-    const storageKey = `ap3x_user_state_${userId}`;
+    const storageKey = `homodevs_user_state_${userId}`;
     localStorage.setItem(storageKey, JSON.stringify(state));
+    localStorage.removeItem(`ap3x_user_state_${userId}`);
 
     // Also sync to Supabase if configured and not guest
     if (supabase && !state.userAccount.isGuest) {
@@ -217,7 +222,7 @@ async function syncStateToSupabase(userId: string, state: AppState) {
 
     await supabase.from('user_plans').upsert({
       user_id: userId,
-      plan_name: `${state.profile.name}'s Apex Plan`,
+      plan_name: `${state.profile.name}'s Olympian Plan`,
       plan_data: {
         profile: state.profile,
         weeklyPlan: state.weeklyPlan,
@@ -298,7 +303,7 @@ export async function signInWithGoogle(): Promise<{ error: Error | null; user?: 
       id: `google_${Date.now()}`,
       name: 'Google Athlete',
       email: 'athlete@gmail.com',
-      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=apex',
+      avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=homodeus',
       createdAt: new Date().toISOString(),
       isGuest: false,
     };
@@ -324,7 +329,7 @@ export function loginAthleteByName(name: string, email?: string): UserAccount {
   const newAccount: UserAccount = {
     id: `athlete_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     name: trimmed,
-    email: email?.trim() || `${trimmed.toLowerCase().replace(/\s+/g, '')}@ap3xforg3.app`,
+    email: email?.trim() || `${trimmed.toLowerCase().replace(/\s+/g, '')}@homodevs.app`,
     createdAt: new Date().toISOString(),
     isGuest: false,
   };
@@ -339,7 +344,7 @@ export function loginAthleteByName(name: string, email?: string): UserAccount {
 export function enterGuestMode(): UserAccount {
   const guest: UserAccount = {
     id: `guest_${Date.now()}`,
-    name: 'Guest Predator',
+    name: 'Guest Gladiator',
     createdAt: new Date().toISOString(),
     isGuest: true,
   };

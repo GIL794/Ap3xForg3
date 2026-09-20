@@ -1,11 +1,15 @@
 import React, { useState } from 'react';
-import { X, Crown, Check, Sparkles, Shield, Zap, Flame, Award } from 'lucide-react';
+import { X, Crown, Check, Sparkles, Shield, Zap, Flame, Award, ExternalLink, HelpCircle, CreditCard } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 interface ImperivmProModalProps {
   isOpen: boolean;
   onClose: () => void;
   onUpgradeSuccess?: () => void;
 }
+
+const STRIPE_MONTHLY_LINK = import.meta.env.VITE_STRIPE_MONTHLY_LINK || '';
+const STRIPE_LIFETIME_LINK = import.meta.env.VITE_STRIPE_LIFETIME_LINK || '';
 
 export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   isOpen,
@@ -15,21 +19,44 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('lifetime');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showStripeGuide, setShowStripeGuide] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
+  const hasStripeConfigured = Boolean(
+    selectedPlan === 'lifetime' ? STRIPE_LIFETIME_LINK : STRIPE_MONTHLY_LINK
+  );
+
   const handleCheckout = (plan: 'monthly' | 'lifetime') => {
+    const targetLink = plan === 'lifetime' ? STRIPE_LIFETIME_LINK : STRIPE_MONTHLY_LINK;
+
+    if (targetLink) {
+      // Redirect to live Stripe Checkout / Payment Link
+      setIsProcessing(true);
+      window.location.href = targetLink;
+      return;
+    }
+
+    // Fallback: Sandbox / Preview instant activation for local and staging testing
     setIsProcessing(true);
     setTimeout(() => {
       setIsProcessing(false);
       setSuccessMessage(`Welcome to HOMO DEVS Imperivm Pro! Plan: ${plan === 'lifetime' ? 'Lifetime Emperor' : 'Monthly Pro'}`);
+      
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#d4af37', '#ffd700', '#f59e0b', '#ffffff']
+      });
+
       if (onUpgradeSuccess) {
         onUpgradeSuccess();
       }
       setTimeout(() => {
         setSuccessMessage(null);
         onClose();
-      }, 2000);
+      }, 2200);
     }, 1200);
   };
 
@@ -58,9 +85,9 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl max-h-[90vh] flex flex-col rounded-3xl bg-[#0c0e17] border-2 border-amber-500/40 shadow-2xl shadow-amber-500/10 overflow-hidden">
+      <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl bg-[#0c0e17] border-2 border-amber-500/40 shadow-2xl shadow-amber-500/10 overflow-hidden">
         {/* Decorative Laurel Banner Header */}
-        <div className="relative p-6 sm:p-8 bg-gradient-to-b from-amber-950/40 via-[#10131f] to-[#0c0e17] border-b border-amber-500/20 text-center">
+        <div className="relative p-6 sm:p-7 bg-gradient-to-b from-amber-950/40 via-[#10131f] to-[#0c0e17] border-b border-amber-500/20 text-center">
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
@@ -147,8 +174,24 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
             </div>
           </div>
 
+          {/* Payment Gateway Trust Badge */}
+          <div className="flex flex-wrap items-center justify-between p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 text-xs text-slate-300">
+            <div className="flex items-center gap-2">
+              <CreditCard className="w-4 h-4 text-amber-400" />
+              <span className="font-medium">
+                Payment Gateway:{' '}
+                <strong className="text-white">Stripe Checkout & Payment Links</strong>
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+              <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-bold">Apple Pay</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-bold">Google Pay</span>
+              <span className="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-bold">Cards</span>
+            </div>
+          </div>
+
           {/* Perks List */}
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-1">
             <h4 className="text-xs font-black uppercase text-amber-400 font-roman tracking-wider">
               Included in Imperivm Pro
             </h4>
@@ -170,12 +213,54 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
               ))}
             </div>
           </div>
+
+          {/* Optional Admin/Developer Stripe Guide */}
+          <div className="border-t border-slate-800 pt-4">
+            <button
+              onClick={() => setShowStripeGuide(!showStripeGuide)}
+              className="text-[11px] text-amber-400/80 hover:text-amber-300 flex items-center gap-1 font-roman transition-colors"
+            >
+              <HelpCircle className="w-3.5 h-3.5" />
+              <span>{showStripeGuide ? 'Hide Stripe Gateway configuration guide' : 'How does the Stripe Payment Gate work?'}</span>
+            </button>
+
+            {showStripeGuide && (
+              <div className="mt-3 p-4 rounded-2xl bg-slate-950 border border-amber-500/20 text-xs text-slate-300 space-y-2.5">
+                <div className="font-bold text-amber-300 font-roman">🏛️ Connecting Your Live Stripe Account:</div>
+                <ol className="list-decimal list-inside space-y-1.5 text-[11px] text-slate-400 leading-relaxed">
+                  <li>Log in to your <a href="https://dashboard.stripe.com" target="_blank" rel="noreferrer" className="text-amber-400 underline">Stripe Dashboard</a>.</li>
+                  <li>Go to <strong>More &gt; Payment Links</strong> and create two links:
+                    <ul className="list-disc list-inside pl-4 mt-1 space-y-1">
+                      <li><strong>HOMO DEVS Pro Monthly</strong>: £4.99 recurring monthly.</li>
+                      <li><strong>HOMO DEVS Emperor Lifetime</strong>: £99.99 one-time payment.</li>
+                    </ul>
+                  </li>
+                  <li>In Stripe, set the confirmation page redirect to:
+                    <code className="block mt-1 p-1 rounded bg-black text-amber-300 text-[10px] select-all">
+                      https://homo-devs.vercel.app/?payment=success&tier=pro
+                    </code>
+                  </li>
+                  <li>In Vercel Project Settings, add the environment variables:
+                    <div className="mt-1 space-y-0.5 text-[10px] text-slate-300 font-mono">
+                      <div>VITE_STRIPE_MONTHLY_LINK = https://buy.stripe.com/...</div>
+                      <div>VITE_STRIPE_LIFETIME_LINK = https://buy.stripe.com/...</div>
+                    </div>
+                  </li>
+                </ol>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Footer Checkout Action */}
         <div className="p-5 sm:p-6 bg-slate-950 border-t border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="text-xs text-slate-400 text-center sm:text-left">
-            <span>🔒 Encrypted 256-bit checkout • Instant activation</span>
+            <span>🔒 256-bit Encrypted Checkout • Instant Activation</span>
+            {!hasStripeConfigured && (
+              <span className="block text-[10px] text-amber-400/70 mt-0.5">
+                (Sandbox / Instant Preview mode active)
+              </span>
+            )}
           </div>
 
           <button
@@ -193,6 +278,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                     ? 'Ascend with Lifetime Emperor — £99.99'
                     : 'Claim Imperivm Pro — £4.99/mo'}
                 </span>
+                {hasStripeConfigured && <ExternalLink className="w-3.5 h-3.5 stroke-[2.5]" />}
               </>
             )}
           </button>
