@@ -3,6 +3,8 @@ import { DEFAULT_PROFILE } from '../data/defaultProfile';
 import { generateWeeklyPlan } from './planGenerator';
 import { resolveTodayWorkout } from './todayDetector';
 
+import { DEFAULT_GABRIELE_ACCOUNT } from './auth';
+
 const STORAGE_KEY = 'apex_exercise_planner_v1';
 
 export function loadSavedState(): AppState {
@@ -14,6 +16,11 @@ export function loadSavedState(): AppState {
         // Re-resolve today workout with fresh reference time
         const todayWorkout = resolveTodayWorkout(parsed.weeklyPlan, parsed.profile);
         return {
+          userId: parsed.userId || DEFAULT_GABRIELE_ACCOUNT.id,
+          userAccount: parsed.userAccount || DEFAULT_GABRIELE_ACCOUNT,
+          onboardingCompleted: parsed.onboardingCompleted ?? true,
+          loreRead: parsed.loreRead ?? true,
+          totalTonnageKg: parsed.totalTonnageKg || 0,
           ...parsed,
           todayWorkout,
         };
@@ -29,12 +36,17 @@ export function loadSavedState(): AppState {
   const todayWorkout = resolveTodayWorkout(weeklyPlan, profile);
 
   return {
+    userId: DEFAULT_GABRIELE_ACCOUNT.id,
+    userAccount: DEFAULT_GABRIELE_ACCOUNT,
     profile,
     weeklyPlan,
     todayWorkout,
     completedSets: {},
     loggedWeights: {},
+    totalTonnageKg: 0,
     lastGeneratedAt: new Date().toISOString(),
+    onboardingCompleted: true,
+    loreRead: true,
   };
 }
 

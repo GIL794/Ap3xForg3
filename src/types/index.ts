@@ -126,11 +126,25 @@ export interface TodayWorkout {
   catchUpPlan?: WorkoutDay;
 }
 
+export interface UserAccount {
+  id: string;
+  email?: string;
+  name: string;
+  avatarUrl?: string;
+  createdAt: string;
+  isGuest?: boolean;
+}
+
 export interface AppState {
+  userId: string;
+  userAccount: UserAccount;
   profile: UserProfile;
   weeklyPlan: WorkoutDay[];
   todayWorkout: TodayWorkout;
   completedSets: Record<string, boolean[]>; // exerciseId -> array of completed booleans
-  loggedWeights: Record<string, number[]>;  // exerciseId -> array of weight in kg
+  loggedWeights: Record<string, number>;    // exerciseId -> weight in kg
+  totalTonnageKg: number;
   lastGeneratedAt: string;
+  onboardingCompleted: boolean;
+  loreRead: boolean;
 }

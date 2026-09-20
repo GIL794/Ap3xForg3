@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { AppState, UserProfile, WorkoutDay, TodayWorkout } from './types';
-import { loadSavedState, saveState, clearSavedState } from './logic/storage';
+import { AppState, UserProfile, WorkoutDay, TodayWorkout, UserAccount } from './types';
+import { 
+  getActiveUserId, 
+  loadUserState, 
+  saveUserState, 
+  DEFAULT_GABRIELE_ACCOUNT,
+  getAllUserAccounts 
+} from './logic/auth';
 import { generateWeeklyPlan } from './logic/planGenerator';
 import { resolveTodayWorkout } from './logic/todayDetector';
 import { parseSharedUrl } from './logic/supabase';
@@ -9,36 +15,61 @@ import { ProfileForm } from './components/ProfileForm';
 import { TodayWorkoutView } from './components/TodayWorkoutView';
 import { WeeklyOverview } from './components/WeeklyOverview';
 import { AiCoachAndCloudModal } from './components/AiCoachAndCloudModal';
-import { Dumbbell, Sparkles, CheckCircle2, RefreshCw } from 'lucide-react';
+import { LoreIntroModal } from './components/LoreIntroModal';
+import { OnboardingModal } from './components/OnboardingModal';
+import { AuthModal } from './components/AuthModal';
+import { BrandedLoader } from './components/BrandedLoader';
+import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck } from 'lucide-react';
 
 export const App: React.FC = () => {
+  const [currentUserId, setCurrentUserId] = useState<string>(() => getActiveUserId());
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [loadingMessage, setLoadingMessage] = useState<string>('FORGING ATHLETE STATE');
+
+  // State strictly partitioned by individual user ID
   const [appState, setAppState] = useState<AppState>(() => {
-    const saved = loadSavedState();
+    const userState = loadUserState(currentUserId);
     // Check if opened via a shared URL parameter
     const sharedData = parseSharedUrl();
     if (sharedData && sharedData.profile) {
-      const mergedProfile = { ...saved.profile, ...sharedData.profile } as UserProfile;
+      const mergedProfile = { ...userState.profile, ...sharedData.profile } as UserProfile;
       const weeklyPlan = generateWeeklyPlan(mergedProfile);
       const todayWorkout = resolveTodayWorkout(weeklyPlan, mergedProfile);
       return {
-        ...saved,
+        ...userState,
         profile: mergedProfile,
         weeklyPlan,
         todayWorkout,
         completedSets: {},
       };
     }
-    return saved;
+    return userState;
   });
 
   const [variationSeed, setVariationSeed] = useState<number>(0);
   const [regenNotification, setRegenNotification] = useState<string | null>(null);
-  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
 
-  // Auto-persist state changes
+  // Modals state
+  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
+  const [isLoreModalOpen, setIsLoreModalOpen] = useState<boolean>(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+
+  // Auto-persist changes strictly to the active user's partition
   useEffect(() => {
-    saveState(appState);
-  }, [appState]);
+    saveUserState(currentUserId, appState);
+  }, [appState, currentUserId]);
+
+  // Handle User Switching
+  const handleUserChanged = (newUser: UserAccount) => {
+    setLoadingMessage(`SWITCHING TO ATHLETE ${newUser.name.toUpperCase()}`);
+    setIsLoading(true);
+    setCurrentUserId(newUser.id);
+    setTimeout(() => {
+      const loaded = loadUserState(newUser.id);
+      setAppState(loaded);
+      setIsLoading(false);
+    }, 600);
+  };
 
   // Handle plan generation & regeneration with rotating variations
   const handleGeneratePlan = (updatedProfile: UserProfile) => {
@@ -53,7 +84,7 @@ export const App: React.FC = () => {
       profile: updatedProfile,
       weeklyPlan,
       todayWorkout,
-      completedSets: {}, // Reset completed sets so user gets a fresh workout
+      completedSets: {}, // Reset completed sets so athlete gets a fresh workout
       lastGeneratedAt: new Date().toISOString(),
     }));
 
@@ -118,9 +149,9 @@ export const App: React.FC = () => {
     }));
   };
 
-  // Handle reset to default profile
+  // Handle reset to default profile for this user
   const handleResetDefaults = () => {
-    const freshState = clearSavedState();
+    const freshState = loadUserState(currentUserId);
     setAppState(freshState);
     setVariationSeed(0);
     setRegenNotification('Profile and workout schedule reset to defaults.');
@@ -138,15 +169,41 @@ export const App: React.FC = () => {
     }));
   };
 
+  // Handle completing onboarding
+  const handleOnboardingComplete = (completedProfile: UserProfile) => {
+    setLoadingMessage('FORGING YOUR PERSONAL APEX SPLIT');
+    setIsLoading(true);
+    setTimeout(() => {
+      const weeklyPlan = generateWeeklyPlan(completedProfile);
+      const todayWorkout = resolveTodayWorkout(weeklyPlan, completedProfile);
+      setAppState((prev) => ({
+        ...prev,
+        profile: completedProfile,
+        weeklyPlan,
+        todayWorkout,
+        onboardingCompleted: true,
+        loreRead: true,
+      }));
+      setIsLoading(false);
+    }, 700);
+  };
+
+  if (isLoading) {
+    return <BrandedLoader message={loadingMessage} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 selection:bg-emerald-500 selection:text-slate-950">
-      {/* Top Navbar */}
+      {/* Top Navbar with Athlete Account & Lore */}
       <Header
         profile={appState.profile}
         weeklyPlan={appState.weeklyPlan}
         todayWorkout={appState.todayWorkout}
+        currentUser={appState.userAccount}
         onOpenAiCoach={() => setIsAiModalOpen(true)}
         onOpenShare={() => setIsAiModalOpen(true)}
+        onOpenAuth={() => setIsAuthModalOpen(true)}
+        onOpenLore={() => setIsLoreModalOpen(true)}
       />
 
       {/* Regeneration Toast Banner */}
@@ -196,23 +253,29 @@ export const App: React.FC = () => {
       <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
-              <Dumbbell className="w-3 h-3" />
-            </div>
-            <span className="font-bold text-slate-300">ApexForge Workout Engine</span>
+            <img src="/logo.png" alt="Ap3xF0rg3" className="w-5 h-5 rounded-md object-cover" />
+            <span className="font-bold text-slate-300">Ap3xF0rg3 Engine</span>
             <span>•</span>
-            <span>Local Storage Active</span>
+            <span className="text-emerald-400 font-medium">Athlete: {appState.userAccount.name}</span>
           </div>
           <div className="flex items-center gap-4 text-slate-400">
+            <button
+              onClick={() => setIsLoreModalOpen(true)}
+              className="hover:text-emerald-400 flex items-center gap-1 transition-colors"
+            >
+              <span>📜</span>
+              <span>The Creed</span>
+            </button>
+            <span>•</span>
             <button
               onClick={() => setIsAiModalOpen(true)}
               className="text-cyan-400 hover:underline flex items-center gap-1"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              AI Coach & Cloud Sync Guide
+              AI Coach & Cloud Sync
             </button>
             <span>•</span>
-            <span>Session Ready for 19:00 BST</span>
+            <span>Session Ready for {appState.profile.targetWorkoutTime} BST</span>
           </div>
         </div>
       </footer>
@@ -224,6 +287,30 @@ export const App: React.FC = () => {
         profile={appState.profile}
         todayWorkout={appState.todayWorkout}
         weeklyPlan={appState.weeklyPlan}
+      />
+
+      {/* Lore Intro Modal */}
+      <LoreIntroModal
+        isOpen={isLoreModalOpen}
+        onClose={() => {
+          setIsLoreModalOpen(false);
+          setAppState((prev) => ({ ...prev, loreRead: true }));
+        }}
+      />
+
+      {/* Onboarding Wizard (shown if not completed) */}
+      <OnboardingModal
+        isOpen={!appState.onboardingCompleted}
+        initialProfile={appState.profile}
+        onComplete={handleOnboardingComplete}
+      />
+
+      {/* Athlete Login & Account Switcher Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        currentUser={appState.userAccount}
+        onUserChanged={handleUserChanged}
       />
     </div>
   );
