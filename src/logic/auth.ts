@@ -21,12 +21,30 @@ if (SUPABASE_URL && SUPABASE_ANON_KEY) {
 
 export const isSupabaseReady = () => Boolean(supabase);
 
-// Default Primary Account for Gabriele
-export const DEFAULT_GABRIELE_ACCOUNT: UserAccount = {
-  id: 'user_gabriele_london',
+// Pre-seeded profile template for Gabriele when he signs in
+export const GABRIELE_PROFILE_TEMPLATE: UserProfile = {
   name: 'Gabriele',
-  email: 'gabriele@ap3xforg3.app',
-  createdAt: '2026-09-20T00:00:00.000Z',
+  location: 'London, UK',
+  timezone: 'Europe/London',
+  experience: 'Intermediate',
+  primaryGoal: 'upper_body_hypertrophy',
+  secondaryGoals: ['strength', 'aesthetics'],
+  availableDays: [1, 2, 4, 5, 0],
+  sessionLengthMinutes: 75,
+  equipment: ['free_weights', 'machines', 'cables'],
+  injuries: '',
+  preferences: 'Likes compound lifts, progressive overload, structured plans. Dislikes overly long workouts, random WOD style.',
+  targetWorkoutTime: '19:00',
+  archetype: 'hercules_mass',
+  genderPreference: 'masculine',
+};
+
+export const DEFAULT_GABRIELE_ACCOUNT: UserAccount = {
+  id: 'athlete_gabriele_founder',
+  name: 'Gabriele',
+  email: 'gabriele@homodevs.app',
+  avatarUrl: '/logo.png',
+  createdAt: '2026-09-20T17:00:00.000Z',
   isGuest: false,
 };
 
@@ -38,16 +56,14 @@ export function getAllUserAccounts(): UserAccount[] {
     const raw = localStorage.getItem(USERS_LIST_KEY);
     if (raw) {
       const list = JSON.parse(raw);
-      if (Array.isArray(list) && list.length > 0) {
+      if (Array.isArray(list)) {
         return list;
       }
     }
   } catch (err) {
     console.warn('Failed to parse user accounts:', err);
   }
-  const initial = [DEFAULT_GABRIELE_ACCOUNT];
-  localStorage.setItem(USERS_LIST_KEY, JSON.stringify(initial));
-  return initial;
+  return [];
 }
 
 /**
@@ -65,27 +81,51 @@ export function saveUserAccount(account: UserAccount): void {
 }
 
 /**
- * Gets currently active user ID
+ * Gets currently active user ID (returns null if visitor is unauthenticated)
  */
-export function getActiveUserId(): string {
-  return localStorage.getItem(ACTIVE_USER_KEY) || DEFAULT_GABRIELE_ACCOUNT.id;
+export function getActiveUserId(): string | null {
+  return localStorage.getItem(ACTIVE_USER_KEY);
 }
 
 /**
  * Sets active user ID
  */
-export function setActiveUserId(userId: string): void {
-  localStorage.setItem(ACTIVE_USER_KEY, userId);
+export function setActiveUserId(userId: string | null): void {
+  if (userId) {
+    localStorage.setItem(ACTIVE_USER_KEY, userId);
+  } else {
+    localStorage.removeItem(ACTIVE_USER_KEY);
+  }
 }
 
 /**
- * Generates an initial clean state for a new user account
+ * Signs out the current athlete and clears the active session
+ */
+export async function signOutAthlete(): Promise<void> {
+  if (supabase) {
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore
+    }
+  }
+  setActiveUserId(null);
+}
+
+/**
+ * Generates an initial clean state for a new user account (unfilled/fresh)
  */
 export function createInitialStateForUser(account: UserAccount): AppState {
-  const profile: UserProfile = {
-    ...DEFAULT_PROFILE,
-    name: account.name,
-  };
+  // If this is Gabriele, provide his curated profile; otherwise provide fresh blank template
+  const isGabriele = account.name.toLowerCase() === 'gabriele';
+
+  const profile: UserProfile = isGabriele
+    ? { ...GABRIELE_PROFILE_TEMPLATE }
+    : {
+        ...DEFAULT_PROFILE,
+        name: account.name,
+      };
+
   const weeklyPlan = generateWeeklyPlan(profile);
   const todayWorkout = resolveTodayWorkout(weeklyPlan, profile);
 
@@ -96,11 +136,13 @@ export function createInitialStateForUser(account: UserAccount): AppState {
     weeklyPlan,
     todayWorkout,
     completedSets: {},
+    setTypes: {},
     loggedWeights: {},
     totalTonnageKg: 0,
     lastGeneratedAt: new Date().toISOString(),
-    onboardingCompleted: account.id === DEFAULT_GABRIELE_ACCOUNT.id, // Gabriele starts onboarded
-    loreRead: account.id === DEFAULT_GABRIELE_ACCOUNT.id,
+    onboardingCompleted: isGabriele, // New users will see onboarding
+    loreRead: false,
+    isProSubscriber: false,
   };
 }
 
@@ -111,8 +153,10 @@ export function loadUserState(userId: string): AppState {
   const storageKey = `ap3x_user_state_${userId}`;
   const accounts = getAllUserAccounts();
   const account = accounts.find(u => u.id === userId) || {
-    ...DEFAULT_GABRIELE_ACCOUNT,
     id: userId,
+    name: 'Athlete',
+    createdAt: new Date().toISOString(),
+    isGuest: true,
   };
 
   try {
@@ -120,7 +164,6 @@ export function loadUserState(userId: string): AppState {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed.profile && parsed.weeklyPlan) {
-        // Re-resolve today workout with current local time
         const todayWorkout = resolveTodayWorkout(parsed.weeklyPlan, parsed.profile);
         return {
           ...parsed,
@@ -134,7 +177,6 @@ export function loadUserState(userId: string): AppState {
     console.warn(`Failed to parse state for user ${userId}:`, err);
   }
 
-  // Fallback: create fresh state and save
   const fresh = createInitialStateForUser(account);
   saveUserState(userId, fresh);
   return fresh;
@@ -148,10 +190,10 @@ export function saveUserState(userId: string, state: AppState): void {
     const storageKey = `ap3x_user_state_${userId}`;
     localStorage.setItem(storageKey, JSON.stringify(state));
 
-    // Also sync to Supabase if configured and user is online
+    // Also sync to Supabase if configured and not guest
     if (supabase && !state.userAccount.isGuest) {
       syncStateToSupabase(userId, state).catch(err => {
-        console.debug('Supabase background cloud sync notice:', err);
+        console.debug('Supabase cloud sync notice:', err);
       });
     }
   } catch (err) {
@@ -182,7 +224,7 @@ async function syncStateToSupabase(userId: string, state: AppState) {
         totalTonnage: state.totalTonnageKg,
       },
     });
-  } catch (err) {
+  } catch {
     // Cloud sync notice
   }
 }
@@ -190,7 +232,7 @@ async function syncStateToSupabase(userId: string, state: AppState) {
 /**
  * Signs in using Google OAuth via Supabase
  */
-export async function signInWithGoogle(): Promise<{ error: Error | null }> {
+export async function signInWithGoogle(): Promise<{ error: Error | null; user?: UserAccount }> {
   if (supabase) {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -200,9 +242,9 @@ export async function signInWithGoogle(): Promise<{ error: Error | null }> {
     });
     return { error };
   } else {
-    // Simulated Google Login for demo / sandbox when Supabase credentials aren't deployed yet
+    // Fallback: local Google athlete profile
     const simulatedAccount: UserAccount = {
-      id: `google_user_${Date.now()}`,
+      id: `google_${Date.now()}`,
       name: 'Google Athlete',
       email: 'athlete@gmail.com',
       avatarUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=apex',
@@ -211,7 +253,7 @@ export async function signInWithGoogle(): Promise<{ error: Error | null }> {
     };
     saveUserAccount(simulatedAccount);
     setActiveUserId(simulatedAccount.id);
-    return { error: null };
+    return { error: null, user: simulatedAccount };
   }
 }
 
@@ -227,7 +269,7 @@ export function loginAthleteByName(name: string, email?: string): UserAccount {
     return existing;
   }
 
-  // Create new account
+  // Create fresh account
   const newAccount: UserAccount = {
     id: `athlete_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     name: trimmed,
@@ -238,4 +280,19 @@ export function loginAthleteByName(name: string, email?: string): UserAccount {
   saveUserAccount(newAccount);
   setActiveUserId(newAccount.id);
   return newAccount;
+}
+
+/**
+ * Quick guest sandbox mode
+ */
+export function enterGuestMode(): UserAccount {
+  const guest: UserAccount = {
+    id: `guest_${Date.now()}`,
+    name: 'Guest Predator',
+    createdAt: new Date().toISOString(),
+    isGuest: true,
+  };
+  saveUserAccount(guest);
+  setActiveUserId(guest.id);
+  return guest;
 }

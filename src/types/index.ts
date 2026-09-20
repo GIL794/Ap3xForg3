@@ -100,6 +100,16 @@ export interface WorkoutDay {
   progressionRule?: string;
 }
 
+export type MythologicalArchetype = 
+  | 'hercules_mass'      // The Titan: Colossal Hypertrophy & Power (Hercules)
+  | 'adonis_aesthetic'   // The Olympian: Golden Ratio V-Taper & Core (Adonis / Apollo)
+  | 'ares_combat'        // The Centurion: Functional Stamina & Warrior Grit (Ares)
+  | 'artemis_power'      // The Huntress: Glute & Posterior Chain Athletic Power (Artemis / Atalanta)
+  | 'athena_sculpt'      // The War Goddess: Sculpted Delts & Aesthetic Symmetry (Athena)
+  | 'aphrodite_curves';  // The Sovereign: Golden Ratio Hourglass & Vitality (Aphrodite / Venus)
+
+export type SetType = 'warmup' | 'normal' | 'drop' | 'failure';
+
 export interface UserProfile {
   name: string;
   location: string;
@@ -113,6 +123,8 @@ export interface UserProfile {
   injuries: string;
   preferences: string;
   targetWorkoutTime: string; // e.g. "19:00"
+  archetype?: MythologicalArchetype;
+  genderPreference?: 'masculine' | 'feminine' | 'neutral';
 }
 
 export interface TodayWorkout {
@@ -142,9 +154,11 @@ export interface AppState {
   weeklyPlan: WorkoutDay[];
   todayWorkout: TodayWorkout;
   completedSets: Record<string, boolean[]>; // exerciseId -> array of completed booleans
+  setTypes?: Record<string, SetType[]>;    // exerciseId -> array of set types
   loggedWeights: Record<string, number>;    // exerciseId -> weight in kg
   totalTonnageKg: number;
   lastGeneratedAt: string;
   onboardingCompleted: boolean;
   loreRead: boolean;
+  isProSubscriber?: boolean;
 }

@@ -4,6 +4,7 @@ import {
   getActiveUserId, 
   loadUserState, 
   saveUserState, 
+  signOutAthlete,
   DEFAULT_GABRIELE_ACCOUNT,
   getAllUserAccounts 
 } from './logic/auth';
@@ -19,17 +20,40 @@ import { LoreIntroModal } from './components/LoreIntroModal';
 import { OnboardingModal } from './components/OnboardingModal';
 import { AuthModal } from './components/AuthModal';
 import { BrandedLoader } from './components/BrandedLoader';
-import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck } from 'lucide-react';
+import { LandingPage } from './components/LandingPage';
+import { LegalPage } from './components/LegalPage';
+import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
+import { TermsModal } from './components/TermsModal';
+import { EvolutionRoadmapModal } from './components/EvolutionRoadmapModal';
+import { ImperivmProModal } from './components/ImperivmProModal';
+import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown } from 'lucide-react';
 
 export const App: React.FC = () => {
-  const [currentUserId, setCurrentUserId] = useState<string>(() => getActiveUserId());
+  // Check direct URL parameters for Google OAuth verification compliance (?page=privacy, ?page=terms, ?page=creed)
+  const [legalPage, setLegalPage] = useState<'privacy' | 'terms' | 'creed' | null>(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get('page');
+      if (page === 'privacy' || page === 'terms' || page === 'creed') {
+        return page;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  });
+
+  const [currentUserId, setCurrentUserId] = useState<string | null>(() => getActiveUserId());
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [loadingMessage, setLoadingMessage] = useState<string>('FORGING ATHLETE STATE');
+  const [loadingMessage, setLoadingMessage] = useState<string>('FORGING OLYMPIAN STATE');
 
   // State strictly partitioned by individual user ID
   const [appState, setAppState] = useState<AppState>(() => {
+    if (!currentUserId) {
+      // Ephemeral fallback state if user is unauthenticated
+      return loadUserState('ephemeral_guest');
+    }
     const userState = loadUserState(currentUserId);
-    // Check if opened via a shared URL parameter
     const sharedData = parseSharedUrl();
     if (sharedData && sharedData.profile) {
       const mergedProfile = { ...userState.profile, ...sharedData.profile } as UserProfile;
@@ -53,11 +77,53 @@ export const App: React.FC = () => {
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
   const [isLoreModalOpen, setIsLoreModalOpen] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(false);
+  const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState<boolean>(false);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState<boolean>(false);
+  const [isRoadmapModalOpen, setIsRoadmapModalOpen] = useState<boolean>(false);
+  const [isProModalOpen, setIsProModalOpen] = useState<boolean>(false);
 
-  // Auto-persist changes strictly to the active user's partition
+  // Auto-persist changes strictly to the active user's partition when authenticated
   useEffect(() => {
-    saveUserState(currentUserId, appState);
+    if (currentUserId) {
+      saveUserState(currentUserId, appState);
+    }
   }, [appState, currentUserId]);
+
+  // Handle Standalone Legal Page Back
+  if (legalPage) {
+    return (
+      <LegalPage
+        pageType={legalPage}
+        onBackToHome={() => {
+          setLegalPage(null);
+          window.history.pushState({}, '', window.location.pathname);
+        }}
+      />
+    );
+  }
+
+  // Handle Authentication from Landing Page
+  const handleAthleteAuthenticated = (user: UserAccount) => {
+    setLoadingMessage(`INITIALIZING OLYMPIAN LEDGER FOR ${user.name.toUpperCase()}`);
+    setIsLoading(true);
+    setCurrentUserId(user.id);
+    setTimeout(() => {
+      const loaded = loadUserState(user.id);
+      setAppState(loaded);
+      setIsLoading(false);
+    }, 600);
+  };
+
+  // Handle Sign Out to Gate
+  const handleSignOut = async () => {
+    setIsLoading(true);
+    setLoadingMessage('SEALING OLYMPIAN LEDGER');
+    await signOutAthlete();
+    setTimeout(() => {
+      setCurrentUserId(null);
+      setIsLoading(false);
+    }, 400);
+  };
 
   // Handle User Switching
   const handleUserChanged = (newUser: UserAccount) => {
@@ -151,8 +217,10 @@ export const App: React.FC = () => {
 
   // Handle reset to default profile for this user
   const handleResetDefaults = () => {
-    const freshState = loadUserState(currentUserId);
-    setAppState(freshState);
+    if (currentUserId) {
+      const freshState = loadUserState(currentUserId);
+      setAppState(freshState);
+    }
     setVariationSeed(0);
     setRegenNotification('Profile and workout schedule reset to defaults.');
     setTimeout(() => setRegenNotification(null), 3000);
@@ -192,8 +260,48 @@ export const App: React.FC = () => {
     return <BrandedLoader message={loadingMessage} />;
   }
 
+  // PUBLIC LANDING GATE: If visitor is unauthenticated, show the landing page
+  if (!currentUserId) {
+    return (
+      <>
+        <LandingPage
+          onAthleteAuthenticated={handleAthleteAuthenticated}
+          onOpenPrivacy={() => setIsPrivacyModalOpen(true)}
+          onOpenTerms={() => setIsTermsModalOpen(true)}
+          onOpenCreed={() => setIsLoreModalOpen(true)}
+          onOpenRoadmap={() => setIsRoadmapModalOpen(true)}
+          onOpenPro={() => setIsProModalOpen(true)}
+        />
+
+        {/* Global Modals for Unauthenticated Visitors */}
+        <PrivacyPolicyModal
+          isOpen={isPrivacyModalOpen}
+          onClose={() => setIsPrivacyModalOpen(false)}
+        />
+        <TermsModal
+          isOpen={isTermsModalOpen}
+          onClose={() => setIsTermsModalOpen(false)}
+        />
+        <LoreIntroModal
+          isOpen={isLoreModalOpen}
+          onClose={() => setIsLoreModalOpen(false)}
+        />
+        <EvolutionRoadmapModal
+          isOpen={isRoadmapModalOpen}
+          onClose={() => setIsRoadmapModalOpen(false)}
+          totalTonnageKg={0}
+        />
+        <ImperivmProModal
+          isOpen={isProModalOpen}
+          onClose={() => setIsProModalOpen(false)}
+        />
+      </>
+    );
+  }
+
+  // AUTHENTICATED ATHLETE DASHBOARD
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen flex flex-col bg-[#08090d] text-slate-100 selection:bg-amber-500 selection:text-slate-950 font-sans">
       {/* Top Navbar with Athlete Account & Lore */}
       <Header
         profile={appState.profile}
@@ -204,11 +312,13 @@ export const App: React.FC = () => {
         onOpenShare={() => setIsAiModalOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenLore={() => setIsLoreModalOpen(true)}
+        onOpenPro={() => setIsProModalOpen(true)}
+        onSignOut={handleSignOut}
       />
 
       {/* Regeneration Toast Banner */}
       {regenNotification && (
-        <div className="sticky top-16 sm:top-20 z-30 w-full bg-gradient-to-r from-cyan-500 to-emerald-400 text-slate-950 px-4 py-2 text-center text-xs font-black flex items-center justify-center gap-2 shadow-lg animate-in slide-in-from-top duration-200">
+        <div className="sticky top-16 sm:top-20 z-30 w-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 px-4 py-2 text-center text-xs font-black font-roman flex items-center justify-center gap-2 shadow-lg animate-in slide-in-from-top duration-200">
           <RefreshCw className="w-3.5 h-3.5 animate-spin" />
           <span>{regenNotification}</span>
         </div>
@@ -224,6 +334,7 @@ export const App: React.FC = () => {
             completedSets={appState.completedSets}
             onUpdateCompletedSets={handleUpdateCompletedSets}
             onOverridePlan={handleOverrideTodayPlan}
+            onOpenPro={() => setIsProModalOpen(true)}
           />
         </section>
 
@@ -249,22 +360,36 @@ export const App: React.FC = () => {
         </section>
       </main>
 
-      {/* Modern Footer */}
-      <footer className="border-t border-slate-800/80 bg-slate-950 py-8 text-xs text-slate-500">
+      {/* Modern Romanvm Impervm Footer */}
+      <footer className="border-t border-slate-800/80 bg-[#06070a] py-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Ap3xF0rg3" className="w-5 h-5 rounded-md object-cover" />
-            <span className="font-bold text-slate-300">Ap3xF0rg3 Engine</span>
+            <img src="/logo.png" alt="HOMO DEVS" className="w-5 h-5 rounded-md object-cover" />
+            <span className="font-roman font-bold text-slate-300">HOMO DEVS Engine</span>
             <span>•</span>
-            <span className="text-emerald-400 font-medium">Athlete: {appState.userAccount.name}</span>
+            <span className="text-amber-400 font-roman">Athlete: {appState.userAccount.name}</span>
           </div>
-          <div className="flex items-center gap-4 text-slate-400">
+          <div className="flex items-center gap-4 text-slate-400 font-roman">
             <button
               onClick={() => setIsLoreModalOpen(true)}
-              className="hover:text-emerald-400 flex items-center gap-1 transition-colors"
+              className="hover:text-amber-400 flex items-center gap-1 transition-colors"
             >
               <span>📜</span>
-              <span>The Creed</span>
+              <span>The Mythos</span>
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => setIsPrivacyModalOpen(true)}
+              className="hover:text-amber-400 transition-colors"
+            >
+              Privacy Policy
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => setIsTermsModalOpen(true)}
+              className="hover:text-amber-400 transition-colors"
+            >
+              Terms
             </button>
             <span>•</span>
             <button
@@ -272,10 +397,8 @@ export const App: React.FC = () => {
               className="text-cyan-400 hover:underline flex items-center gap-1"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              AI Coach & Cloud Sync
+              AI Oracle
             </button>
-            <span>•</span>
-            <span>Session Ready for {appState.profile.targetWorkoutTime} BST</span>
           </div>
         </div>
       </footer>
@@ -311,6 +434,34 @@ export const App: React.FC = () => {
         onClose={() => setIsAuthModalOpen(false)}
         currentUser={appState.userAccount}
         onUserChanged={handleUserChanged}
+      />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyPolicyModal
+        isOpen={isPrivacyModalOpen}
+        onClose={() => setIsPrivacyModalOpen(false)}
+      />
+
+      {/* Terms of Service Modal */}
+      <TermsModal
+        isOpen={isTermsModalOpen}
+        onClose={() => setIsTermsModalOpen(false)}
+      />
+
+      {/* Evolution Roadmap Modal */}
+      <EvolutionRoadmapModal
+        isOpen={isRoadmapModalOpen}
+        onClose={() => setIsRoadmapModalOpen(false)}
+        totalTonnageKg={appState.totalTonnageKg || 0}
+      />
+
+      {/* Imperivm Pro Paywall Modal */}
+      <ImperivmProModal
+        isOpen={isProModalOpen}
+        onClose={() => setIsProModalOpen(false)}
+        onUpgradeSuccess={() => {
+          setAppState(prev => ({ ...prev, isProSubscriber: true }));
+        }}
       />
     </div>
   );

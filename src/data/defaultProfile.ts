@@ -1,19 +1,20 @@
 import { UserProfile } from '../types';
 
 export const DEFAULT_PROFILE: UserProfile = {
-  name: 'Gabriele',
-  location: 'London, UK',
-  timezone: 'Europe/London',
+  name: '',
+  location: '',
+  timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'Europe/London',
   experience: 'Intermediate',
   primaryGoal: 'upper_body_hypertrophy',
   secondaryGoals: ['strength', 'aesthetics'],
-  // Mon (1), Tue (2), Thu (4), Fri (5), and Sun (0) to ensure today's 19:00 session is ready
   availableDays: [1, 2, 4, 5, 0],
   sessionLengthMinutes: 75,
   equipment: ['free_weights', 'machines', 'cables'],
   injuries: '',
-  preferences: 'Likes compound lifts, progressive overload, structured plans. Dislikes overly long workouts, random WOD style.',
+  preferences: '',
   targetWorkoutTime: '19:00',
+  archetype: 'hercules_mass',
+  genderPreference: 'masculine',
 };
 
 export const DAY_NAMES = [

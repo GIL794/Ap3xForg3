@@ -16,28 +16,28 @@ export const LoreIntroModal: React.FC<LoreIntroModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-200">
-      <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl bg-slate-900 border border-emerald-500/40 shadow-2xl glow-emerald overflow-hidden">
-        {/* Background glow & Cyber Gorilla watermark */}
-        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative w-full max-w-2xl max-h-[92vh] flex flex-col rounded-3xl bg-[#0c0e17] border-2 border-amber-500/40 shadow-2xl glow-gold overflow-hidden">
+        {/* Background glow */}
+        <div className="absolute top-0 right-0 -mt-12 -mr-12 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Header */}
-        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-6 border-b border-amber-500/20 bg-gradient-to-r from-amber-950/30 to-slate-950 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
               src="/logo.png"
-              alt="Ap3xF0rg3"
-              className="w-12 h-12 rounded-2xl object-cover border border-emerald-400 shadow-md"
+              alt="HOMO DEVS"
+              className="w-12 h-12 rounded-2xl object-cover border border-amber-400 shadow-md shadow-amber-500/20"
             />
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-lg font-black text-white tracking-tight">
-                  THE AP3XF0RG3 CREED
+                <h3 className="text-lg font-black font-roman text-white tracking-wider">
+                  THE HOMO DEVS MYTHOS
                 </h3>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
-                  Primal Lore
+                <span className="text-[10px] font-roman uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  Romanvm Impervm
                 </span>
               </div>
-              <p className="text-xs text-slate-400">Why the Silverback Gorilla is not enough</p>
+              <p className="text-xs text-slate-400 font-roman">The Silverback Paradox & The Path to Divine Ascension</p>
             </div>
           </div>
 
@@ -53,75 +53,51 @@ export const LoreIntroModal: React.FC<LoreIntroModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-6 text-xs sm:text-sm text-slate-300 leading-relaxed">
           {/* Act I */}
           <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
-            <div className="flex items-center gap-2 font-bold text-amber-400 uppercase tracking-wider text-xs">
-              <span>🐒</span> Act I: The Fragile Primate
+            <div className="flex items-center gap-2 font-bold text-amber-400 font-roman uppercase tracking-wider text-xs">
+              <span>🏛️</span> Act I: The Fragile Mortal (Tiro)
             </div>
             <p>
-              Humans enter the gym weak, hunched over desk monitors, and disconnected from raw biological power. They pick up light dumbbells, swing mindlessly, and dream of raw strength.
+              Mortals enter the gym unconditioned, sedentary, and disconnected from raw Olympian power. They swing weights aimlessly, mimic fleeting trends, and struggle against biological inertia.
             </p>
           </div>
 
           {/* Act II */}
-          <div className="p-4 rounded-2xl bg-slate-950/70 border border-cyan-500/30 space-y-2">
-            <div className="flex items-center gap-2 font-bold text-cyan-400 uppercase tracking-wider text-xs">
+          <div className="p-4 rounded-2xl bg-slate-950/70 border border-amber-500/20 space-y-2">
+            <div className="flex items-center gap-2 font-bold text-amber-300 font-roman uppercase tracking-wider text-xs">
               <span>🦍</span> Act II: The Silverback Paradox
             </div>
             <p>
-              They lift heavy, eat in an aggressive surplus, and grow thick slabs of muscle. Soon, they feel like a <strong className="text-white">Silverback Gorilla</strong>. A 400-pound beast capable of breaking branches and bench-pressing massive iron.
+              They lift, eat in surplus, and add raw muscle. Soon they feel like a <strong className="text-white">Silverback Gorilla</strong> — 400 pounds of muscle capable of snapping branches and moving iron.
             </p>
-            <p className="text-cyan-300/90 font-medium italic border-l-2 border-cyan-400 pl-3 my-2">
-              "Yet in the wild savannah, a gorilla is still a herbivore primate. When a pride of lions descends, the gorilla is prey. Pure raw bulk without savage conditioning, tactical biomechanics, and relentless heart will always get hunted down."
+            <p className="text-amber-200 font-medium italic border-l-2 border-amber-400 pl-3 my-2 font-roman">
+              "Yet in the wild savannah, a gorilla is still prey. When night falls, the solitary leopard and the lion pride strike without mercy. Raw mass without predatory tactical speed, cardiovascular fortitude, and strategic intelligence will always be hunted down."
             </p>
             <p>
-              In gym culture, most people plateau at the "gorilla" stage: heavy, slow, out of breath tying their shoes, and vulnerable to fatigue.
+              Most gym lifters plateau at this stage: heavy, breathless tying their shoes, and vulnerable to fatigue and plateaus.
             </p>
           </div>
 
           {/* Act III */}
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 to-emerald-950/40 border border-emerald-500/40 space-y-2">
-            <div className="flex items-center gap-2 font-bold text-emerald-400 uppercase tracking-wider text-xs">
-              <span>👑</span> Act III: The Ascension to Apex Predator
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-950 to-amber-950/40 border border-amber-500/40 space-y-2">
+            <div className="flex items-center gap-2 font-bold text-amber-400 font-roman uppercase tracking-wider text-xs">
+              <span>👑</span> Act III: The Ascension to HOMO DEVS
             </div>
             <p>
-              <strong className="text-white">Ap3xF0rg3</strong> is built to shatter that ceiling. We fuse progressive overload compound science with savage mechanical tension and high-volume hypertrophy.
+              <strong className="text-white font-roman">HOMO DEVS</strong> shatters that ceiling. We synthesize progressive overload compound science, autoregulated bio-recovery, and relentless mechanical tension.
             </p>
-            <p className="text-slate-200 font-semibold">
-              You do not stop at the gorilla. You forge your body, your nervous system, and your mental fortitude until you stand at the <strong className="text-emerald-400">ABSOLUTE TOP OF THE FOOD CHAIN</strong>.
+            <p className="text-slate-200 font-semibold font-roman">
+              We do not stop at the beast. We unite human intelligence with the eternal aesthetics and power of Roman champions and Olympian gods: <strong className="text-amber-400 font-roman">HOMO DEVS — A God Among Mortals</strong>.
             </p>
-            <p className="text-xs text-slate-400">
-              Beaten by no animal. Beaten by no barbell. Beaten by no obstacle.
+            <p className="text-xs text-slate-400 italic">
+              Beaten by no predator. Beaten by no barbell. Beaten by no obstacle.
             </p>
-          </div>
-
-          {/* Evolution Ladder */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center text-xs">
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-xl block mb-1">🐒</span>
-              <span className="font-bold text-slate-400 block text-[11px]">Chimp</span>
-              <span className="text-[10px] text-slate-600">0 - 1.5k kg</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-xl block mb-1">🦍</span>
-              <span className="font-bold text-cyan-400 block text-[11px]">Gorilla</span>
-              <span className="text-[10px] text-slate-500">1.5k - 4k kg</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-xl block mb-1">🐅</span>
-              <span className="font-bold text-emerald-400 block text-[11px]">Hunter</span>
-              <span className="text-[10px] text-slate-500">4k - 7.5k kg</span>
-            </div>
-            <div className="p-2.5 rounded-xl bg-slate-950 border border-purple-500/40">
-              <span className="text-xl block mb-1">👑</span>
-              <span className="font-bold text-purple-400 block text-[11px]">Apex Predator</span>
-              <span className="text-[10px] text-purple-300 font-bold">7.5k+ kg</span>
-            </div>
           </div>
         </div>
 
         {/* Footer Actions */}
         <div className="p-5 bg-slate-950 border-t border-slate-800 flex flex-wrap items-center justify-between gap-3">
-          <span className="text-[11px] text-slate-500 italic">
-            "Fear no load. Own the food chain."
+          <span className="text-[11px] text-slate-500 italic font-roman">
+            "Vincit qui se vincit"
           </span>
 
           <button
@@ -129,9 +105,9 @@ export const LoreIntroModal: React.FC<LoreIntroModalProps> = ({
               if (onEnterForge) onEnterForge();
               onClose();
             }}
-            className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/20 transition-all"
+            className="px-6 py-2.5 rounded-2xl bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-roman font-black text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition-all"
           >
-            <span>Take the Oath & Enter Forge</span>
+            <span>Swear the Oath & Enter The Imperivm</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </div>

@@ -6,26 +6,19 @@ import {
   getSavedGeminiKey, 
   saveGeminiKey 
 } from '../logic/aiCoach';
-import { 
-  generateShareableUrl, 
-  SUPABASE_SQL_SCHEMA, 
-  isSupabaseConfigured 
-} from '../logic/supabase';
+import { generateShareableUrl } from '../logic/supabase';
 import { 
   Bot, 
   Sparkles, 
   Share2, 
-  Cloud, 
   Key, 
   ExternalLink, 
   Copy, 
   Check, 
   X, 
   Flame, 
-  Activity, 
   ArrowRight,
-  ShieldCheck,
-  Zap
+  ShieldCheck
 } from 'lucide-react';
 
 interface AiCoachAndCloudModalProps {
@@ -43,13 +36,12 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
   todayWorkout,
   weeklyPlan,
 }) => {
-  const [activeTab, setActiveTab] = useState<'ai_coach' | 'share' | 'cloud'>('ai_coach');
+  const [activeTab, setActiveTab] = useState<'ai_coach' | 'share'>('ai_coach');
   const [apiKey, setApiKey] = useState<string>(getSavedGeminiKey());
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [recommendation, setRecommendation] = useState<AiCoachRecommendation | null>(null);
   const [shareUrl, setShareUrl] = useState<string>('');
   const [copiedLink, setCopiedLink] = useState<boolean>(false);
-  const [copiedSql, setCopiedSql] = useState<boolean>(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -81,12 +73,6 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
-  const handleCopySql = () => {
-    navigator.clipboard.writeText(SUPABASE_SQL_SCHEMA);
-    setCopiedSql(true);
-    setTimeout(() => setCopiedSql(false), 2000);
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -100,13 +86,13 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                AI Coach, Sharing & Cloud Sync
+                AI Coach & Workout Sharing
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  100% Free
+                  Zero Paywall
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Gemini LLM recommendations • Supabase Google login • Vercel deployment
+                Gemini LLM recommendations • Share plan with gym partners
               </p>
             </div>
           </div>
@@ -142,17 +128,6 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
           >
             <Share2 className="w-4 h-4" /> Share with Friends
           </button>
-
-          <button
-            onClick={() => setActiveTab('cloud')}
-            className={`py-3 px-4 border-b-2 transition-colors flex items-center gap-1.5 ${
-              activeTab === 'cloud'
-                ? 'border-purple-400 text-purple-400'
-                : 'border-transparent text-slate-400 hover:text-white'
-            }`}
-          >
-            <Cloud className="w-4 h-4" /> Supabase & Vercel Guide
-          </button>
         </div>
 
         {/* Tab Content */}
@@ -165,7 +140,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2 font-bold text-slate-200">
                     <Key className="w-4 h-4 text-cyan-400" />
-                    Google Gemini 1.5/2.0 Flash API Key (Free Tier)
+                    Google Gemini Flash API Key (Optional Free Tier)
                   </div>
                   <a
                     href="https://aistudio.google.com/app/apikey"
@@ -173,7 +148,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                     rel="noreferrer"
                     className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-semibold"
                   >
-                    <span>Get Free Key at Google AI Studio</span>
+                    <span>Get Free Key</span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
@@ -281,7 +256,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                   <Share2 className="w-4 h-4" /> Instant Plan Link (Zero Setup Required)
                 </h4>
                 <p className="text-slate-300 text-[11px] leading-relaxed">
-                  Your entire personalized split and today's 19:00 workout are encoded into this URL. Anyone who clicks it will immediately load your exact routine in their browser—no account or login required!
+                  Your entire personalized split and today's workout are encoded into this URL. Anyone who clicks it will load your routine in their browser.
                 </p>
               </div>
 
@@ -314,69 +289,11 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
               <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 space-y-2">
                 <span className="font-bold text-slate-200 uppercase text-[10px]">What your friends will see:</span>
                 <ul className="space-y-1 text-[11px] text-slate-300 list-disc list-inside">
-                  <li>Your customized 4-5 day Upper-Body Hypertrophy split</li>
-                  <li>Today's full workout with exact sets, reps, and cues</li>
+                  <li>Your customized progressive overload split</li>
+                  <li>Today's full session with exact working sets, reps, and cues</li>
                   <li>Interactive set trackers and rest stopwatch</li>
-                  <li>Ability to save and edit their own variation locally</li>
+                  <li>Ability to create their own athlete profile</li>
                 </ul>
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: SUPABASE & VERCEL GUIDE */}
-          {activeTab === 'cloud' && (
-            <div className="space-y-5 text-xs">
-              {/* Vercel Deployment */}
-              <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2">
-                <div className="flex items-center gap-2 font-bold text-white text-sm">
-                  <Zap className="w-4 h-4 text-cyan-400" />
-                  Step 1: 1-Click Free Deployment on Vercel
-                </div>
-                <ol className="space-y-1.5 text-slate-300 text-[11px] list-decimal list-inside">
-                  <li>Push this repository to your GitHub account: <code className="text-cyan-300 bg-slate-900 px-1 py-0.5 rounded">git push origin main</code></li>
-                  <li>Go to <a href="https://vercel.com/new" target="_blank" rel="noreferrer" className="text-cyan-400 underline">vercel.com/new</a> and select your repository.</li>
-                  <li>Framework Preset: <strong>Vite</strong>. Build command: <code className="text-cyan-300 bg-slate-900 px-1 py-0.5 rounded">npm run build</code>.</li>
-                  <li>Click <strong>Deploy</strong>. Your app will be live with free SSL in ~40 seconds!</li>
-                </ol>
-              </div>
-
-              {/* Supabase Free Setup */}
-              <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5">
-                <div className="flex items-center gap-2 font-bold text-white text-sm">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  Step 2: Free Supabase Cloud Database + Google Login
-                </div>
-                <ol className="space-y-1.5 text-slate-300 text-[11px] list-decimal list-inside">
-                  <li>Create a free project at <a href="https://supabase.com" target="_blank" rel="noreferrer" className="text-cyan-400 underline">supabase.com</a>.</li>
-                  <li>In Google Cloud Console (<a href="https://console.cloud.google.com" target="_blank" rel="noreferrer" className="text-cyan-400 underline">console.cloud.google.com</a>): Create OAuth Credentials &gt; Web Application. Set Redirect URI to: <code className="text-emerald-300 bg-slate-900 px-1 py-0.5 rounded">https://&lt;PROJECT-ID&gt;.supabase.co/auth/v1/callback</code>.</li>
-                  <li>In Supabase Dashboard &gt; <strong>Authentication &gt; Providers &gt; Google</strong>: Paste Client ID and Secret.</li>
-                  <li>In Supabase Dashboard &gt; <strong>SQL Editor</strong>: Paste and run the schema below to enable database tables & Row Level Security:</li>
-                </ol>
-
-                {/* SQL Copy Box */}
-                <div className="relative mt-2">
-                  <pre className="p-3 bg-slate-900 border border-slate-800 rounded-xl text-[10px] font-mono text-slate-300 max-h-36 overflow-y-auto">
-                    {SUPABASE_SQL_SCHEMA}
-                  </pre>
-                  <button
-                    onClick={handleCopySql}
-                    className="absolute top-2 right-2 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[10px] font-bold flex items-center gap-1 border border-slate-700"
-                  >
-                    {copiedSql ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-                    {copiedSql ? 'Copied' : 'Copy SQL'}
-                  </button>
-                </div>
-              </div>
-
-              {/* Environment Variables */}
-              <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-200 space-y-1 text-[11px]">
-                <strong className="block text-purple-300 font-bold mb-1">Environment Variables for Vercel:</strong>
-                <p>In Vercel Project Settings &gt; Environment Variables, add:</p>
-                <div className="font-mono text-[10px] text-slate-300 bg-slate-950/80 p-2 rounded-lg border border-slate-800 mt-1">
-                  <div>VITE_SUPABASE_URL = https://your-project.supabase.co</div>
-                  <div>VITE_SUPABASE_ANON_KEY = your-anon-key</div>
-                  <div>VITE_GEMINI_API_KEY = your-free-gemini-key</div>
-                </div>
               </div>
             </div>
           )}

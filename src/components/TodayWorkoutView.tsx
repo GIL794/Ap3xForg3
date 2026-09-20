@@ -4,6 +4,7 @@ import { ExerciseCard } from './ExerciseCard';
 import { RestTimerModal } from './RestTimerModal';
 import { GymToolsModal } from './GymToolsModal';
 import { ApexEvolutionCard } from './ApexEvolutionCard';
+import { MuscleRecoveryGauge } from './MuscleRecoveryGauge';
 import { copyWorkoutToClipboard } from '../logic/storage';
 import confetti from 'canvas-confetti';
 import { 
@@ -27,6 +28,7 @@ interface TodayWorkoutViewProps {
   completedSets: Record<string, boolean[]>;
   onUpdateCompletedSets: (updated: Record<string, boolean[]>) => void;
   onOverridePlan: (newDayPlan: WorkoutDay) => void;
+  onOpenPro?: () => void;
 }
 
 export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
@@ -34,6 +36,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
   profile,
   completedSets,
   onUpdateCompletedSets,
+  onOpenPro,
 }) => {
   const [useCatchUp, setUseCatchUp] = useState(false);
   const [warmupDone, setWarmupDone] = useState(false);
@@ -326,12 +329,19 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         </div>
       </div>
 
-      {/* APEX PREDATOR EVOLUTION CARD (Primate ➔ Apex Predator Progress) */}
+      {/* APEX PREDATOR EVOLUTION CARD (Pantheon & 13 Tiers of Ascension) */}
       <ApexEvolutionCard
         totalTonnageKg={totalTonnageKg}
         completedSetsCount={completedSetsCount}
         totalSetsCount={totalSetsCount}
         onOpenGymTools={() => setGymTools({ isOpen: true, weight: 80 })}
+      />
+
+      {/* BIO-RECOVERY & FATIGUE GAUGE */}
+      <MuscleRecoveryGauge
+        primaryMuscles={activePlan.focus || []}
+        totalSetsToday={totalSetsCount}
+        onOpenPro={onOpenPro || (() => {})}
       />
 
       {/* Live Gym Completion Progress Bar */}

@@ -4,7 +4,8 @@ import {
   ExperienceLevel, 
   PrimaryGoal, 
   SecondaryGoal, 
-  EquipmentType 
+  EquipmentType,
+  MythologicalArchetype
 } from '../types';
 import { 
   User, 
@@ -19,7 +20,8 @@ import {
   RotateCcw, 
   Save, 
   ChevronDown, 
-  ChevronUp 
+  ChevronUp,
+  Crown
 } from 'lucide-react';
 import { DAY_NAMES, DAY_NAMES_SHORT, DEFAULT_PROFILE } from '../data/defaultProfile';
 
@@ -131,8 +133,8 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   };
 
   const handleReset = () => {
-    if (window.confirm("Reset profile to Gabriele's default profile?")) {
-      setFormData({ ...DEFAULT_PROFILE });
+    if (window.confirm("Reset profile to default calibration?")) {
+      setFormData({ ...DEFAULT_PROFILE, name: formData.name });
       onResetDefaults();
     }
   };
@@ -182,6 +184,54 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
       {/* Expanded Form Content */}
       {isOpen && (
         <form onSubmit={handleSubmit} className="p-5 sm:p-7 border-t border-slate-800 space-y-6 animate-in fade-in duration-200">
+          {/* Olympian Mythological Archetype Selector (Male & Female Inclusive) */}
+          <div className="space-y-3">
+            <label className="block text-xs font-roman font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Crown className="w-4 h-4 text-amber-400" />
+              <span>Olympian Physique Archetype</span>
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+              {[
+                { id: 'hercules_mass', name: 'The Titan', god: 'Hercules', emoji: '🏛️', gender: 'Masc', focus: 'Mass & Power' },
+                { id: 'artemis_power', name: 'The Huntress', god: 'Artemis', emoji: '🏹', gender: 'Fem', focus: 'Glutes & Speed' },
+                { id: 'adonis_aesthetic', name: 'The Olympian', god: 'Adonis', emoji: '⚡', gender: 'Masc', focus: 'V-Taper Symmetry' },
+                { id: 'athena_sculpt', name: 'The War Goddess', god: 'Athena', emoji: '🛡️', gender: 'Fem', focus: 'Delts & Posture' },
+                { id: 'ares_combat', name: 'The Centurion', god: 'Ares', emoji: '⚔️', gender: 'Masc', focus: 'Warrior Stamina' },
+                { id: 'aphrodite_curves', name: 'The Sovereign', god: 'Aphrodite', emoji: '👑', gender: 'Fem', focus: 'Hourglass Curves' },
+              ].map((arch) => {
+                const isSelected = (formData.archetype || 'hercules_mass') === arch.id;
+                return (
+                  <button
+                    key={arch.id}
+                    type="button"
+                    onClick={() => setFormData({ ...formData, archetype: arch.id as MythologicalArchetype })}
+                    className={`p-3 rounded-2xl border text-left transition-all ${
+                      isSelected
+                        ? 'border-amber-400 bg-amber-500/15 shadow-md shadow-amber-500/10'
+                        : 'border-slate-800 bg-slate-950/60 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xl">{arch.emoji}</span>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded font-bold uppercase bg-slate-900 text-slate-400">
+                        {arch.gender}
+                      </span>
+                    </div>
+                    <div className="font-roman font-black text-xs text-white truncate">
+                      {arch.name}
+                    </div>
+                    <div className="text-[10px] text-amber-400/90 font-roman truncate">
+                      {arch.god}
+                    </div>
+                    <div className="text-[9px] text-slate-400 mt-0.5 truncate">
+                      {arch.focus}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Row 1: Name, Location, Timezone */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
