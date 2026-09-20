@@ -5,6 +5,7 @@ import {
   loadUserState, 
   saveUserState, 
   signOutAthlete,
+  initSupabaseAuthListener,
   DEFAULT_GABRIELE_ACCOUNT,
   getAllUserAccounts 
 } from './logic/auth';
@@ -81,6 +82,18 @@ export const App: React.FC = () => {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState<boolean>(false);
   const [isRoadmapModalOpen, setIsRoadmapModalOpen] = useState<boolean>(false);
   const [isProModalOpen, setIsProModalOpen] = useState<boolean>(false);
+
+  // Listen for Supabase OAuth session on mount (Google redirect return)
+  useEffect(() => {
+    const unsubscribe = initSupabaseAuthListener((user) => {
+      setCurrentUserId(user.id);
+      const loaded = loadUserState(user.id);
+      setAppState(loaded);
+    });
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, []);
 
   // Auto-persist changes strictly to the active user's partition when authenticated
   useEffect(() => {

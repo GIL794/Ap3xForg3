@@ -230,6 +230,57 @@ async function syncStateToSupabase(userId: string, state: AppState) {
 }
 
 /**
+ * Maps Supabase User to internal UserAccount
+ */
+export function mapSupabaseUserToAccount(sbUser: SupabaseUser): UserAccount {
+  const metadata = sbUser.user_metadata || {};
+  const name = metadata.full_name || metadata.name || sbUser.email?.split('@')[0] || 'Olympian';
+  const isGabriele = name.toLowerCase().includes('gabriele') || (sbUser.email && sbUser.email.toLowerCase().includes('gabriele'));
+
+  return {
+    id: sbUser.id,
+    name: isGabriele ? 'Gabriele' : name,
+    email: sbUser.email,
+    avatarUrl: metadata.avatar_url || metadata.picture,
+    createdAt: sbUser.created_at || new Date().toISOString(),
+    isGuest: false,
+  };
+}
+
+/**
+ * Listens for Supabase OAuth redirect callbacks (e.g. Google redirect back with access_token or code)
+ */
+export function initSupabaseAuthListener(onAuthSuccess: (user: UserAccount) => void): (() => void) | null {
+  if (!supabase) return null;
+
+  // 1. Check existing session on load
+  supabase.auth.getSession().then(({ data: { session } }) => {
+    if (session?.user) {
+      const account = mapSupabaseUserToAccount(session.user);
+      saveUserAccount(account);
+      setActiveUserId(account.id);
+      onAuthSuccess(account);
+    }
+  });
+
+  // 2. Listen for sign-in event (including OAuth redirect hash)
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session?.user) {
+      const account = mapSupabaseUserToAccount(session.user);
+      saveUserAccount(account);
+      setActiveUserId(account.id);
+      onAuthSuccess(account);
+    } else if (event === 'SIGNED_OUT') {
+      setActiveUserId(null);
+    }
+  });
+
+  return () => {
+    subscription.unsubscribe();
+  };
+}
+
+/**
  * Signs in using Google OAuth via Supabase
  */
 export async function signInWithGoogle(): Promise<{ error: Error | null; user?: UserAccount }> {
@@ -242,7 +293,7 @@ export async function signInWithGoogle(): Promise<{ error: Error | null; user?: 
     });
     return { error };
   } else {
-    // Fallback: local Google athlete profile
+    // Fallback: local Google athlete profile when Supabase env vars not yet configured
     const simulatedAccount: UserAccount = {
       id: `google_${Date.now()}`,
       name: 'Google Athlete',
