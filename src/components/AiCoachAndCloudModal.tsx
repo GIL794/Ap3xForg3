@@ -2,16 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { UserProfile, TodayWorkout, WorkoutDay } from '../types';
 import { 
   generateAiCoachingRecommendations, 
-  AiCoachRecommendation, 
-  getSavedGeminiKey, 
-  saveGeminiKey 
+  AiCoachRecommendation
 } from '../logic/aiCoach';
 import { generateShareableUrl } from '../logic/supabase';
 import { 
   Bot, 
   Sparkles, 
   Share2, 
-  Key, 
   ExternalLink, 
   Copy, 
   Check, 
@@ -43,8 +40,6 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
   onOpenPro,
 }) => {
   const [activeTab, setActiveTab] = useState<'ai_coach' | 'share'>('ai_coach');
-  const [apiKey, setApiKey] = useState<string>(getSavedGeminiKey());
-  const [showKeyOverride, setShowKeyOverride] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [recommendation, setRecommendation] = useState<AiCoachRecommendation | null>(null);
   const [shareUrl, setShareUrl] = useState<string>('');
@@ -62,18 +57,13 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
   const handleFetchRecommendations = async () => {
     setIsLoading(true);
     try {
-      const rec = await generateAiCoachingRecommendations(profile, todayWorkout, apiKey);
+      const rec = await generateAiCoachingRecommendations(profile, todayWorkout, '');
       setRecommendation(rec);
     } catch (err) {
       console.error('Failed to get coaching recommendations:', err);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleSaveApiKey = () => {
-    saveGeminiKey(apiKey);
-    handleFetchRecommendations();
   };
 
   const handleCopyShareLink = () => {
@@ -295,39 +285,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                     </div>
                   )}
 
-                  {/* Optional Developer Override (Collapsed) */}
-                  <div className="pt-2 border-t border-slate-800/80">
-                    <button
-                      onClick={() => setShowKeyOverride(!showKeyOverride)}
-                      className="text-[11px] text-slate-500 hover:text-slate-400 font-roman flex items-center gap-1"
-                    >
-                      <Key className="w-3 h-3" />
-                      <span>{showKeyOverride ? 'Hide Developer Key Override' : 'Developer: Custom Gemini API Key Override (Optional)'}</span>
-                    </button>
 
-                    {showKeyOverride && (
-                      <div className="mt-2 p-3 rounded-xl bg-black/50 border border-slate-800 space-y-2 text-xs">
-                        <p className="text-[11px] text-slate-400">
-                          As a Pro user, the platform automatically powers your requests. If you are a developer and wish to test your own Google AI Studio key, you can override it here.
-                        </p>
-                        <div className="flex gap-2">
-                          <input
-                            type="password"
-                            value={apiKey}
-                            onChange={(e) => setApiKey(e.target.value)}
-                            placeholder="AIzaSy..."
-                            className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-white font-mono text-xs focus:outline-none focus:border-amber-500"
-                          />
-                          <button
-                            onClick={handleSaveApiKey}
-                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-roman font-bold"
-                          >
-                            Save Override
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
                 </div>
               )}
             </div>
