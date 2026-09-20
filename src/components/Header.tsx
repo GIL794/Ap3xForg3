@@ -1,13 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import { Download, Sparkles, Share2, Crown, LogOut, User } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Download, Sparkles, Share2, Crown, LogOut, Globe } from 'lucide-react';
 import { UserProfile, WorkoutDay, TodayWorkout, UserAccount } from '../types';
 import { exportPlanAsJson } from '../logic/storage';
+import { 
+  SUPPORTED_LANGUAGES, 
+  SupportedLanguage, 
+  getSavedLanguage, 
+  saveLanguage, 
+  t 
+} from '../logic/i18n';
 
 interface HeaderProps {
   profile: UserProfile;
   weeklyPlan: WorkoutDay[];
   todayWorkout: TodayWorkout;
   currentUser: UserAccount;
+  language?: SupportedLanguage;
+  onLanguageChange?: (lang: SupportedLanguage) => void;
   onOpenAiCoach: () => void;
   onOpenShare: () => void;
   onOpenAuth: () => void;
@@ -21,6 +30,8 @@ export const Header: React.FC<HeaderProps> = ({
   weeklyPlan,
   todayWorkout,
   currentUser,
+  language = 'en',
+  onLanguageChange,
   onOpenAiCoach,
   onOpenShare,
   onOpenAuth,
@@ -29,6 +40,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSignOut,
 }) => {
   const [londonTimeStr, setLondonTimeStr] = useState<string>('');
+  const [showLangMenu, setShowLangMenu] = useState<boolean>(false);
+  const langMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const updateTime = () => {
@@ -49,6 +62,25 @@ export const Header: React.FC<HeaderProps> = ({
     const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, [profile.timezone]);
+
+  // Click outside to close language dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (langMenuRef.current && !langMenuRef.current.contains(event.target as Node)) {
+        setShowLangMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectLang = (code: SupportedLanguage) => {
+    saveLanguage(code);
+    setShowLangMenu(false);
+    if (onLanguageChange) onLanguageChange(code);
+  };
+
+  const currentLangObj = SUPPORTED_LANGUAGES.find(l => l.code === language) || SUPPORTED_LANGUAGES[0];
 
   const handleExport = () => {
     exportPlanAsJson(profile, weeklyPlan, todayWorkout);
@@ -75,7 +107,7 @@ export const Header: React.FC<HeaderProps> = ({
                 title="Read the HOMO DEVS Mythos"
               >
                 <span>📜</span>
-                <span>Mythos</span>
+                <span>{t('nav.mythos', language)}</span>
               </button>
             </div>
             <p className="text-[10px] text-slate-400 font-roman tracking-wider uppercase hidden sm:block">
@@ -85,7 +117,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Status indicator & Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Live London Time & 19:00 Status */}
           <div className="hidden xl:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
             <span className="flex h-2 w-2 relative">
@@ -95,7 +127,41 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="text-slate-400 font-medium font-roman">Time:</span>
             <span className="mono-font font-bold text-slate-200">{londonTimeStr}</span>
             <span className="text-slate-600">|</span>
-            <span className="text-amber-400 font-semibold font-roman">{profile.targetWorkoutTime} Session Ready</span>
+            <span className="text-amber-400 font-semibold font-roman">{profile.targetWorkoutTime} {t('nav.sessionReady', language)}</span>
+          </div>
+
+          {/* Language Selector Dropdown */}
+          <div className="relative" ref={langMenuRef}>
+            <button
+              onClick={() => setShowLangMenu(!showLangMenu)}
+              className="flex items-center gap-1 px-2 sm:px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-xs font-bold font-roman text-slate-300 transition-colors shadow-sm"
+              title="Change Language / Cambia Lingua"
+            >
+              <span>{currentLangObj.flag}</span>
+              <span className="hidden sm:inline uppercase text-[11px]">{currentLangObj.code}</span>
+            </button>
+
+            {showLangMenu && (
+              <div className="absolute right-0 mt-2 w-40 rounded-2xl bg-[#0c0e17] border border-amber-500/40 shadow-2xl p-1.5 z-50 animate-in fade-in zoom-in-95 duration-150">
+                <div className="px-2 py-1 text-[10px] font-roman uppercase font-bold text-slate-400 border-b border-slate-800 mb-1">
+                  {t('lang.choose', language)}
+                </div>
+                {SUPPORTED_LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => handleSelectLang(lang.code)}
+                    className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-roman transition-colors text-left ${
+                      language === lang.code
+                        ? 'bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30'
+                        : 'text-slate-300 hover:bg-slate-800'
+                    }`}
+                  >
+                    <span>{lang.flag}</span>
+                    <span>{lang.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Imperivm Pro Badge Button */}
@@ -105,7 +171,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Unlock Imperivm Pro"
           >
             <Crown className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Pro</span>
+            <span className="hidden sm:inline">{t('nav.pro', language)}</span>
           </button>
 
           {/* User Account / Switcher Badge */}
@@ -127,7 +193,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Open AI Oracle Coach Advice"
           >
             <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden xs:inline">Oracle</span>
+            <span className="hidden xs:inline">{t('nav.oracle', language)}</span>
           </button>
 
           {/* Share Plan */}
@@ -137,7 +203,7 @@ export const Header: React.FC<HeaderProps> = ({
             title="Share with Legion & Cloud Sync"
           >
             <Share2 className="w-3.5 h-3.5 text-amber-400" />
-            <span className="hidden sm:inline">Share</span>
+            <span className="hidden sm:inline">{t('nav.share', language)}</span>
           </button>
 
           {/* Export Plan (JSON) */}

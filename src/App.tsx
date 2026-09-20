@@ -29,6 +29,7 @@ import { EvolutionRoadmapModal } from './components/EvolutionRoadmapModal';
 import { ImperivmProModal } from './components/ImperivmProModal';
 import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { SupportedLanguage, getSavedLanguage } from './logic/i18n';
 
 export const App: React.FC = () => {
   // Check direct URL parameters for Google OAuth verification compliance (?page=privacy, ?page=terms, ?page=creed)
@@ -75,6 +76,7 @@ export const App: React.FC = () => {
   const [variationSeed, setVariationSeed] = useState<number>(0);
   const [regenNotification, setRegenNotification] = useState<string | null>(null);
   const [proWelcomeNotice, setProWelcomeNotice] = useState<string | null>(null);
+  const [language, setLanguage] = useState<SupportedLanguage>(getSavedLanguage());
 
   // Modals state
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
@@ -349,6 +351,8 @@ export const App: React.FC = () => {
         weeklyPlan={appState.weeklyPlan}
         todayWorkout={appState.todayWorkout}
         currentUser={appState.userAccount}
+        language={language}
+        onLanguageChange={setLanguage}
         onOpenAiCoach={() => setIsAiModalOpen(true)}
         onOpenShare={() => setIsAiModalOpen(true)}
         onOpenAuth={() => setIsAuthModalOpen(true)}
@@ -384,6 +388,7 @@ export const App: React.FC = () => {
             onUpdateCompletedSets={handleUpdateCompletedSets}
             onOverridePlan={handleOverrideTodayPlan}
             onOpenPro={() => setIsProModalOpen(true)}
+            language={language}
           />
         </section>
 
@@ -459,6 +464,8 @@ export const App: React.FC = () => {
         profile={appState.profile}
         todayWorkout={appState.todayWorkout}
         weeklyPlan={appState.weeklyPlan}
+        isProSubscriber={appState.isProSubscriber}
+        onOpenPro={() => setIsProModalOpen(true)}
       />
 
       {/* Lore Intro Modal */}
@@ -510,6 +517,7 @@ export const App: React.FC = () => {
         onClose={() => setIsProModalOpen(false)}
         currentUser={appState.userAccount}
         isProSubscriber={appState.isProSubscriber}
+        language={language}
         onUpgradeSuccess={() => {
           setAppState(prev => ({ ...prev, isProSubscriber: true }));
         }}

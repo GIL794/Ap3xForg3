@@ -6,6 +6,7 @@ import { GymToolsModal } from './GymToolsModal';
 import { OlympianEvolutionCard } from './OlympianEvolutionCard';
 import { MuscleRecoveryGauge } from './MuscleRecoveryGauge';
 import { copyWorkoutToClipboard } from '../logic/storage';
+import { SupportedLanguage, t } from '../logic/i18n';
 import confetti from 'canvas-confetti';
 import { 
   Flame, 
@@ -29,6 +30,7 @@ interface TodayWorkoutViewProps {
   onUpdateCompletedSets: (updated: Record<string, boolean[]>) => void;
   onOverridePlan: (newDayPlan: WorkoutDay) => void;
   onOpenPro?: () => void;
+  language?: SupportedLanguage;
 }
 
 export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
@@ -37,6 +39,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
   completedSets,
   onUpdateCompletedSets,
   onOpenPro,
+  language = 'en',
 }) => {
   const [useCatchUp, setUseCatchUp] = useState(false);
   const [warmupDone, setWarmupDone] = useState(false);
@@ -208,7 +211,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
               </span>
               <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-400 mono-font">
-                TODAY'S WORKOUT • {todayWorkout.scheduledTime} BST
+                {t('today.arena', language)} • {todayWorkout.scheduledTime}
               </span>
             </div>
 
@@ -322,7 +325,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 title="Reset completion progress"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span>Reset sets</span>
+                <span>{t('today.reset', language)}</span>
               </button>
             )}
           </div>

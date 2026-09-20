@@ -12,11 +12,16 @@ import {
   CreditCard, 
   Send, 
   KeyRound,
-  AlertCircle
+  AlertCircle,
+  HelpCircle,
+  Activity,
+  Calculator,
+  Flame
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { UserAccount } from '../types';
 import { isLifetimeVipUser, verifyEmperorPasscode } from '../logic/auth';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface ImperivmProModalProps {
   isOpen: boolean;
@@ -24,6 +29,7 @@ interface ImperivmProModalProps {
   onUpgradeSuccess?: () => void;
   currentUser?: UserAccount | null;
   isProSubscriber?: boolean;
+  language?: SupportedLanguage;
 }
 
 const AIRTM_RECIPIENT_EMAIL = 'gella94@gmail.com';
@@ -36,6 +42,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   onUpgradeSuccess,
   currentUser,
   isProSubscriber = false,
+  language = 'en',
 }) => {
   const [activeTab, setActiveTab] = useState<'airtm' | 'card' | 'passcode'>('airtm');
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('lifetime');
@@ -109,26 +116,42 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
     }, 1000);
   };
 
-  const PRO_PERKS = [
+  const DEEP_PRO_PILLARS = [
     {
-      title: 'Live Oracle AI Exercise Physiologist',
-      description: 'Real-time Gemini Flash 2.0 intelligence for dynamic fatigue analysis, injury swaps, and nutrition adjustments.',
+      emoji: '🔮',
+      title: 'Live Oracle AI Exercise Physiologist (Gemini 2.0)',
+      badge: 'Zero Setup • Managed by Platform',
+      description: 'Consult our automated AI sport scientist for every single workout session. The Oracle dynamically critiques weekly volume, calculates exact RPE mechanical tension, suggests smart biomechanical injury substitutions, and provides pre-workout fueling timing calibrated to your target training hour without demanding any technical API keys.',
     },
     {
-      title: 'Full 3D Bio-Recovery & Fatigue Heatmap',
-      description: 'Algorithmic muscle readiness scores preventing overtraining and pinpointing optimal progressive overload windows.',
+      emoji: '🧬',
+      title: 'Full 3D Bio-Recovery & CNS Fatigue Heatmap',
+      badge: 'Autoregulation • Overtraining Defense',
+      description: 'Algorithmic readiness scoring across Pectorals, Deltoids, Lats, Quads, Glutes, and Core. Tracks central nervous system (CNS) systemic exhaustion and tells you exactly when each muscle is primed for progressive overload versus when fatigue demands a deload set.',
     },
     {
-      title: 'Divine Ascension Tiers XI — XIII',
-      description: 'Unlock Poseidon, Jupiter, and the ultimate HOMO DEVS rank with custom imperial badges and ceremonial fanfares.',
+      emoji: '🏋️',
+      title: 'Barbell 1RM Intensity Brackets & Warmup Ramp',
+      badge: 'Heavy Compound Precision',
+      description: 'Unlock heavy compound percentage target tables (80%, 85%, 90%, 95% of 1RM) across Brzycki and Epley equations. Includes the visual Olympic bumper plate loader and automated progressive warmup ramp schemes (50% → 70% → 85% → Working Weight) to prevent joint injury.',
     },
     {
-      title: 'Unlimited Cloud Sync & Multi-Device Ledger',
-      description: 'Seamlessly access and synchronize all your workout logs across iPhone, Android, iPad, and desktop.',
+      emoji: '👑',
+      title: 'Divine Ascension Tiers XI — XIII (Living Deity)',
+      badge: 'Poseidon, Jupiter & HOMO DEVS',
+      description: 'Unlock the highest echelons of lifetime iron tonnage (100,000kg to 140,000kg+). Earn mythical golden laurel badges, imperial profile borders, and 4-note victory fanfares reserved strictly for lifters who surpass mortal boundaries.',
     },
     {
-      title: 'Imperial PDF Scrolls & Training Certificates',
-      description: 'Export pristine Roman-styled workout scrolls and proof of strength achievements.',
+      emoji: '☁️',
+      title: 'Encrypted Cloud Ledger & Multi-Device Sync',
+      badge: 'Seamless Mobility',
+      description: 'Synchronize your entire workout history, custom exercises, logged weights, and set tags (Warmup, Drop, Failure) across iPhone, Android, iPad, and desktop in real-time via encrypted cloud storage.',
+    },
+    {
+      emoji: '📜',
+      title: 'Imperial PDF Workout Scrolls & Certificates',
+      badge: 'Proof of Strength',
+      description: 'Export beautifully typeset Roman training scrolls and verified proof-of-strength milestone certificates to celebrate your personal records and share your achievements with your training partners.',
     },
   ];
 
@@ -152,7 +175,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
             HOMO DEVS <span className="text-amber-400">IMPERIVM PRO</span>
           </h3>
           <p className="text-xs text-slate-300 max-w-md mx-auto mt-1 font-roman">
-            Ascend to the highest echelon of strength. Unlock the complete Olympian arsenal.
+            {t('pro.subtitle', language)}
           </p>
 
           {/* Already Pro Banner */}
@@ -190,7 +213,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
             >
               <div className="flex justify-between items-start mb-2">
                 <span className="text-xs font-roman uppercase font-black text-slate-300 tracking-wider">
-                  Regular Pro
+                  {t('pro.monthly', language)}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-bold uppercase">
                   Monthly Pass
@@ -198,10 +221,10 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
               </div>
               <div className="text-2xl sm:text-3xl font-black text-white mono-font flex items-baseline gap-1">
                 <span className="text-amber-300">£4.99</span>
-                <span className="text-xs text-slate-400 font-sans">($6.50 USD) / mo</span>
+                <span className="text-xs text-slate-400 font-sans">($6.50 USD) {t('pro.perMonth', language)}</span>
               </div>
               <p className="text-[11px] text-slate-400 mt-2">
-                Full access to Live Oracle AI, Bio-Recovery gauge, and cloud synchronization. Cancel anytime.
+                Full access to Live Oracle AI, 3D Bio-Recovery, Barbell 1RM calculators, and cloud synchronization. Cancel anytime.
               </p>
             </div>
 
@@ -219,7 +242,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
               </div>
               <div className="flex justify-between items-start mb-2">
                 <span className="text-xs font-roman uppercase font-black text-amber-300 tracking-wider">
-                  Emperor Lifetime
+                  {t('pro.lifetime', language)}
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold uppercase">
                   One-Time
@@ -227,10 +250,10 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
               </div>
               <div className="text-2xl sm:text-3xl font-black text-white mono-font flex items-baseline gap-1">
                 <span className="text-amber-300">£99.99</span>
-                <span className="text-xs text-emerald-400 font-sans font-bold">($130 USD) forever</span>
+                <span className="text-xs text-emerald-400 font-sans font-bold">($130 USD) {t('pro.forever', language)}</span>
               </div>
               <p className="text-[11px] text-slate-300 mt-2">
-                Eternal membership. Never pay another subscription fee. Includes all future expansions.
+                Eternal membership. Never pay another subscription fee. Includes all future expansions and divine perks.
               </p>
             </div>
           </div>
@@ -250,7 +273,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                 }`}
               >
                 <Send className="w-3.5 h-3.5" />
-                <span>AirTM Pay</span>
+                <span>{t('pro.airtm', language)}</span>
               </button>
 
               <button
@@ -262,7 +285,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                 }`}
               >
                 <CreditCard className="w-3.5 h-3.5" />
-                <span>Stripe / Card</span>
+                <span>{t('pro.card', language)}</span>
               </button>
 
               <button
@@ -274,7 +297,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                 }`}
               >
                 <KeyRound className="w-3.5 h-3.5" />
-                <span>VIP Passcode</span>
+                <span>{t('pro.passcode', language)}</span>
               </button>
             </div>
 
@@ -359,7 +382,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                   ) : (
                     <>
                       <Check className="w-4 h-4 stroke-[3]" />
-                      <span>Confirm AirTM Transfer & Unlock Pro</span>
+                      <span>{t('pro.confirmAirtm', language)}</span>
                     </>
                   )}
                 </button>
@@ -461,25 +484,36 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
             )}
           </div>
 
-          {/* Perks List */}
-          <div className="space-y-3 pt-1 border-t border-slate-800">
-            <h4 className="text-xs font-black uppercase text-amber-400 font-roman tracking-wider">
-              Included in Imperivm Pro
-            </h4>
-            <div className="space-y-2.5">
-              {PRO_PERKS.map((perk, index) => (
-                <div key={index} className="flex items-start gap-3 p-3 rounded-xl bg-slate-950/40 border border-slate-800/80">
-                  <div className="w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+          {/* DEEP PRO PILLARS BREAKDOWN */}
+          <div className="space-y-4 pt-3 border-t border-slate-800">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-black uppercase text-amber-400 font-roman tracking-wider">
+                What Is Behind the Paywall (The 6 Imperivm Pro Pillars)
+              </h4>
+              <span className="text-[10px] text-slate-400 font-roman">Complete Breakdown</span>
+            </div>
+
+            <div className="space-y-3">
+              {DEEP_PRO_PILLARS.map((pillar, index) => (
+                <div 
+                  key={index} 
+                  className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 hover:border-amber-500/30 transition-colors space-y-1.5"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base">{pillar.emoji}</span>
+                      <strong className="text-xs font-bold text-white font-roman">
+                        {pillar.title}
+                      </strong>
+                    </div>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/20 font-bold font-roman">
+                      {pillar.badge}
+                    </span>
                   </div>
-                  <div>
-                    <strong className="text-xs font-bold text-white block font-roman">
-                      {perk.title}
-                    </strong>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      {perk.description}
-                    </p>
-                  </div>
+
+                  <p className="text-[11px] text-slate-300 leading-relaxed pl-6">
+                    {pillar.description}
+                  </p>
                 </div>
               ))}
             </div>
