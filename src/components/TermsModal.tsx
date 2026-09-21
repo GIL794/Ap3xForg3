@@ -20,7 +20,7 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 className="text-lg font-black font-roman text-white">Terms of Service</h3>
-              <p className="text-xs text-slate-400 font-roman">HOMO DEVS • Gym Safety & Usage Terms</p>
+              <p className="text-xs text-slate-400 font-roman">HOMO DEUS • Gym Safety & Usage Terms</p>
             </div>
           </div>
 
@@ -45,14 +45,14 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose }) => {
           <section className="space-y-1.5">
             <h4 className="text-sm font-bold text-white font-roman">1. Service Description</h4>
             <p>
-              HOMO DEVS provides computational workout scheduling, barbell plate loading assistance, bio-recovery analytics, and progress tracking tools for personal training use.
+              HOMO DEUS provides computational workout scheduling, barbell plate loading assistance, bio-recovery analytics, and progress tracking tools for personal training use.
             </p>
           </section>
 
           <section className="space-y-1.5">
             <h4 className="text-sm font-bold text-white font-roman">2. User Responsibility</h4>
             <p>
-              Athletes are solely responsible for selecting safe working loads, checking gym equipment integrity, and listening to biological pain cues. HOMO DEVS is not liable for injury or property damage incurred while executing exercises.
+              Athletes are solely responsible for selecting safe working loads, checking gym equipment integrity, and listening to biological pain cues. HOMO DEUS is not liable for injury or property damage incurred while executing exercises.
             </p>
           </section>
 

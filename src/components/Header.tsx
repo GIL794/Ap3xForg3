@@ -93,18 +93,18 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2.5 sm:gap-3">
           <img 
             src="/logo.png" 
-            alt="HOMO DEVS Logo" 
+            alt="HOMO DEUS Logo" 
             className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl object-cover border border-amber-500/40 shadow-md shadow-amber-500/20 shrink-0"
           />
           <div>
             <div className="flex items-center gap-1.5 sm:gap-2">
               <h1 className="text-base sm:text-lg font-black font-roman tracking-wider text-white flex items-center gap-1">
-                HOMO <span className="text-amber-400">DEVS</span>
+                HOMO <span className="text-amber-400">DEUS</span>
               </h1>
               <button
                 onClick={onOpenLore}
                 className="hidden xs:flex items-center gap-1 text-[10px] font-roman uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-colors"
-                title="Read the HOMO DEVS Mythos"
+                title="Read the HOMO DEUS Mythos"
               >
                 <span>📜</span>
                 <span>{t('nav.mythos', language)}</span>

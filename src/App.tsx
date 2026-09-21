@@ -29,7 +29,7 @@ import { EvolutionRoadmapModal } from './components/EvolutionRoadmapModal';
 import { ImperivmProModal } from './components/ImperivmProModal';
 import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { SupportedLanguage, getSavedLanguage } from './logic/i18n';
+import { SupportedLanguage, getSavedLanguage, t } from './logic/i18n';
 
 export const App: React.FC = () => {
   // Check direct URL parameters for Google OAuth verification compliance (?page=privacy, ?page=terms, ?page=creed)
@@ -394,8 +394,8 @@ export const App: React.FC = () => {
       <footer className="border-t border-slate-800/80 bg-[#06070a] py-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="HOMO DEVS" className="w-5 h-5 rounded-md object-cover" />
-            <span className="font-roman font-bold text-slate-300">HOMO DEVS Engine</span>
+            <img src="/logo.png" alt="HOMO DEUS" className="w-5 h-5 rounded-md object-cover" />
+            <span className="font-roman font-bold text-slate-300">{t('footer.engine', language)}</span>
             <span>•</span>
             <span className="text-amber-400 font-roman">Athlete: {appState.userAccount.name}</span>
           </div>
@@ -405,21 +405,21 @@ export const App: React.FC = () => {
               className="hover:text-amber-400 flex items-center gap-1 transition-colors"
             >
               <span>📜</span>
-              <span>The Mythos</span>
+              <span>{t('footer.mythos', language)}</span>
             </button>
             <span>•</span>
             <button
               onClick={() => setIsPrivacyModalOpen(true)}
               className="hover:text-amber-400 transition-colors"
             >
-              Privacy Policy
+              {t('footer.privacy', language)}
             </button>
             <span>•</span>
             <button
               onClick={() => setIsTermsModalOpen(true)}
               className="hover:text-amber-400 transition-colors"
             >
-              Terms
+              {t('footer.terms', language)}
             </button>
             <span>•</span>
             <button
@@ -427,7 +427,7 @@ export const App: React.FC = () => {
               className="text-cyan-400 hover:underline flex items-center gap-1"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              AI Oracle
+              {t('footer.oracle', language)}
             </button>
           </div>
         </div>
@@ -442,6 +442,7 @@ export const App: React.FC = () => {
         weeklyPlan={appState.weeklyPlan}
         isProSubscriber={appState.isProSubscriber}
         onOpenPro={() => setIsProModalOpen(true)}
+        language={language}
       />
 
       {/* Lore Intro Modal */}
@@ -458,6 +459,7 @@ export const App: React.FC = () => {
         isOpen={!appState.onboardingCompleted}
         initialProfile={appState.profile}
         onComplete={handleOnboardingComplete}
+        language={language}
       />
 
       {/* Athlete Login & Account Switcher Modal */}

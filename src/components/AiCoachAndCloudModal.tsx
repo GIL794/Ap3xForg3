@@ -5,6 +5,7 @@ import {
   AiCoachRecommendation
 } from '../logic/aiCoach';
 import { generateShareableUrl } from '../logic/supabase';
+import { SupportedLanguage, t } from '../logic/i18n';
 import { 
   Bot, 
   Sparkles, 
@@ -28,6 +29,7 @@ interface AiCoachAndCloudModalProps {
   weeklyPlan: WorkoutDay[];
   isProSubscriber?: boolean;
   onOpenPro?: () => void;
+  language?: SupportedLanguage;
 }
 
 export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
@@ -38,6 +40,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
   weeklyPlan,
   isProSubscriber = false,
   onOpenPro,
+  language = 'en',
 }) => {
   const [activeTab, setActiveTab] = useState<'ai_coach' | 'share'>('ai_coach');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -195,6 +198,16 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
               ) : (
                 /* PRO SUBSCRIBER UNLOCKED VIEW */
                 <div className="space-y-4">
+                  {/* Active Injuries Acknowledgment */}
+                  {profile.injuries && (
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-300">
+                      <ShieldCheck className="w-4 h-4 text-rose-400 shrink-0" />
+                      <span>
+                        <strong className="font-roman">Adapting for:</strong> {profile.injuries}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Status Pill */}
                   <div className="flex items-center justify-between p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs text-amber-300">
                     <div className="flex items-center gap-2 font-roman">
@@ -206,7 +219,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                       disabled={isLoading}
                       className="px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-roman font-bold transition-colors"
                     >
-                      {isLoading ? 'Consulting...' : 'Refresh Audit'}
+                      {isLoading ? t('general.loading', language) : t('oracle.refresh', language)}
                     </button>
                   </div>
 
@@ -214,7 +227,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                     <div className="p-8 text-center space-y-3">
                       <div className="w-8 h-8 mx-auto border-3 border-amber-400 border-t-transparent rounded-full animate-spin" />
                       <p className="text-xs text-slate-400 font-roman animate-pulse">
-                        Consulting the Olympian sport-science oracle...
+                         {t('oracle.loading', language)}
                       </p>
                     </div>
                   )}
@@ -224,7 +237,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                       {/* Summary */}
                       <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1">
                         <span className="text-[10px] font-roman uppercase font-bold text-amber-400 tracking-wider">
-                          Executive Assessment
+                          {t('oracle.assessment', language)}
                         </span>
                         <p className="text-xs text-slate-200 leading-relaxed font-sans">
                           {recommendation.summary}
@@ -235,7 +248,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1">
                           <span className="text-[10px] font-roman uppercase font-bold text-cyan-400 tracking-wider">
-                            RPE & Tension Strategy
+                            {t('oracle.intensity', language)}
                           </span>
                           <p className="text-xs text-slate-300 leading-relaxed">
                             {recommendation.intensityCritique}
@@ -244,7 +257,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
 
                         <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-1">
                           <span className="text-[10px] font-roman uppercase font-bold text-emerald-400 tracking-wider">
-                            Volume & Recovery Ratio
+                            {t('oracle.volume', language)}
                           </span>
                           <p className="text-xs text-slate-300 leading-relaxed">
                             {recommendation.volumeEvaluation}
@@ -252,11 +265,24 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                         </div>
                       </div>
 
+                      {/* Injury Adaptations (always shown for Pro users) */}
+                      {recommendation.injuryAdaptations && (
+                        <div className="p-4 rounded-2xl bg-rose-950/30 border border-rose-500/30 space-y-1">
+                          <span className="text-[10px] font-roman uppercase font-bold text-rose-400 tracking-wider flex items-center gap-1">
+                            <ShieldCheck className="w-3.5 h-3.5" />
+                            {t('oracle.injuryAdapt', language)}
+                          </span>
+                          <p className="text-xs text-rose-200 leading-relaxed">
+                            {recommendation.injuryAdaptations}
+                          </p>
+                        </div>
+                      )}
+
                       {/* Swaps */}
                       {recommendation.suggestedSwaps && recommendation.suggestedSwaps.length > 0 && (
                         <div className="p-4 rounded-2xl bg-slate-950/70 border border-slate-800 space-y-2">
                           <span className="text-[10px] font-roman uppercase font-bold text-amber-400 tracking-wider">
-                            Suggested Biomechanical Swaps
+                            {t('oracle.swaps', language)}
                           </span>
                           <div className="space-y-2">
                             {recommendation.suggestedSwaps.map((swap, idx) => (
@@ -276,7 +302,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                       <div className="p-4 rounded-2xl bg-slate-950/70 border border-amber-500/20 space-y-1">
                         <span className="text-[10px] font-roman uppercase font-bold text-amber-300 tracking-wider flex items-center gap-1">
                           <Flame className="w-3.5 h-3.5" />
-                          Pre-Workout Priming ({profile.targetWorkoutTime})
+                            {t('oracle.preworkout', language)} ({profile.targetWorkoutTime})
                         </span>
                         <p className="text-xs text-slate-300 leading-relaxed">
                           {recommendation.preWorkoutTip}

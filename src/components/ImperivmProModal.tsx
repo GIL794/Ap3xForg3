@@ -152,7 +152,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
           </div>
 
           <h3 className="text-2xl font-black text-white font-roman tracking-wider uppercase">
-            HOMO DEVS <span className="text-amber-400">IMPERIVM PRO</span>
+            {t('pro.modalTitle', language)}
           </h3>
           <p className="text-xs text-slate-300 max-w-md mx-auto mt-1 font-roman">
             {t('pro.subtitle', language)}
