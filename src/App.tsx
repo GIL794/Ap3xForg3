@@ -99,30 +99,6 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  // Listen for Stripe Checkout return (?payment=success&tier=...)
-  useEffect(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('payment') === 'success') {
-        const tier = params.get('tier') || 'pro';
-        setAppState(prev => ({ ...prev, isProSubscriber: true }));
-        setProWelcomeNotice(`🏛️ IMPERIVM PRO ACTIVATED: Welcome to the Divine Pantheon! (${tier.toUpperCase()})`);
-        confetti({
-          particleCount: 140,
-          spread: 90,
-          origin: { y: 0.5 },
-          colors: ['#d4af37', '#ffd700', '#f59e0b', '#ffffff']
-        });
-        window.history.replaceState({}, '', window.location.pathname);
-        setTimeout(() => {
-          setProWelcomeNotice(null);
-        }, 8000);
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
-
   // Auto-persist changes strictly to the active user's partition when authenticated
   useEffect(() => {
     if (currentUserId) {
@@ -361,7 +337,7 @@ export const App: React.FC = () => {
         onSignOut={handleSignOut}
       />
 
-      {/* Stripe Checkout Success Banner */}
+      {/* Pro Activation Success Banner */}
       {proWelcomeNotice && (
         <div className="sticky top-16 sm:top-20 z-30 w-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500 text-slate-950 px-4 py-2.5 text-center text-xs sm:text-sm font-black font-roman flex items-center justify-center gap-2 shadow-xl animate-in slide-in-from-top duration-300">
           <Crown className="w-4 h-4 fill-slate-950" />
@@ -519,7 +495,14 @@ export const App: React.FC = () => {
         isProSubscriber={appState.isProSubscriber}
         language={language}
         onUpgradeSuccess={() => {
-          setAppState(prev => ({ ...prev, isProSubscriber: true }));
+          setAppState(prev => {
+            const updated = { ...prev, isProSubscriber: true };
+            // Persist immediately so Pro survives page refresh
+            if (prev.userId) {
+              saveUserState(prev.userId, updated);
+            }
+            return updated;
+          });
         }}
       />
     </div>

@@ -5,15 +5,12 @@ import {
   Check, 
   Sparkles, 
   Shield, 
-  Zap, 
   Copy, 
   CheckCheck, 
   ExternalLink, 
-  CreditCard, 
   Send, 
   KeyRound,
   AlertCircle,
-  HelpCircle,
   Activity,
   Calculator,
   Flame
@@ -33,8 +30,6 @@ interface ImperivmProModalProps {
 }
 
 const AIRTM_RECIPIENT_EMAIL = 'gella94@gmail.com';
-const STRIPE_MONTHLY_LINK = import.meta.env.VITE_STRIPE_MONTHLY_LINK || '';
-const STRIPE_LIFETIME_LINK = import.meta.env.VITE_STRIPE_LIFETIME_LINK || '';
 
 export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   isOpen,
@@ -44,7 +39,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   isProSubscriber = false,
   language = 'en',
 }) => {
-  const [activeTab, setActiveTab] = useState<'airtm' | 'card' | 'passcode'>('airtm');
+  const [activeTab, setActiveTab] = useState<'airtm' | 'passcode'>('airtm');
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'lifetime'>('lifetime');
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -100,21 +95,6 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
     }
   };
 
-  const handleStripeCheckout = () => {
-    const targetLink = selectedPlan === 'lifetime' ? STRIPE_LIFETIME_LINK : STRIPE_MONTHLY_LINK;
-    if (targetLink) {
-      setIsProcessing(true);
-      window.location.href = targetLink;
-      return;
-    }
-
-    // Sandbox fallback
-    setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      triggerCelebration(`Sandbox upgrade granted: ${selectedPlan === 'lifetime' ? 'Lifetime Emperor' : 'Monthly Pro'}`);
-    }, 1000);
-  };
 
   const DEEP_PRO_PILLARS = [
     {
@@ -263,7 +243,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
             <div className="text-xs font-roman uppercase font-bold text-slate-400">
               Select Payment Method:
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 onClick={() => setActiveTab('airtm')}
                 className={`py-2.5 px-3 rounded-xl font-roman text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
@@ -274,18 +254,6 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>{t('pro.airtm', language)}</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('card')}
-                className={`py-2.5 px-3 rounded-xl font-roman text-xs font-bold transition-all flex items-center justify-center gap-1.5 border ${
-                  activeTab === 'card'
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-400 shadow-lg glow-gold'
-                    : 'bg-slate-900/80 text-slate-400 border-slate-800 hover:text-white'
-                }`}
-              >
-                <CreditCard className="w-3.5 h-3.5" />
-                <span>{t('pro.card', language)}</span>
               </button>
 
               <button
@@ -389,52 +357,6 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
               </div>
             )}
 
-            {/* TAB 2: STRIPE / CARD */}
-            {activeTab === 'card' && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 animate-in fade-in duration-150">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-5 h-5 text-amber-400" />
-                    <div>
-                      <h4 className="text-sm font-bold text-white font-roman">
-                        Stripe 256-Bit Checkout
-                      </h4>
-                      <p className="text-[11px] text-slate-400">
-                        Apple Pay, Google Pay, Visa, Mastercard
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex gap-1 text-[10px]">
-                    <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-bold">Apple Pay</span>
-                    <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-700 text-slate-300 font-bold">Cards</span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-slate-400">
-                  Instant activation with receipt and cancellation portal directly managed by Stripe.
-                </p>
-
-                <button
-                  onClick={handleStripeCheckout}
-                  disabled={isProcessing}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-roman font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/30 transition-all flex items-center justify-center gap-2"
-                >
-                  {isProcessing ? (
-                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Crown className="w-4 h-4 fill-slate-950" />
-                      <span>
-                        {selectedPlan === 'lifetime'
-                          ? 'Checkout Lifetime Emperor — £99.99'
-                          : 'Checkout Imperivm Pro — £4.99/mo'}
-                      </span>
-                      <ExternalLink className="w-3.5 h-3.5 stroke-[2.5]" />
-                    </>
-                  )}
-                </button>
-              </div>
-            )}
 
             {/* TAB 3: VIP PASSCODE */}
             {activeTab === 'passcode' && (
@@ -453,14 +375,14 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
 
                 <div className="flex gap-2">
                   <input
-                    type="text"
+                    type="password"
                     value={passcode}
                     onChange={(e) => {
-                      setPasscode(e.target.value);
+                      setPasscode(e.target.value.toUpperCase());
                       setPasscodeError(null);
                     }}
-                    placeholder="Enter secret passcode (e.g. IMPERATOR2026)"
-                    className="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-purple-500 uppercase tracking-widest placeholder:text-slate-600"
+                    placeholder="Enter secret passcode"
+                    className="flex-1 px-4 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-purple-500 tracking-widest placeholder:text-slate-600"
                   />
                   <button
                     type="submit"
@@ -477,9 +399,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                   </div>
                 )}
 
-                <p className="text-[11px] text-slate-500">
-                  Tip: You can also grant permanent lifetime access to any email or codename by adding them to the <code className="text-slate-400">VITE_LIFETIME_PRO_EMAILS</code> environment variable in Vercel.
-                </p>
+
               </form>
             )}
           </div>
