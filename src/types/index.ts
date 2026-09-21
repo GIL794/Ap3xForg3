@@ -125,6 +125,11 @@ export interface UserProfile {
   targetWorkoutTime: string; // e.g. "19:00"
   archetype?: MythologicalArchetype;
   genderPreference?: 'masculine' | 'feminine' | 'neutral';
+  ageYears?: number;
+  heightCm?: number;
+  currentWeightKg?: number;
+  goalWeightKg?: number;
+  bodyFatPercent?: number;
 }
 
 export interface TodayWorkout {
@@ -147,6 +152,35 @@ export interface UserAccount {
   isGuest?: boolean;
 }
 
+export interface LoggedSetRecord {
+  setNumber: number;
+  type: SetType;
+  weightKg: number;
+  reps: number;
+  targetWeightKg?: number;
+  targetReps?: string;
+  completed: boolean;
+  isPr?: boolean;
+}
+
+export interface WorkoutHistorySession {
+  id: string;
+  date: string; // ISO date or YYYY-MM-DD
+  dayName: string;
+  workoutName: string;
+  durationMinutes: number;
+  totalTonnageKg: number;
+  completedSetsCount: number;
+  totalSetsCount: number;
+  prCount: number;
+  exercises: {
+    id: string;
+    name: string;
+    category: ExerciseCategory;
+    sets: LoggedSetRecord[];
+  }[];
+}
+
 export interface AppState {
   userId: string;
   userAccount: UserAccount;
@@ -156,9 +190,11 @@ export interface AppState {
   completedSets: Record<string, boolean[]>; // exerciseId -> array of completed booleans
   setTypes?: Record<string, SetType[]>;    // exerciseId -> array of set types
   loggedWeights: Record<string, number>;    // exerciseId -> weight in kg
+  detailedSets?: Record<string, LoggedSetRecord[]>; // exerciseId -> array of LoggedSetRecord
   totalTonnageKg: number;
   lastGeneratedAt: string;
   onboardingCompleted: boolean;
   loreRead: boolean;
   isProSubscriber?: boolean;
 }
+

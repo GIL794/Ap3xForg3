@@ -21,15 +21,19 @@ import {
   Save, 
   ChevronDown, 
   ChevronUp,
-  Crown
+  Crown,
+  Scale,
+  Activity
 } from 'lucide-react';
 import { DAY_NAMES, DAY_NAMES_SHORT, DEFAULT_PROFILE } from '../data/defaultProfile';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface ProfileFormProps {
   profile: UserProfile;
   onSaveProfile: (updatedProfile: UserProfile) => void;
   onGeneratePlan: (updatedProfile: UserProfile) => void;
   onResetDefaults: () => void;
+  language?: SupportedLanguage;
 }
 
 export const ProfileForm: React.FC<ProfileFormProps> = ({
@@ -37,6 +41,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   onSaveProfile,
   onGeneratePlan,
   onResetDefaults,
+  language = 'en',
 }) => {
   const [formData, setFormData] = useState<UserProfile>(profile);
   const [isOpen, setIsOpen] = useState(false);
@@ -153,7 +158,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-base sm:text-lg font-bold text-white">
-                Profile & Training Configuration
+                {t('profile.title', language)}
               </h3>
               <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
                 {formData.name} • {formData.experience}
@@ -236,7 +241,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-slate-500" /> Athlete Name
+                <User className="w-3.5 h-3.5 text-slate-500" /> {t('profile.name', language)}
               </label>
               <input
                 type="text"
@@ -250,7 +255,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-slate-500" /> Location
+                <MapPin className="w-3.5 h-3.5 text-slate-500" /> {t('profile.location', language)}
               </label>
               <input
                 type="text"
@@ -274,6 +279,119 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   <option key={tz} value={tz}>{tz}</option>
                 ))}
               </select>
+            </div>
+          </div>
+
+          {/* Row 1.5: Body & Physique Metrics (Fitbod / Hevy Caliber) */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 border border-amber-500/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Scale className="w-4 h-4 text-amber-400" />
+                <h4 className="text-xs font-black font-roman uppercase tracking-wider text-white">
+                  {t('profile.bodyMetrics', language)}
+                </h4>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 font-roman font-bold border border-amber-500/30">
+                Fitbod & Hevy Calibration
+              </span>
+            </div>
+            <p className="text-[11px] text-slate-400">
+              {t('profile.bodyMetricsDesc', language)}
+            </p>
+
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 pt-1">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                  {t('profile.age', language)}
+                </label>
+                <div className="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-3 py-2">
+                  <input
+                    type="number"
+                    min="14"
+                    max="100"
+                    value={formData.ageYears || ''}
+                    placeholder="28"
+                    onChange={(e) => setFormData({ ...formData, ageYears: Number(e.target.value) || undefined })}
+                    className="w-full bg-transparent text-sm text-white font-bold mono-font focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 ml-1">yrs</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                  {t('profile.height', language)}
+                </label>
+                <div className="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-3 py-2">
+                  <input
+                    type="number"
+                    min="100"
+                    max="250"
+                    value={formData.heightCm || ''}
+                    placeholder="180"
+                    onChange={(e) => setFormData({ ...formData, heightCm: Number(e.target.value) || undefined })}
+                    className="w-full bg-transparent text-sm text-white font-bold mono-font focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 ml-1">cm</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                  {t('profile.currentWeight', language)}
+                </label>
+                <div className="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-3 py-2">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="30"
+                    max="300"
+                    value={formData.currentWeightKg || ''}
+                    placeholder="80"
+                    onChange={(e) => setFormData({ ...formData, currentWeightKg: Number(e.target.value) || undefined })}
+                    className="w-full bg-transparent text-sm text-amber-300 font-bold mono-font focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 ml-1">kg</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                  {t('profile.goalWeight', language)}
+                </label>
+                <div className="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-3 py-2">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="30"
+                    max="300"
+                    value={formData.goalWeightKg || ''}
+                    placeholder="85"
+                    onChange={(e) => setFormData({ ...formData, goalWeightKg: Number(e.target.value) || undefined })}
+                    className="w-full bg-transparent text-sm text-emerald-300 font-bold mono-font focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 ml-1">kg</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                  {t('profile.bodyFat', language)}
+                </label>
+                <div className="flex items-center bg-slate-900 border border-slate-700 rounded-xl px-3 py-2">
+                  <input
+                    type="number"
+                    step="0.5"
+                    min="4"
+                    max="60"
+                    value={formData.bodyFatPercent || ''}
+                    placeholder="15"
+                    onChange={(e) => setFormData({ ...formData, bodyFatPercent: Number(e.target.value) || undefined })}
+                    className="w-full bg-transparent text-sm text-white font-bold mono-font focus:outline-none"
+                  />
+                  <span className="text-[10px] text-slate-500 ml-1">%</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -473,7 +591,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
               className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              Reset Defaults
+              {t('profile.reset', language)}
             </button>
 
             <div className="flex items-center gap-2.5">
@@ -483,15 +601,15 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700"
               >
                 <Save className="w-3.5 h-3.5" />
-                Save Profile
+                {t('profile.save', language)}
               </button>
 
               <button
                 type="submit"
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:from-cyan-400 hover:to-emerald-300 text-slate-950 text-xs font-black shadow-lg shadow-emerald-500/20 transition-all"
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-black shadow-lg shadow-amber-500/20 transition-all font-roman uppercase tracking-wider"
               >
                 <Sparkles className="w-4 h-4 fill-current" />
-                Generate / Regenerate Plan
+                {t('profile.generate', language)}
               </button>
             </div>
           </div>

@@ -122,3 +122,48 @@ export async function copyWorkoutToClipboard(todayWorkout: TodayWorkout): Promis
     return false;
   }
 }
+
+const HISTORY_STORAGE_KEY = 'homodevs_workout_history_v1';
+const NOTES_STORAGE_KEY = 'homodevs_exercise_notes_v1';
+
+export function saveWorkoutSession(session: import('../types').WorkoutHistorySession): void {
+  try {
+    const existing = getWorkoutHistory();
+    const updated = [session, ...existing.filter(s => s.id !== session.id)].slice(0, 100);
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+  } catch (err) {
+    console.error('Failed to save workout session:', err);
+  }
+}
+
+export function getWorkoutHistory(): import('../types').WorkoutHistorySession[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveExerciseNote(exerciseId: string, note: string): void {
+  try {
+    const raw = localStorage.getItem(NOTES_STORAGE_KEY);
+    const notes = raw ? JSON.parse(raw) : {};
+    notes[exerciseId] = note;
+    localStorage.setItem(NOTES_STORAGE_KEY, JSON.stringify(notes));
+  } catch (err) {
+    console.error('Failed to save exercise note:', err);
+  }
+}
+
+export function getExerciseNote(exerciseId: string): string {
+  try {
+    const raw = localStorage.getItem(NOTES_STORAGE_KEY);
+    if (!raw) return '';
+    const notes = JSON.parse(raw);
+    return notes[exerciseId] || '';
+  } catch {
+    return '';
+  }
+}
+

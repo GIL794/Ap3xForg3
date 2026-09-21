@@ -349,6 +349,46 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                   </div>
                 </div>
 
+                {/* Body Metrics: Height & Weight */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 mb-1.5">
+                      {t('profile.height', language)}
+                    </label>
+                    <div className="flex items-center bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5">
+                      <input
+                        type="number"
+                        min="100"
+                        max="240"
+                        value={profile.heightCm || ''}
+                        placeholder="180"
+                        onChange={(e) => setProfile({ ...profile, heightCm: Number(e.target.value) || undefined })}
+                        className="w-full bg-transparent text-white font-bold mono-font text-sm focus:outline-none"
+                      />
+                      <span className="text-xs text-slate-500 ml-1">cm</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold text-slate-400 mb-1.5">
+                      {t('profile.currentWeight', language)}
+                    </label>
+                    <div className="flex items-center bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5">
+                      <input
+                        type="number"
+                        step="0.5"
+                        min="35"
+                        max="250"
+                        value={profile.currentWeightKg || ''}
+                        placeholder="80"
+                        onChange={(e) => setProfile({ ...profile, currentWeightKg: Number(e.target.value) || undefined })}
+                        className="w-full bg-transparent text-amber-300 font-bold mono-font text-sm focus:outline-none"
+                      />
+                      <span className="text-xs text-slate-500 ml-1">kg</span>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Injuries Field */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1.5">

@@ -52,7 +52,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
             </h4>
             <ul className="list-disc list-inside space-y-1 pl-1 text-slate-400">
               <li><strong className="text-slate-200">Athlete Profile Data:</strong> Athlete codename, fitness experience level, mythological archetype, primary and secondary goals, and target training times.</li>
-              <li><strong className="text-slate-200">Workout & Performance Logs:</strong> Working set weights, repetitions, set types, logged tonnage, and customized exercise splits.</li>
+              <li><strong className="text-slate-200">Workout & Performance Logs:</strong> Working set weights, repetitions, set types, logged tonnage, and customised exercise splits.</li>
               <li><strong className="text-slate-200">Authentication Information:</strong> If you sign in via Google OAuth, we receive your basic public profile information (name, email address, and profile picture avatar) solely to authenticate your athlete account.</li>
             </ul>
           </section>

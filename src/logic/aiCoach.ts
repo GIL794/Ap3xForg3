@@ -63,69 +63,98 @@ function generateRuleBasedAudit(profile: UserProfile, todayWorkout: TodayWorkout
   const totalSets = plan.exercises.reduce((sum, e) => sum + e.sets, 0);
   const injuries = (profile.injuries || '').trim();
 
-  let volumeEvaluation = `Current session features ${totalSets} working sets across ${exerciseCount} movements, calibrated for ${profile.sessionLengthMinutes} minutes.`;
+  const athleteGreeting = profile.name ? `Greetings ${profile.name}` : 'Greetings Olympian';
+  const statsSnippet = profile.currentWeightKg 
+    ? ` At ${profile.currentWeightKg}kg${profile.heightCm ? ` (${profile.heightCm}cm)` : ''},` 
+    : '';
+
+  let volumeEvaluation = `Today's session features ${totalSets} working sets across ${exerciseCount} movements, calibrated for ${profile.sessionLengthMinutes} minutes.`;
   if (totalSets > 20) {
-    volumeEvaluation += ' Volume is high — ensure 2-3 reps in reserve (RIR) on early sets to prevent junk volume accumulation.';
+    volumeEvaluation += ' Volume is high — ensure you leave 2 reps in reserve on early sets to prevent premature muscle exhaustion.';
   } else {
-    volumeEvaluation += ' Solid stimulus-to-fatigue ratio without excessive neural fatigue.';
+    volumeEvaluation += ' Ideal volume-to-recovery ratio to stimulate muscle growth without excessive fatigue.';
   }
 
-  // Injury-aware adaptations
-  let injuryAdaptations = 'No active injuries noted. Cleared for full prescribed program.';
+  // Injury-aware adaptations & dynamic substitutions
+  let injuryAdaptations = 'No active injuries reported. Full clearance for all prescribed exercises.';
+  const suggestedSwaps: { original: string; suggested: string; reason: string }[] = [];
+
   if (injuries) {
     const lower = injuries.toLowerCase();
     const adaptations: string[] = [];
 
-    if (lower.includes('shoulder') || lower.includes('rotator')) {
-      adaptations.push('Avoid overhead pressing behind the neck. Substitute military press with landmine press or Arnold press with neutral grip. Keep external rotation under control on lateral raises.');
+    if (lower.includes('shoulder') || lower.includes('rotator') || lower.includes('impingement')) {
+      adaptations.push('Avoid flared elbows and pressing behind the neck. Keep elbows at a 45° angle to the torso. Use neutral-grip dumbbells or cable crossovers to protect the rotator cuff.');
+      suggestedSwaps.push({
+        original: 'Barbell Overhead Press',
+        suggested: 'Neutral-Grip Dumbbell Press or Landmine Press',
+        reason: 'Significantly reduces shoulder joint impingement while isolating delts safely.',
+      });
     }
-    if (lower.includes('knee') || lower.includes('patel')) {
-      adaptations.push('Replace full-depth barbell squats with box squats or leg press at 70° angle. Avoid leg extensions — substitute with terminal knee extensions (TKE) with band.');
+    if (lower.includes('knee') || lower.includes('patel') || lower.includes('meniscus')) {
+      adaptations.push('Replace deep barbell back squats with box squats or leg press with feet placed high on the platform. Avoid leg extensions under heavy loads; use band terminal knee extensions instead.');
+      suggestedSwaps.push({
+        original: 'Barbell Squat',
+        suggested: 'Box Squat or 45° Leg Press (High Foot Position)',
+        reason: 'Reduces shear force on the patellar tendon while preserving quad hypertrophy.',
+      });
     }
-    if (lower.includes('lower back') || lower.includes('lumbar') || lower.includes('disc')) {
-      adaptations.push('Replace conventional deadlifts with trap bar deadlifts or Romanian deadlifts with controlled ROM. Avoid loaded spinal flexion (cable crunches) — substitute with planks and dead bugs.');
+    if (lower.includes('lower back') || lower.includes('lumbar') || lower.includes('disc') || lower.includes('spine')) {
+      adaptations.push('Avoid heavy axial spinal loading. Substitute conventional deadlifts with chest-supported rows or trap-bar deadlifts. Replace seated crunches with isometric planks and bird-dogs.');
+      suggestedSwaps.push({
+        original: 'Conventional Deadlift / Bent-Over Row',
+        suggested: 'Chest-Supported Row or Trap Bar Deadlift',
+        reason: 'Takes compressive shear forces off the lumbar spine while maintaining back stimulus.',
+      });
     }
     if (lower.includes('elbow') || lower.includes('tenni') || lower.includes('golfer')) {
-      adaptations.push('Reduce grip-intensive work. Substitute barbell curls with cable curls (neutral grip). Avoid reverse curls temporarily. Use wrist wraps for pressing movements.');
+      adaptations.push('Minimise straight-bar curls. Use EZ-bars, hammer curls (neutral grip), or cables with rope attachments to alleviate tendon strain at the joint.');
+      suggestedSwaps.push({
+        original: 'Barbell Biceps Curl',
+        suggested: 'Incline Dumbbell Hammer Curl (Neutral Grip)',
+        reason: 'Aligns the wrist and forearm naturally to eliminate elbow tendonitis pain.',
+      });
     }
     if (lower.includes('wrist')) {
-      adaptations.push('Use wrist straps on pulling movements. Substitute barbell press with dumbbell (neutral grip). Avoid extreme wrist flexion on preacher curls.');
+      adaptations.push('Use wrist wraps on heavy pressing and lifting straps on pulls. Avoid extreme wrist hyperextension during pressing movements.');
     }
 
     injuryAdaptations = adaptations.length > 0
-      ? `Adapting for: ${injuries}. ${adaptations.join(' ')}`
-      : `Active condition noted: ${injuries}. Monitor pain signals — stop any movement that causes sharp or acute pain and consult a physiotherapist if symptoms persist.`;
+      ? `🛡️ Explicit Injury Protection Protocol for "${injuries}": ${adaptations.join(' ')}`
+      : `🛡️ Note for "${injuries}": Warm up thoroughly with 2-3 progressive warmup sets before working loads. Stop any exercise immediately if sharp pain occurs.`;
   }
 
-  const suggestedSwaps: { original: string; suggested: string; reason: string }[] = [];
-  if (plan.exercises.some(e => e.name.toLowerCase().includes('incline dumbbell press'))) {
-    suggestedSwaps.push({
-      original: 'Incline Dumbbell Press',
-      suggested: '30° Incline Smith Machine Press',
-      reason: 'Increases stability for deeper clavicular pec stretch and safer failure training.',
-    });
-  }
-  if (plan.exercises.some(e => e.name.toLowerCase().includes('lateral raise'))) {
-    suggestedSwaps.push({
-      original: 'Dumbbell Lateral Raises',
-      suggested: 'Cross-Body Cable Lateral Raise (pulley at knee height)',
-      reason: 'Provides continuous resistance in the lengthened position where DBs have zero tension.',
-    });
+  // Fallback swaps if none triggered by injury
+  if (suggestedSwaps.length === 0) {
+    if (plan.exercises.some(e => e.name.toLowerCase().includes('incline dumbbell press'))) {
+      suggestedSwaps.push({
+        original: 'Incline Dumbbell Press',
+        suggested: '30° Incline Smith Machine Press',
+        reason: 'Increases stability for a deeper upper-chest stretch and safer failure training.',
+      });
+    }
+    if (plan.exercises.some(e => e.name.toLowerCase().includes('lateral raise'))) {
+      suggestedSwaps.push({
+        original: 'Dumbbell Lateral Raises',
+        suggested: 'Cross-Body Cable Lateral Raise (pulley at knee height)',
+        reason: 'Provides continuous resistance in the lengthened position where dumbbells have zero tension.',
+      });
+    }
   }
 
   return {
-    summary: `${profile.name}, your ${plan.name} session is primed for your target goal. Compounds are prioritized first when CNS drive is highest.`,
-    intensityCritique: `Aim for RPE 8 on main compounds (leave 2 clean reps in tank). Take your final isolation set to technical failure (RPE 9.5–10) with controlled 3-second eccentrics.`,
+    summary: `${athleteGreeting}!${statsSnippet} your ${plan.name} session is tailored for ${profile.primaryGoal.replace(/_/g, ' ')}. Primary compound lifts are prioritised first while your energy and muscular focus are peak.`,
+    intensityCritique: `Aim for an Effort rating of 8/10 on your main barbell and dumbbell lifts (leave 2 clean repetitions in reserve). On your final isolation exercise, challenge yourself close to positive failure with smooth, controlled 3-second lowering tempo.`,
     volumeEvaluation,
     injuryAdaptations,
     suggestedSwaps: suggestedSwaps.length > 0 ? suggestedSwaps : [
       {
         original: plan.exercises[0]?.name || 'First Compound',
         suggested: 'Weighted Dips or Cable Crossover',
-        reason: 'Adds mechanical variation depending on gym equipment availability.',
+        reason: 'Adds mechanical variety depending on gym equipment availability.',
       },
     ],
-    preWorkoutTip: `For your ${profile.targetWorkoutTime} session, consume 30–40g fast carbs (banana, rice cake with honey) and 500ml water with a pinch of sea salt 45 minutes prior for optimal intracellular hydration and muscle pumps.`,
+    preWorkoutTip: `For your ${profile.targetWorkoutTime} session, drink 500ml water with a pinch of sea salt and consume 30–40g of quick carbohydrates (such as a banana, porridge with honey, or rice cakes) 45 minutes prior for sustained stamina and great muscle pumps.`,
     isAiGenerated: false,
   };
 }

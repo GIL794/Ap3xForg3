@@ -56,7 +56,7 @@ export const EXERCISE_LIBRARY: ExerciseDefinition[] = [
     targetRpe: '8',
     tempo: '2-1-1-0',
     techniqueCues: [
-      'Lean torso forward slightly (~20-30 deg) to maximize chest recruitment.',
+      'Lean torso forward slightly (~20-30 deg) to maximise chest recruitment.',
       'Lower until upper arms are parallel to the floor.',
       'Lock out with controlled triceps extension.'
     ],

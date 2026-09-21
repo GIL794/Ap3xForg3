@@ -37,6 +37,11 @@ export const GABRIELE_PROFILE_TEMPLATE: UserProfile = {
   targetWorkoutTime: '19:00',
   archetype: 'hercules_mass',
   genderPreference: 'masculine',
+  ageYears: 30,
+  heightCm: 180,
+  currentWeightKg: 82,
+  goalWeightKg: 85,
+  bodyFatPercent: 14,
 };
 
 export const DEFAULT_GABRIELE_ACCOUNT: UserAccount = {
@@ -88,6 +93,14 @@ export function isLifetimeVipUser(account?: UserAccount | null): boolean {
   return false;
 }
 
+export function isPasscodeUnlocked(): boolean {
+  try {
+    return localStorage.getItem('homodevs_vip_passcode_unlocked') === 'true';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Validates Emperor secret passcodes for instant VIP unlock
  */
@@ -100,7 +113,15 @@ export function verifyEmperorPasscode(code: string): boolean {
     (import.meta.env.VITE_LIFETIME_PRO_CODE || '').toUpperCase().trim(),
   ].filter(Boolean);
 
-  return validCodes.includes(clean);
+  const isMatch = validCodes.includes(clean);
+  if (isMatch) {
+    try {
+      localStorage.setItem('homodevs_vip_passcode_unlocked', 'true');
+    } catch {
+      // ignore
+    }
+  }
+  return isMatch;
 }
 
 /**
@@ -200,7 +221,7 @@ export function createInitialStateForUser(account: UserAccount): AppState {
     lastGeneratedAt: new Date().toISOString(),
     onboardingCompleted: isGabriele, // New users will see onboarding
     loreRead: false,
-    isProSubscriber: isLifetimeVipUser(account),
+    isProSubscriber: isLifetimeVipUser(account) || isPasscodeUnlocked(),
   };
 }
 
@@ -224,7 +245,7 @@ export function loadUserState(userId: string): AppState {
       const parsed = JSON.parse(raw);
       if (parsed.profile && parsed.weeklyPlan) {
         const todayWorkout = resolveTodayWorkout(parsed.weeklyPlan, parsed.profile);
-        const isVip = isLifetimeVipUser(account);
+        const isVip = isLifetimeVipUser(account) || isPasscodeUnlocked();
         return {
           ...parsed,
           userId,

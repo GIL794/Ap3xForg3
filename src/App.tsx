@@ -6,6 +6,7 @@ import {
   saveUserState, 
   signOutAthlete,
   initSupabaseAuthListener,
+  isLifetimeVipUser,
   DEFAULT_GABRIELE_ACCOUNT,
   getAllUserAccounts 
 } from './logic/auth';
@@ -27,7 +28,9 @@ import { PrivacyPolicyModal } from './components/PrivacyPolicyModal';
 import { TermsModal } from './components/TermsModal';
 import { EvolutionRoadmapModal } from './components/EvolutionRoadmapModal';
 import { ImperivmProModal } from './components/ImperivmProModal';
-import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown } from 'lucide-react';
+import { GymToolsModal } from './components/GymToolsModal';
+import { WorkoutHistoryModal } from './components/WorkoutHistoryModal';
+import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown, Calendar, User, Calculator } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SupportedLanguage, getSavedLanguage, t } from './logic/i18n';
 
@@ -86,12 +89,18 @@ export const App: React.FC = () => {
   const [isTermsModalOpen, setIsTermsModalOpen] = useState<boolean>(false);
   const [isRoadmapModalOpen, setIsRoadmapModalOpen] = useState<boolean>(false);
   const [isProModalOpen, setIsProModalOpen] = useState<boolean>(false);
+  const [isGymToolsOpen, setIsGymToolsOpen] = useState<boolean>(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState<boolean>(false);
 
   // Listen for Supabase OAuth session on mount (Google redirect return)
   useEffect(() => {
     const unsubscribe = initSupabaseAuthListener((user) => {
       setCurrentUserId(user.id);
       const loaded = loadUserState(user.id);
+      if (isLifetimeVipUser(user)) {
+        loaded.isProSubscriber = true;
+        saveUserState(user.id, loaded);
+      }
       setAppState(loaded);
     });
     return () => {
@@ -126,6 +135,10 @@ export const App: React.FC = () => {
     setCurrentUserId(user.id);
     setTimeout(() => {
       const loaded = loadUserState(user.id);
+      if (isLifetimeVipUser(user)) {
+        loaded.isProSubscriber = true;
+        saveUserState(user.id, loaded);
+      }
       setAppState(loaded);
       setIsLoading(false);
     }, 600);
@@ -334,6 +347,7 @@ export const App: React.FC = () => {
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenLore={() => setIsLoreModalOpen(true)}
         onOpenPro={() => setIsProModalOpen(true)}
+        onOpenHistory={() => setIsHistoryModalOpen(true)}
         onSignOut={handleSignOut}
       />
 
@@ -376,6 +390,7 @@ export const App: React.FC = () => {
             profile={appState.profile}
             onToggleDayActive={handleToggleDayActive}
             onUpdateDayFocus={handleUpdateDayFocus}
+            language={language}
           />
         </section>
 
@@ -386,12 +401,13 @@ export const App: React.FC = () => {
             onSaveProfile={handleSaveProfile}
             onGeneratePlan={handleGeneratePlan}
             onResetDefaults={handleResetDefaults}
+            language={language}
           />
         </section>
       </main>
 
       {/* Modern Romanvm Impervm Footer */}
-      <footer className="border-t border-slate-800/80 bg-[#06070a] py-8 text-xs text-slate-500">
+      <footer className="border-t border-slate-800/80 bg-[#06070a] py-8 pb-24 md:pb-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="HOMO DEUS" className="w-5 h-5 rounded-md object-cover" />
@@ -433,6 +449,63 @@ export const App: React.FC = () => {
         </div>
       </footer>
 
+      {/* Mobile Sticky Bottom Tab Bar (Hevy / Strong / Fitbod Caliber) */}
+      <nav 
+        aria-label="Mobile Bottom Navigation"
+        className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0c0e17]/95 backdrop-blur-xl border-t border-amber-500/20 px-3 py-2 flex items-center justify-around shadow-2xl pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+      >
+        <button
+          onClick={() => {
+            const el = document.getElementById('today-workout');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-emerald-400 hover:text-white transition-colors"
+        >
+          <Dumbbell className="w-4 h-4" />
+          <span>Today</span>
+        </button>
+
+        <button
+          onClick={() => {
+            const el = document.getElementById('weekly-overview');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-cyan-400 hover:text-white transition-colors"
+        >
+          <Calendar className="w-4 h-4" />
+          <span>Week</span>
+        </button>
+
+        <button
+          onClick={() => setIsGymToolsOpen(true)}
+          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-amber-400 hover:text-white transition-colors -mt-3"
+        >
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/30">
+            <Calculator className="w-5 h-5 stroke-[2.5]" />
+          </div>
+          <span>Tools</span>
+        </button>
+
+        <button
+          onClick={() => setIsAiModalOpen(true)}
+          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-purple-400 hover:text-white transition-colors"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Oracle AI</span>
+        </button>
+
+        <button
+          onClick={() => {
+            const el = document.getElementById('profile-configuration');
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+          }}
+          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-slate-400 hover:text-white transition-colors"
+        >
+          <User className="w-4 h-4" />
+          <span>Profile</span>
+        </button>
+      </nav>
+
       {/* AI Coach, Share & Cloud Sync Modal */}
       <AiCoachAndCloudModal
         isOpen={isAiModalOpen}
@@ -443,6 +516,19 @@ export const App: React.FC = () => {
         isProSubscriber={appState.isProSubscriber}
         onOpenPro={() => setIsProModalOpen(true)}
         language={language}
+      />
+
+      {/* Gym Tools Modal (Plate Calculator & 1RM Percentages) */}
+      <GymToolsModal
+        isOpen={isGymToolsOpen}
+        onClose={() => setIsGymToolsOpen(false)}
+        initialWeight={80}
+      />
+
+      {/* Workout History Ledger Modal */}
+      <WorkoutHistoryModal
+        isOpen={isHistoryModalOpen}
+        onClose={() => setIsHistoryModalOpen(false)}
       />
 
       {/* Lore Intro Modal */}
@@ -497,11 +583,21 @@ export const App: React.FC = () => {
         isProSubscriber={appState.isProSubscriber}
         language={language}
         onUpgradeSuccess={() => {
+          try {
+            localStorage.setItem('homodevs_vip_passcode_unlocked', 'true');
+          } catch {
+            // ignore
+          }
+          setProWelcomeNotice('👑 Imperivm Pro Activated! All Elite Features Unlocked.');
+          setTimeout(() => setProWelcomeNotice(null), 4000);
           setAppState(prev => {
             const updated = { ...prev, isProSubscriber: true };
             // Persist immediately so Pro survives page refresh
             if (prev.userId) {
               saveUserState(prev.userId, updated);
+            }
+            if (currentUserId && currentUserId !== prev.userId) {
+              saveUserState(currentUserId, updated);
             }
             return updated;
           });

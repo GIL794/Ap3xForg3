@@ -326,7 +326,7 @@ export const AiCoachAndCloudModal: React.FC<AiCoachAndCloudModalProps> = ({
                   Instant Plan Share Link
                 </h4>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Share your exact weekly split, workout times, and exercises with friends. When they open this link, their app automatically loads your customized Olympian routine.
+                  Share your exact weekly split, workout times, and exercises with friends. When they open this link, their app automatically loads your customised Olympian routine.
                 </p>
 
                 <div className="flex gap-2 pt-2">

@@ -11,6 +11,7 @@ import {
   X 
 } from 'lucide-react';
 import { DAY_NAMES, DAY_NAMES_SHORT } from '../data/defaultProfile';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface WeeklyOverviewProps {
   weeklyPlan: WorkoutDay[];
@@ -18,6 +19,7 @@ interface WeeklyOverviewProps {
   profile: UserProfile;
   onToggleDayActive: (dayIndex: number) => void;
   onUpdateDayFocus: (dayIndex: number, newName: string, newFocus: string[]) => void;
+  language?: SupportedLanguage;
 }
 
 export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
@@ -26,6 +28,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
   profile,
   onToggleDayActive,
   onUpdateDayFocus,
+  language = 'en',
 }) => {
   const [inspectDay, setInspectDay] = useState<WorkoutDay | null>(null);
 
@@ -52,10 +55,10 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
             <Calendar className="w-5 h-5 text-emerald-400" />
-            Weekly Schedule & Split
+            {t('weekly.title', language)}
           </h2>
           <p className="text-xs text-slate-400">
-            {totalTrainingDays} training days planned • Tap any day to toggle on/off or preview routine
+            {totalTrainingDays} {t('weekly.subtitle', language)}
           </p>
         </div>
 
@@ -102,7 +105,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                     </span>
                     {isToday && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500 text-slate-950 uppercase tracking-wider animate-pulse">
-                        Today
+                        {t('weekly.today', language)}
                       </span>
                     )}
                   </div>
@@ -161,7 +164,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       </span>
                     </>
                   ) : (
-                    <span className="text-slate-500 italic">Active Rest</span>
+                    <span className="text-slate-500 italic">{t('weekly.rest', language)}</span>
                   )}
                 </div>
 
@@ -172,7 +175,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                       onClick={() => setInspectDay(day)}
                       className="w-full py-1.5 px-2 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold flex items-center justify-center gap-1 transition-colors"
                     >
-                      <span>View Exercises</span>
+                      <span className="capitalize">{t('weekly.exercises', language)}</span>
                       <ChevronRight className="w-3 h-3" />
                     </button>
                   ) : (

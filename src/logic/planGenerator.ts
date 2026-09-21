@@ -304,7 +304,7 @@ function buildLowerB(available: ExerciseDefinition[], sessionLength: number, var
     warmup,
     exercises: calibrated,
     cooldown,
-    progressionRule: 'Control eccentric tempo on RDL to protect lower back and maximize hamstring recruitment.'
+    progressionRule: 'Control eccentric tempo on RDL to protect lower back and maximise hamstring recruitment.'
   };
 }
 

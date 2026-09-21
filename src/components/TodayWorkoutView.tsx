@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutDay, TodayWorkout, UserProfile } from '../types';
+import { WorkoutDay, TodayWorkout, UserProfile, PlannedExercise, ExerciseDefinition, WorkoutHistorySession } from '../types';
 import { ExerciseCard } from './ExerciseCard';
 import { RestTimerModal } from './RestTimerModal';
+import { FloatingRestTimer } from './FloatingRestTimer';
 import { GymToolsModal } from './GymToolsModal';
+import { ExerciseSwapModal } from './ExerciseSwapModal';
+import { WorkoutSummaryModal } from './WorkoutSummaryModal';
+import { WorkoutHistoryModal } from './WorkoutHistoryModal';
 import { OlympianEvolutionCard } from './OlympianEvolutionCard';
 import { MuscleRecoveryGauge } from './MuscleRecoveryGauge';
-import { copyWorkoutToClipboard } from '../logic/storage';
+import { copyWorkoutToClipboard, saveWorkoutSession } from '../logic/storage';
 import { SupportedLanguage, t } from '../logic/i18n';
 import confetti from 'canvas-confetti';
 import { 
@@ -20,7 +24,10 @@ import {
   AlertCircle,
   Activity,
   Award,
-  Calculator
+  Calculator,
+  Trophy,
+  History,
+  Check
 } from 'lucide-react';
 
 interface TodayWorkoutViewProps {
@@ -38,6 +45,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
   profile,
   completedSets,
   onUpdateCompletedSets,
+  onOverridePlan,
   onOpenPro,
   language = 'en',
 }) => {
@@ -54,7 +62,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
     overhead_press: 50,
     lat_pulldown: 65,
     seated_cable_row: 60,
-    pull_ups: 80, // bodyweight default
+    pull_ups: 80,
     db_lateral_raise: 12,
     cable_lateral_raise: 7.5,
     rear_delt_flyes: 10,
@@ -71,16 +79,33 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
     hanging_leg_raise: 75,
   });
 
+  // Docked Floating Rest Timer & Expanded Modal
   const [activeTimer, setActiveTimer] = useState<{ isOpen: boolean; seconds: number; exerciseName: string }>({
     isOpen: false,
     seconds: 90,
     exerciseName: '',
   });
 
+  const [isFullTimerOpen, setIsFullTimerOpen] = useState(false);
+
+  // Gym Floor Modals
   const [gymTools, setGymTools] = useState<{ isOpen: boolean; weight: number }>({
     isOpen: false,
     weight: 80,
   });
+
+  const [swapModal, setSwapModal] = useState<{
+    isOpen: boolean;
+    exerciseIndex: number;
+    exercise: PlannedExercise | null;
+  }>({
+    isOpen: false,
+    exerciseIndex: -1,
+    exercise: null,
+  });
+
+  const [isSummaryOpen, setIsSummaryOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Real-time countdown calculation
   const [timeUntilString, setTimeUntilString] = useState<string>('');
@@ -172,6 +197,79 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
     });
   };
 
+  const handleAddSet = (exerciseIndex: number) => {
+    const ex = exercises[exerciseIndex];
+    if (!ex) return;
+    const updatedExercises = [...exercises];
+    updatedExercises[exerciseIndex] = {
+      ...ex,
+      sets: ex.sets + 1,
+    };
+    onOverridePlan({
+      ...activePlan,
+      exercises: updatedExercises,
+    });
+  };
+
+  const handleRemoveSet = (exerciseIndex: number) => {
+    const ex = exercises[exerciseIndex];
+    if (!ex || ex.sets <= 1) return;
+    const updatedExercises = [...exercises];
+    updatedExercises[exerciseIndex] = {
+      ...ex,
+      sets: ex.sets - 1,
+    };
+    onOverridePlan({
+      ...activePlan,
+      exercises: updatedExercises,
+    });
+  };
+
+  const handleMoveExercise = (fromIndex: number, toIndex: number) => {
+    if (toIndex < 0 || toIndex >= exercises.length) return;
+    const updated = [...exercises];
+    const [moved] = updated.splice(fromIndex, 1);
+    updated.splice(toIndex, 0, moved);
+    onOverridePlan({
+      ...activePlan,
+      exercises: updated,
+    });
+  };
+
+  // Exercise Swap implementation
+  const handleSwapMovement = (substitute: ExerciseDefinition) => {
+    if (swapModal.exerciseIndex < 0) return;
+    const targetEx = exercises[swapModal.exerciseIndex];
+    if (!targetEx) return;
+
+    const swapped: PlannedExercise = {
+      id: substitute.id,
+      name: substitute.name,
+      category: substitute.category,
+      tier: substitute.tier,
+      sets: targetEx.sets || substitute.defaultSets,
+      reps: substitute.defaultReps || targetEx.reps,
+      restSeconds: substitute.defaultRestSec || targetEx.restSeconds,
+      targetRpe: substitute.targetRpe || targetEx.targetRpe,
+      notes: substitute.techniqueCues[0] || targetEx.notes,
+      techniqueCues: substitute.techniqueCues,
+      tempo: substitute.tempo,
+      equipment: substitute.equipment,
+      primaryMuscles: substitute.primaryMuscles,
+      progressionRule: substitute.progressionRule,
+    };
+
+    const updatedExercises = [...exercises];
+    updatedExercises[swapModal.exerciseIndex] = swapped;
+
+    onOverridePlan({
+      ...activePlan,
+      exercises: updatedExercises,
+    });
+
+    setSwapModal({ isOpen: false, exerciseIndex: -1, exercise: null });
+  };
+
   const handleResetWorkout = () => {
     if (window.confirm('Reset all logged sets and warm-up checks for today?')) {
       onUpdateCompletedSets({});
@@ -195,6 +293,33 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
     });
   };
 
+  const handleSaveToHistory = () => {
+    const session: WorkoutHistorySession = {
+      id: `session_${Date.now()}`,
+      date: todayWorkout.date,
+      dayName: activePlan.dayName,
+      workoutName: activePlan.name,
+      durationMinutes: activePlan.estimatedDurationMinutes,
+      totalTonnageKg: totalTonnageKg,
+      completedSetsCount: completedSetsCount,
+      totalSetsCount: totalSetsCount,
+      prCount: 1,
+      exercises: exercises.map(ex => ({
+        id: ex.id,
+        name: ex.name,
+        category: ex.category,
+        sets: (completedSets[ex.id] || []).map((c, idx) => ({
+          setNumber: idx + 1,
+          type: 'normal',
+          weightKg: exerciseWeights[ex.id] || 50,
+          reps: 10,
+          completed: c,
+        })),
+      })),
+    };
+    saveWorkoutSession(session);
+  };
+
   return (
     <div className="space-y-6">
       {/* Hero Workout Header Card */}
@@ -215,15 +340,27 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               </span>
             </div>
 
-            {/* Countdown Badge */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-semibold">
-              <Clock className="w-3.5 h-3.5 text-cyan-400" />
-              {isPastTime ? (
-                <span className="text-amber-300 mono-font">{timeUntilString}</span>
-              ) : (
-                <span className="text-slate-200">
-                  Starts in <strong className="text-emerald-400 mono-font">{timeUntilString}</strong>
-                </span>
+            {/* Top Right: Countdown Badge & Finish Workout Trigger */}
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-semibold">
+                <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                {isPastTime ? (
+                  <span className="text-amber-300 mono-font">{timeUntilString}</span>
+                ) : (
+                  <span className="text-slate-200">
+                    Starts in <strong className="text-emerald-400 mono-font">{timeUntilString}</strong>
+                  </span>
+                )}
+              </div>
+
+              {completedSetsCount > 0 && (
+                <button
+                  onClick={() => setIsSummaryOpen(true)}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-roman font-black tracking-wide shadow-md shadow-amber-500/20 hover:scale-105 transition-all"
+                >
+                  <Trophy className="w-3.5 h-3.5 stroke-[2.5]" />
+                  <span>Finish Workout</span>
+                </button>
               )}
             </div>
           </div>
@@ -233,7 +370,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
           </h2>
 
           <p className="text-sm text-slate-300 max-w-2xl mb-6">
-            Personalized for <strong className="text-white">{profile.name}</strong> • London gym session ready with compound overload, hypertrophy volume, and active rest pacing.
+            Personalised for <strong className="text-white">{profile.name}</strong> • London gym session ready with compound overload, hypertrophy volume, and active rest pacing.
           </p>
 
           {/* Quick Metrics Strip */}
@@ -303,6 +440,14 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 <span>Plate & 1RM Calculator</span>
               </button>
 
+              <button
+                onClick={() => setIsHistoryOpen(true)}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold transition-all border border-amber-500/30 shadow-sm"
+              >
+                <History className="w-4 h-4 text-amber-400" />
+                <span>Training Ledger</span>
+              </button>
+
               {todayWorkout.catchUpPlan && (
                 <button
                   onClick={() => setUseCatchUp(!useCatchUp)}
@@ -332,7 +477,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         </div>
       </div>
 
-      {/* OLYMPIAN ASCENSION CARD (Pantheon & 13 Tiers of Ascension) */}
+      {/* OLYMPIAN ASCENSION CARD */}
       <OlympianEvolutionCard
         totalTonnageKg={totalTonnageKg}
         completedSetsCount={completedSetsCount}
@@ -340,7 +485,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         onOpenGymTools={() => setGymTools({ isOpen: true, weight: 80 })}
       />
 
-      {/* BIO-RECOVERY & FATIGUE GAUGE */}
+      {/* BIO-RECOVERY & FATIGUE GAUGE (Fitbod Calibre) */}
       <MuscleRecoveryGauge
         primaryMuscles={activePlan.focus || []}
         totalSetsToday={totalSetsCount}
@@ -441,40 +586,83 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         </div>
       )}
 
-      {/* Main Working Exercises */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Dumbbell className="w-5 h-5 text-cyan-400" />
-            Working Exercises ({exercises.length})
+      {/* Main Working Exercises (Hevy & Strong Calibre) or Rest Day View */}
+      {exercises.length === 0 ? (
+        <div className="rounded-3xl bg-slate-900/80 border border-amber-500/30 p-8 text-center space-y-4 shadow-xl">
+          <div className="w-16 h-16 rounded-3xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto shadow-md">
+            <Sparkles className="w-8 h-8" />
+          </div>
+          <h3 className="text-xl sm:text-2xl font-black font-roman text-white">
+            REST & SUPERCOMPENSATION PROTOCOL
           </h3>
-          <span className="text-xs text-slate-400">
-            Follow listed order for optimal neural drive
-          </span>
-        </div>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto">
+            No heavy lifting scheduled today. Muscle protein synthesis, central nervous system regeneration, and glycogen supercompensation are actively restoring your power.
+          </p>
 
-        {exercises.map((exercise, index) => (
-          <ExerciseCard
-            key={exercise.id}
-            exercise={exercise}
-            index={index}
-            completedSets={completedSets[exercise.id] || []}
-            weightKg={exerciseWeights[exercise.id] || 50}
-            onUpdateWeight={(newW) => {
-              setExerciseWeights(prev => ({ ...prev, [exercise.id]: newW }));
-            }}
-            onToggleSet={(setIdx) => handleToggleSet(exercise.id, setIdx, exercise.sets)}
-            onOpenRestTimer={(seconds, name) => {
-              setActiveTimer({
-                isOpen: true,
-                seconds,
-                exerciseName: name,
-              });
-            }}
-            onOpenPlateCalc={handleOpenPlateCalc}
-          />
-        ))}
-      </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto text-xs text-slate-300 pt-2">
+            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
+              <span className="text-amber-400 font-bold block mb-1 font-roman">💧 Hydration & Salts</span>
+              Target 3–4L of water with sodium & electrolytes
+            </div>
+            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
+              <span className="text-cyan-400 font-bold block mb-1 font-roman">🚶 Active Recovery</span>
+              20–30 min gentle walk or light mobility
+            </div>
+            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
+              <span className="text-emerald-400 font-bold block mb-1 font-roman">😴 Deep Sleep</span>
+              Aim for 8–9 hours of restorative sleep
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Dumbbell className="w-5 h-5 text-cyan-400" />
+              Working Exercises ({exercises.length})
+            </h3>
+            <span className="text-xs text-slate-400">
+              Follow listed order for optimal neural drive
+            </span>
+          </div>
+
+          {exercises.map((exercise, index) => (
+            <ExerciseCard
+              key={exercise.id}
+              exercise={exercise}
+              index={index}
+              completedSets={completedSets[exercise.id] || []}
+              weightKg={exerciseWeights[exercise.id] || 50}
+              onUpdateWeight={(newW) => {
+                setExerciseWeights(prev => ({ ...prev, [exercise.id]: newW }));
+              }}
+              onToggleSet={(setIdx) => handleToggleSet(exercise.id, setIdx, exercise.sets)}
+              onOpenRestTimer={(seconds, name) => {
+                setActiveTimer({
+                  isOpen: true,
+                  seconds,
+                  exerciseName: name,
+                });
+              }}
+              onOpenPlateCalc={handleOpenPlateCalc}
+              onOpenSwapModal={() => {
+                setSwapModal({
+                  isOpen: true,
+                  exerciseIndex: index,
+                  exercise,
+                });
+              }}
+              onAddSet={() => handleAddSet(index)}
+              onRemoveSet={() => handleRemoveSet(index)}
+              onMoveUp={() => handleMoveExercise(index, index - 1)}
+              onMoveDown={() => handleMoveExercise(index, index + 1)}
+              isFirst={index === 0}
+              isLast={index === exercises.length - 1}
+              language={language}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Cool-down Section */}
       {activePlan.cooldown && (
@@ -524,12 +712,42 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         </div>
       )}
 
-      {/* Floating / Interactive Rest Timer Modal */}
-      <RestTimerModal
+      {/* Bottom Finish Workout Banner */}
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-slate-900 via-amber-950/30 to-slate-900 border border-amber-500/30 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+        <div>
+          <h4 className="text-base font-bold text-white font-roman flex items-center justify-center sm:justify-start gap-2">
+            <Trophy className="w-4 h-4 text-amber-400" />
+            Conquered All Movements?
+          </h4>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Log your achievements, establish personal records, and seal your session into the permanent ledger.
+          </p>
+        </div>
+
+        <button
+          onClick={() => setIsSummaryOpen(true)}
+          className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-sm font-black font-roman tracking-wider transition-all shadow-lg shadow-amber-500/20 hover:scale-105 flex items-center justify-center gap-2 shrink-0"
+        >
+          <Check className="w-4 h-4 stroke-[3]" />
+          <span>FINISH WORKOUT</span>
+        </button>
+      </div>
+
+      {/* Docked Floating Rest Timer (Non-intrusive Hevy & Strong style) */}
+      <FloatingRestTimer
         isOpen={activeTimer.isOpen}
         initialSeconds={activeTimer.seconds}
         exerciseName={activeTimer.exerciseName}
         onClose={() => setActiveTimer({ ...activeTimer, isOpen: false })}
+        onExpand={() => setIsFullTimerOpen(true)}
+      />
+
+      {/* Fullscreen Rest Timer Stopwatch Modal */}
+      <RestTimerModal
+        isOpen={isFullTimerOpen}
+        initialSeconds={activeTimer.seconds}
+        exerciseName={activeTimer.exerciseName}
+        onClose={() => setIsFullTimerOpen(false)}
       />
 
       {/* Barbell Plate & 1RM Calculator Modal */}
@@ -537,6 +755,36 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         isOpen={gymTools.isOpen}
         initialWeight={gymTools.weight}
         onClose={() => setGymTools({ ...gymTools, isOpen: false })}
+      />
+
+      {/* Exercise Swap Movement Modal */}
+      {swapModal.isOpen && swapModal.exercise && (
+        <ExerciseSwapModal
+          isOpen={swapModal.isOpen}
+          currentExercise={swapModal.exercise}
+          onClose={() => setSwapModal({ isOpen: false, exerciseIndex: -1, exercise: null })}
+          onSelectSubstitute={handleSwapMovement}
+        />
+      )}
+
+      {/* Workout Completion Summary Celebration Modal */}
+      <WorkoutSummaryModal
+        isOpen={isSummaryOpen}
+        onClose={() => setIsSummaryOpen(false)}
+        workoutPlan={activePlan}
+        profile={profile}
+        totalTonnageKg={totalTonnageKg}
+        durationMinutes={activePlan.estimatedDurationMinutes}
+        completedSetsCount={completedSetsCount}
+        totalSetsCount={totalSetsCount}
+        prCount={1}
+        onSaveToHistory={handleSaveToHistory}
+      />
+
+      {/* Workout History Ledger Modal */}
+      <WorkoutHistoryModal
+        isOpen={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
       />
     </div>
   );

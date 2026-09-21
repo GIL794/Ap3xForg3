@@ -25,12 +25,16 @@ export default async function handler(req, res) {
     const injuryText = profile.injuries?.trim() || 'None';
 
     const prompt = `You are an elite strength & conditioning specialist and sports medicine physiologist.
-Analyze this athlete's workout plan and provide concise, high-value coaching recommendations.
+Analyse this athlete's workout plan and provide concise, high-value, plain-English coaching recommendations.
 Pay SPECIAL attention to any listed injuries and provide explicit exercise modifications.
 
 Athlete Profile:
 - Name: ${profile.name}
-- Location & Timezone: ${profile.location || 'Unknown'} (${profile.timezone || 'UTC'})
+- Age: ${profile.ageYears ? profile.ageYears + ' years' : 'Adult'}
+- Height: ${profile.heightCm ? profile.heightCm + ' cm' : 'Standard'}
+- Current Weight: ${profile.currentWeightKg ? profile.currentWeightKg + ' kg' : 'Standard'}
+- Goal Weight: ${profile.goalWeightKg ? profile.goalWeightKg + ' kg' : 'Not specified'}
+- Location & Timezone: ${profile.location || 'London, UK'} (${profile.timezone || 'Europe/London'})
 - Experience: ${profile.experience}
 - Primary Goal: ${(profile.primaryGoal || '').replace(/_/g, ' ')}
 - Secondary Goals: ${(profile.secondaryGoals || []).join(', ') || 'None'}
@@ -44,18 +48,24 @@ Today's Scheduled Session:
 - Title: ${plan.name}
 - Estimated Duration: ${plan.estimatedDurationMinutes} min
 - Exercises:
-${(plan.exercises || []).map((e, idx) => `  ${idx + 1}. ${e.name} (${e.sets} sets x ${e.reps}, Rest: ${e.restSeconds}s, RPE: ${e.targetRpe})`).join('\n')}
+${(plan.exercises || []).map((e, idx) => `  ${idx + 1}. ${e.name} (${e.sets} sets x ${e.reps}, Rest: ${e.restSeconds}s, Target Effort: ${e.targetRpe}/10)`).join('\n')}
+
+MANDATORY RULES:
+1. Use British English spelling throughout (e.g. optimise, prioritise, colour, programme, minimise, calibre).
+2. Write in plain, clear, conversational English that is easily understood by any gym-goer. Avoid academic jargon (explain any technical terms like RPE simply as effort level out of 10).
+3. Greet the athlete warmly by name (${profile.name}) in the summary and reference their specific stats.
+4. If an injury is present (${injuryText}), you MUST explicitly name it, explain the safe range of motion, and suggest direct exercise substitutions.
 
 Format your response strictly as JSON with the following structure:
 {
-  "summary": "1-2 sentence assessment of how this workout fits their goal",
-  "intensityCritique": "Advice on RPE and mechanical tension for today's compounds",
-  "volumeEvaluation": "Assessment of weekly and session volume for their experience level",
-  "injuryAdaptations": "${injuryText !== 'None' ? 'Specific modifications for ' + injuryText + ' — list any exercises to avoid or substitute, and provide safe alternatives' : 'No active injuries noted. Cleared for full prescribed program.'}",
+  "summary": "Warm, personalised 1-2 sentence overview addressing ${profile.name} and how today's session moves them towards their goal",
+  "intensityCritique": "Clear advice on how hard to push (Effort out of 10) on main compound lifts versus accessory exercises",
+  "volumeEvaluation": "Plain-English assessment of the ${plan.exercises.length} movements and set volume for their recovery capacity",
+  "injuryAdaptations": "${injuryText !== 'None' ? 'Explicit protection protocol for ' + injuryText + ' — movements/angles to avoid, and safe alternatives' : 'No active injuries reported. Full clearance for all prescribed exercises.'}",
   "suggestedSwaps": [
-    {"original": "Exercise Name", "suggested": "Alternative Name", "reason": "Why this swap may benefit them"}
+    {"original": "Exercise Name", "suggested": "Alternative Name", "reason": "Plain-English reason why this swap protects joints or fits equipment"}
   ],
-  "preWorkoutTip": "Specific timing or nutritional advice for their session at ${profile.targetWorkoutTime}"
+  "preWorkoutTip": "Actionable hydration and fueling tip timed for their ${profile.targetWorkoutTime} session"
 }`;
 
     const geminiRes = await fetch(

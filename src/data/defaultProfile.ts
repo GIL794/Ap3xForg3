@@ -15,6 +15,11 @@ export const DEFAULT_PROFILE: UserProfile = {
   targetWorkoutTime: '19:00',
   archetype: 'hercules_mass',
   genderPreference: 'masculine',
+  ageYears: 28,
+  heightCm: 178,
+  currentWeightKg: 78,
+  goalWeightKg: 82,
+  bodyFatPercent: 15,
 };
 
 export const DAY_NAMES = [
