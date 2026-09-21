@@ -137,7 +137,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         const pastSecs = Math.floor(Math.abs(diffMs) / 1000);
         const pastHrs = Math.floor(pastSecs / 3600);
         const pastMins = Math.floor((pastSecs % 3600) / 60);
-        setTimeUntilString(`Session was scheduled ${pastHrs > 0 ? `${pastHrs}h ` : ''}${pastMins}m ago`);
+        setTimeUntilString(`${pastHrs > 0 ? `${pastHrs}h ` : ''}${pastMins}m`);
       }
     };
 
@@ -345,10 +345,12 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-semibold">
                 <Clock className="w-3.5 h-3.5 text-cyan-400" />
                 {isPastTime ? (
-                  <span className="text-amber-300 mono-font">{timeUntilString}</span>
+                  <span className="text-amber-300 mono-font">
+                    {t('today.scheduledAgo', language).replace('{time}', timeUntilString)}
+                  </span>
                 ) : (
                   <span className="text-slate-200">
-                    Starts in <strong className="text-emerald-400 mono-font">{timeUntilString}</strong>
+                    {t('today.startsIn', language)} <strong className="text-emerald-400 mono-font">{timeUntilString}</strong>
                   </span>
                 )}
               </div>
@@ -359,7 +361,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                   className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-roman font-black tracking-wide shadow-md shadow-amber-500/20 hover:scale-105 transition-all"
                 >
                   <Trophy className="w-3.5 h-3.5 stroke-[2.5]" />
-                  <span>Finish Workout</span>
+                  <span>{t('today.finishWorkout', language)}</span>
                 </button>
               )}
             </div>
@@ -370,41 +372,41 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
           </h2>
 
           <p className="text-sm text-slate-300 max-w-2xl mb-6">
-            Personalised for <strong className="text-white">{profile.name}</strong> • London gym session ready with compound overload, hypertrophy volume, and active rest pacing.
+            {t('today.readySubtitle', language)}
           </p>
 
           {/* Quick Metrics Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
               <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                <Clock className="w-3.5 h-3.5 text-cyan-400" /> Duration
+                <Clock className="w-3.5 h-3.5 text-cyan-400" /> {t('today.duration', language)}
               </div>
               <div className="text-lg font-bold text-white mono-font">
-                ~{activePlan.estimatedDurationMinutes} <span className="text-xs text-slate-400 font-normal">min</span>
+                ~{activePlan.estimatedDurationMinutes} <span className="text-xs text-slate-400 font-normal">{t('today.min', language)}</span>
               </div>
             </div>
 
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
               <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                <Dumbbell className="w-3.5 h-3.5 text-emerald-400" /> Movements
+                <Dumbbell className="w-3.5 h-3.5 text-emerald-400" /> {t('today.movements', language)}
               </div>
               <div className="text-lg font-bold text-white mono-font">
-                {exercises.length} <span className="text-xs text-slate-400 font-normal">stations</span>
+                {exercises.length} <span className="text-xs text-slate-400 font-normal">{t('today.stations', language)}</span>
               </div>
             </div>
 
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
               <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                <Flame className="w-3.5 h-3.5 text-amber-400" /> Working Sets
+                <Flame className="w-3.5 h-3.5 text-amber-400" /> {t('today.workingSets', language)}
               </div>
               <div className="text-lg font-bold text-white mono-font">
-                {totalSetsCount} <span className="text-xs text-slate-400 font-normal">sets</span>
+                {totalSetsCount} <span className="text-xs text-slate-400 font-normal">{t('today.setsUnit', language)}</span>
               </div>
             </div>
 
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
               <div className="flex items-center gap-2 text-slate-400 text-xs mb-1">
-                <Activity className="w-3.5 h-3.5 text-pink-400" /> Focus
+                <Activity className="w-3.5 h-3.5 text-pink-400" /> {t('today.focus', language)}
               </div>
               <div className="text-xs font-semibold text-slate-200 capitalize truncate mt-1">
                 {activePlan.focus.slice(0, 3).join(', ')}
@@ -422,12 +424,12 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 {copied ? (
                   <>
                     <CheckCheck className="w-4 h-4 text-emerald-400" />
-                    <span>Copied Plan!</span>
+                    <span>{t('today.copiedPlan', language)}</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-4 h-4 text-slate-400" />
-                    <span>Copy to Notes</span>
+                    <span>{t('today.copyNotes', language)}</span>
                   </>
                 )}
               </button>
@@ -437,7 +439,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 text-xs font-bold transition-all border border-cyan-500/30 shadow-sm"
               >
                 <Calculator className="w-4 h-4 text-cyan-400" />
-                <span>Plate & 1RM Calculator</span>
+                <span>{t('today.plateCalcBtn', language)}</span>
               </button>
 
               <button
@@ -445,7 +447,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 text-xs font-bold transition-all border border-amber-500/30 shadow-sm"
               >
                 <History className="w-4 h-4 text-amber-400" />
-                <span>Training Ledger</span>
+                <span>{t('today.ledgerBtn', language)}</span>
               </button>
 
               {todayWorkout.catchUpPlan && (
@@ -458,7 +460,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                   }`}
                 >
                   <Zap className="w-4 h-4 text-amber-400" />
-                  <span>{useCatchUp ? 'Express Plan Active (35m)' : 'Switch to Express (35m)'}</span>
+                  <span>{useCatchUp ? t('today.standardBtn', language) : t('today.expressBtn', language)}</span>
                 </button>
               )}
             </div>
@@ -483,6 +485,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         completedSetsCount={completedSetsCount}
         totalSetsCount={totalSetsCount}
         onOpenGymTools={() => setGymTools({ isOpen: true, weight: 80 })}
+        language={language}
       />
 
       {/* BIO-RECOVERY & FATIGUE GAUGE (Fitbod Calibre) */}
@@ -490,6 +493,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         primaryMuscles={activePlan.focus || []}
         totalSetsToday={totalSetsCount}
         onOpenPro={onOpenPro || (() => {})}
+        language={language}
       />
 
       {/* Live Gym Completion Progress Bar */}
@@ -501,10 +505,10 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
             </div>
             <div>
               <div className="text-sm font-bold text-white flex items-center gap-2">
-                Session Progress: <span className="mono-font text-emerald-400">{progressPercent}%</span>
+                {t('today.sessionProgress', language)}: <span className="mono-font text-emerald-400">{progressPercent}%</span>
               </div>
               <div className="text-xs text-slate-400">
-                {completedSetsCount} of {totalSetsCount} working sets checked off
+                {completedSetsCount} / {totalSetsCount} {t('today.setsCheckedOff', language)}
               </div>
             </div>
           </div>
@@ -532,12 +536,12 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               </div>
               <div>
                 <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  Warm-Up Protocol
+                  {t('today.warmupProtocol', language)}
                   <span className="text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 font-normal mono-font">
-                    {activePlan.warmup.durationMinutes} min
+                    {activePlan.warmup.durationMinutes} {t('today.min', language)}
                   </span>
                 </h3>
-                <p className="text-xs text-slate-400">Cardiovascular prep & joint lubrication</p>
+                <p className="text-xs text-slate-400">{t('today.warmupSub', language)}</p>
               </div>
             </div>
 
@@ -550,14 +554,14 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               }`}
             >
               <CheckCheck className="w-3.5 h-3.5" />
-              {warmupDone ? 'Warm-up Done' : 'Mark Complete'}
+              {warmupDone ? t('today.warmupFinished', language) : t('today.markComplete', language)}
             </button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3 pt-3 border-t border-slate-800/80 text-xs">
             <div className="space-y-1.5">
               <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
-                1. General Prep (3-5 min)
+                {t('today.warmupGeneral', language)}
               </span>
               <ul className="space-y-1 text-slate-300">
                 {activePlan.warmup.general.map((g, idx) => (
@@ -571,7 +575,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
 
             <div className="space-y-1.5">
               <span className="font-semibold text-slate-400 uppercase tracking-wider text-[10px]">
-                2. Specific Muscle Activation
+                {t('today.warmupSpecific', language)}
               </span>
               <ul className="space-y-1 text-slate-300">
                 {activePlan.warmup.specificActivation.map((s, idx) => (
@@ -593,24 +597,24 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
             <Sparkles className="w-8 h-8" />
           </div>
           <h3 className="text-xl sm:text-2xl font-black font-roman text-white">
-            REST & SUPERCOMPENSATION PROTOCOL
+            {t('today.restProtocol', language)}
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mx-auto">
-            No heavy lifting scheduled today. Muscle protein synthesis, central nervous system regeneration, and glycogen supercompensation are actively restoring your power.
+            {t('today.restProtocolDesc', language)}
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-xl mx-auto text-xs text-slate-300 pt-2">
             <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-              <span className="text-amber-400 font-bold block mb-1 font-roman">💧 Hydration & Salts</span>
-              Target 3–4L of water with sodium & electrolytes
+              <span className="text-amber-400 font-bold block mb-1 font-roman">{t('today.hydration', language)}</span>
+              {t('today.hydrationDesc', language)}
             </div>
             <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-              <span className="text-cyan-400 font-bold block mb-1 font-roman">🚶 Active Recovery</span>
-              20–30 min gentle walk or light mobility
+              <span className="text-cyan-400 font-bold block mb-1 font-roman">{t('today.activeRecovery', language)}</span>
+              {t('today.activeRecoveryDesc', language)}
             </div>
             <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800">
-              <span className="text-emerald-400 font-bold block mb-1 font-roman">😴 Deep Sleep</span>
-              Aim for 8–9 hours of restorative sleep
+              <span className="text-emerald-400 font-bold block mb-1 font-roman">{t('today.deepSleep', language)}</span>
+              {t('today.deepSleepDesc', language)}
             </div>
           </div>
         </div>
@@ -619,10 +623,10 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
               <Dumbbell className="w-5 h-5 text-cyan-400" />
-              Working Exercises ({exercises.length})
+              {t('today.workingExercises', language)} ({exercises.length})
             </h3>
             <span className="text-xs text-slate-400">
-              Follow listed order for optimal neural drive
+              {t('today.neuralOrder', language)}
             </span>
           </div>
 
@@ -675,7 +679,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-emerald-400" />
               <h3 className="text-base font-bold text-white">
-                Cool-Down & Mobility ({activePlan.cooldown.durationMinutes} min)
+                {t('today.cooldownProtocol', language)} ({activePlan.cooldown.durationMinutes} {t('today.min', language)})
               </h3>
             </div>
             <button
@@ -687,7 +691,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               }`}
             >
               <CheckCheck className="w-3.5 h-3.5" />
-              {cooldownDone ? 'Finished' : 'Mark Done'}
+              {cooldownDone ? t('today.cooldownFinished', language) : t('today.cooldownMark', language)}
             </button>
           </div>
           <ul className="space-y-1 text-xs text-slate-300 mt-2">
@@ -706,7 +710,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         <div className="p-4 rounded-2xl bg-amber-950/20 border border-amber-900/40 text-amber-200 text-xs flex items-start gap-3">
           <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <div>
-            <strong className="text-amber-300 block mb-0.5">Progression Principle for Today:</strong>
+            <strong className="text-amber-300 block mb-0.5">{t('today.progressionTitle', language)}</strong>
             {activePlan.progressionRule}
           </div>
         </div>
@@ -717,10 +721,10 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         <div>
           <h4 className="text-base font-bold text-white font-roman flex items-center justify-center sm:justify-start gap-2">
             <Trophy className="w-4 h-4 text-amber-400" />
-            Conquered All Movements?
+            {t('today.conqueredMovements', language)}
           </h4>
           <p className="text-xs text-slate-400 mt-0.5">
-            Log your achievements, establish personal records, and seal your session into the permanent ledger.
+            {t('today.conqueredSub', language)}
           </p>
         </div>
 
@@ -729,7 +733,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
           className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-sm font-black font-roman tracking-wider transition-all shadow-lg shadow-amber-500/20 hover:scale-105 flex items-center justify-center gap-2 shrink-0"
         >
           <Check className="w-4 h-4 stroke-[3]" />
-          <span>FINISH WORKOUT</span>
+          <span>{t('today.finishWorkout', language)}</span>
         </button>
       </div>
 
@@ -740,6 +744,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         exerciseName={activeTimer.exerciseName}
         onClose={() => setActiveTimer({ ...activeTimer, isOpen: false })}
         onExpand={() => setIsFullTimerOpen(true)}
+        language={language}
       />
 
       {/* Fullscreen Rest Timer Stopwatch Modal */}
@@ -748,6 +753,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         initialSeconds={activeTimer.seconds}
         exerciseName={activeTimer.exerciseName}
         onClose={() => setIsFullTimerOpen(false)}
+        language={language}
       />
 
       {/* Barbell Plate & 1RM Calculator Modal */}
@@ -755,6 +761,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         isOpen={gymTools.isOpen}
         initialWeight={gymTools.weight}
         onClose={() => setGymTools({ ...gymTools, isOpen: false })}
+        language={language}
       />
 
       {/* Exercise Swap Movement Modal */}
@@ -764,6 +771,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
           currentExercise={swapModal.exercise}
           onClose={() => setSwapModal({ isOpen: false, exerciseIndex: -1, exercise: null })}
           onSelectSubstitute={handleSwapMovement}
+          language={language}
         />
       )}
 
@@ -779,12 +787,14 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         totalSetsCount={totalSetsCount}
         prCount={1}
         onSaveToHistory={handleSaveToHistory}
+        language={language}
       />
 
       {/* Workout History Ledger Modal */}
       <WorkoutHistoryModal
         isOpen={isHistoryOpen}
         onClose={() => setIsHistoryOpen(false)}
+        language={language}
       />
     </div>
   );

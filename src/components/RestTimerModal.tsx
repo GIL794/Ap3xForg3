@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, RotateCcw, X, Plus, Minus, Volume2, Bell, Crown, Sparkles } from 'lucide-react';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface RestTimerModalProps {
   initialSeconds: number;
   isOpen: boolean;
   onClose: () => void;
   exerciseName?: string;
+  language?: SupportedLanguage;
 }
 
 export const RestTimerModal: React.FC<RestTimerModalProps> = ({
@@ -13,6 +15,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
   isOpen,
   onClose,
   exerciseName,
+  language = 'en',
 }) => {
   const [totalSeconds, setTotalSeconds] = useState(initialSeconds);
   const [remaining, setRemaining] = useState(initialSeconds);
@@ -241,11 +244,11 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
           >
             {isRunning ? (
               <>
-                <Pause className="w-5 h-5 fill-current" /> Pause
+                <Pause className="w-5 h-5 fill-current" /> {t('timer.pause', language)}
               </>
             ) : (
               <>
-                <Play className="w-5 h-5 fill-current" /> Resume
+                <Play className="w-5 h-5 fill-current" /> {t('timer.resume', language)}
               </>
             )}
           </button>
@@ -254,7 +257,7 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
             onClick={onClose}
             className="px-4 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-300 text-xs font-roman font-bold transition-colors border border-slate-800"
           >
-            Done
+            {t('timer.done', language)}
           </button>
         </div>
 

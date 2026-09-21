@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Activity, Sparkles, Layers, UserCheck, ShieldCheck, Flame } from 'lucide-react';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface MuscleRecoveryGaugeProps {
   primaryMuscles: string[];
   totalSetsToday: number;
   onOpenPro: () => void;
   isPro?: boolean;
+  language?: SupportedLanguage;
 }
 
 interface MuscleStatus {
@@ -23,6 +25,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
   totalSetsToday,
   onOpenPro,
   isPro = false,
+  language = 'en',
 }) => {
   const [viewMode, setViewMode] = useState<'map' | 'cards'>('map');
   const [bodyOrientation, setBodyOrientation] = useState<'front' | 'back'>('front');
@@ -134,13 +137,13 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
           </div>
           <div>
             <h3 className="text-sm font-black text-white font-roman tracking-wide flex items-center gap-2">
-              BIO-RECOVERY & FATIGUE GAUGE
+              {t('recovery.title', language)}
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-sans font-bold uppercase">
-                Fitbod Calibre
+                {t('recovery.calibre', language)}
               </span>
             </h3>
             <p className="text-[11px] text-slate-400">
-              Interactive anatomical muscle readiness & recovery simulation
+              {t('recovery.subtitle', language)}
             </p>
           </div>
         </div>
@@ -156,7 +159,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Anatomical Map
+              {t('recovery.anatomicalMap', language)}
             </button>
             <button
               onClick={() => setViewMode('cards')}
@@ -166,7 +169,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Scorecard
+              {t('recovery.scorecard', language)}
             </button>
           </div>
 
@@ -175,7 +178,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
             className="px-3 py-1 rounded-xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 border border-amber-500/40 text-amber-300 text-xs font-roman font-bold transition-all flex items-center gap-1"
           >
             <Sparkles className="w-3 h-3 text-amber-400" />
-            <span className="hidden sm:inline">Pro Insights</span>
+            <span className="hidden sm:inline">{t('recovery.proInsights', language)}</span>
           </button>
         </div>
       </div>
@@ -194,7 +197,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Anterior (Front)
+                {t('recovery.anterior', language)}
               </button>
               <button
                 onClick={() => setBodyOrientation('back')}
@@ -204,7 +207,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Posterior (Back)
+                {t('recovery.posterior', language)}
               </button>
             </div>
 
@@ -345,7 +348,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
             </div>
 
             <p className="text-[10px] text-slate-500 mt-2 italic">
-              Tap any muscle group to inspect biological recovery state
+              {t('recovery.tapTip', language)}
             </p>
           </div>
 
@@ -355,7 +358,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-[10px] font-roman uppercase font-bold text-slate-400">
-                    Selected Anatomy
+                    {t('recovery.selected', language)}
                   </span>
                   <h4 className="text-base sm:text-lg font-black text-white font-roman">
                     {selectedMuscle.name}
@@ -364,7 +367,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
 
                 <div className="text-right">
                   <span className="text-[10px] uppercase font-bold text-slate-400 block">
-                    Readiness
+                    {t('recovery.readiness', language)}
                   </span>
                   <span className={`text-lg font-black mono-font ${
                     selectedMuscle.recoveryPercentage >= 90
@@ -393,7 +396,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
               </div>
 
               <div className="text-xs text-slate-300">
-                <strong className="text-amber-300 font-roman">Physiological Status:</strong>{' '}
+                <strong className="text-amber-300 font-roman">{t('recovery.status', language)}:</strong>{' '}
                 {selectedMuscle.recommendation}
               </div>
 
@@ -412,7 +415,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
               {/* Suggested movements */}
               <div className="pt-2 border-t border-slate-800">
                 <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1">
-                  Target Exercises
+                  {t('recovery.targetExercises', language)}
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {selectedMuscle.bestMovements.map((move, idx) => (
@@ -430,15 +433,15 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
             {/* Quick Summary Pill Strip */}
             <div className="grid grid-cols-3 gap-2 text-center text-xs">
               <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Fresh Groups</span>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">{t('recovery.fresh', language)}</span>
                 <span className="text-sm font-black text-emerald-400 mono-font">6 / 9</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Recovering</span>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">{t('recovery.recovering', language)}</span>
                 <span className="text-sm font-black text-amber-400 mono-font">3 / 9</span>
               </div>
               <div className="p-2.5 rounded-xl bg-slate-900/60 border border-slate-800">
-                <span className="text-[10px] uppercase font-bold text-slate-400 block">Fatigued</span>
+                <span className="text-[10px] uppercase font-bold text-slate-400 block">{t('recovery.fatigued', language)}</span>
                 <span className="text-sm font-black text-slate-400 mono-font">0 / 9</span>
               </div>
             </div>

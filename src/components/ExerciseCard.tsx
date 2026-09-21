@@ -291,11 +291,11 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         <div className="mt-4 overflow-hidden rounded-2xl border border-slate-800/90 bg-slate-950/80">
           {/* Table Header */}
           <div className="grid grid-cols-12 gap-1 px-3 py-2 bg-slate-900/70 border-b border-slate-800 text-[10px] font-roman uppercase font-bold text-slate-400 text-center items-center">
-            <div className="col-span-2 text-left pl-1">SET</div>
-            <div className="col-span-3 text-slate-500">PREV / TARGET</div>
-            <div className="col-span-3">KG</div>
-            <div className="col-span-2">REPS</div>
-            <div className="col-span-2">LOG</div>
+            <div className="col-span-2 text-left pl-1">{t('table.set', language)}</div>
+            <div className="col-span-3 text-slate-500">{t('table.prevTarget', language)}</div>
+            <div className="col-span-3">{t('table.kg', language)}</div>
+            <div className="col-span-2">{t('table.reps', language)}</div>
+            <div className="col-span-2">{t('table.log', language)}</div>
           </div>
 
           {/* Table Rows */}
@@ -397,7 +397,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 className="w-full py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-dashed border-slate-700 hover:border-amber-500/40 text-amber-300 text-xs font-roman font-bold transition-all flex items-center justify-center gap-1.5"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Set</span>
+                <span>{t('exercise.addSet', language)}</span>
               </button>
             </div>
           )}
@@ -411,7 +411,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
               className="flex items-center gap-1 text-slate-400 hover:text-amber-300 font-roman font-bold transition-colors"
             >
               <Info className="w-3.5 h-3.5 text-amber-400" />
-              <span>Form Cues</span>
+              <span>{t('exercise.formCues', language)}</span>
               {showDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
             </button>
 
@@ -422,17 +422,17 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
               }`}
             >
               <FileText className="w-3.5 h-3.5 text-amber-400" />
-              <span>{noteText ? 'Note Active' : 'Add Note'}</span>
+              <span>{noteText ? t('exercise.noteActive', language) : t('exercise.addNote', language)}</span>
             </button>
           </div>
 
           {isAllComplete ? (
             <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-1 font-roman">
-              <Sparkles className="w-3.5 h-3.5" /> Exercise Complete
+              <Sparkles className="w-3.5 h-3.5" /> {t('exercise.complete', language)}
             </span>
           ) : (
             <span className="text-[11px] text-slate-400 mono-font">
-              {completedCount}/{exercise.sets} sets logged
+              {completedCount}/{exercise.sets} {t('exercise.setsLogged', language)}
             </span>
           )}
         </div>
@@ -441,13 +441,13 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
         {showNotes && (
           <div className="mt-3 p-3 rounded-2xl bg-slate-950/90 border border-slate-800 animate-in fade-in duration-150">
             <label className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1.5">
-              Personal Setup Notes (e.g. Pin position, grip width, seat setting)
+              {t('exercise.personalNotesTitle', language)}
             </label>
             <input
               type="text"
               value={noteText}
               onChange={(e) => handleNoteSave(e.target.value)}
-              placeholder="e.g. Seat #4, thumb-around grip, pause 1s at chest..."
+              placeholder={t('exercise.personalNotesPlaceholder', language)}
               className="w-full bg-slate-900 border border-slate-700 focus:border-amber-500 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder:text-slate-600 focus:outline-none"
             />
           </div>
@@ -459,7 +459,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             {exercise.techniqueCues && exercise.techniqueCues.length > 0 && (
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 font-roman block mb-1">
-                  Biomechanical Execution
+                  {t('exercise.bioExecution', language)}
                 </span>
                 <ul className="space-y-1 text-xs text-slate-300">
                   {exercise.techniqueCues.map((cue, cIdx) => (
@@ -475,7 +475,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             {exercise.progressionRule && (
               <div className="pt-2 border-t border-slate-800/80 flex items-start gap-1.5 text-xs text-amber-300">
                 <TrendingUp className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
-                <span><strong className="text-amber-200 font-roman">Progression Rule:</strong> {exercise.progressionRule}</span>
+                <span><strong className="text-amber-200 font-roman">{t('exercise.progressionRule', language)}</strong> {exercise.progressionRule}</span>
               </div>
             )}
           </div>

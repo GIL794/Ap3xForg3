@@ -2,12 +2,14 @@ import React, { useState, useMemo } from 'react';
 import { PlannedExercise, ExerciseDefinition, ExerciseCategory, EquipmentType } from '../types';
 import { EXERCISE_LIBRARY } from '../data/exercises';
 import { X, Search, RefreshCw, Dumbbell, Sparkles, Check, Plus } from 'lucide-react';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface ExerciseSwapModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentExercise: PlannedExercise;
   onSelectSubstitute: (replacement: ExerciseDefinition) => void;
+  language?: SupportedLanguage;
 }
 
 export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
@@ -15,6 +17,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
   onClose,
   currentExercise,
   onSelectSubstitute,
+  language = 'en',
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState<'recommended' | 'all' | 'machines' | 'dumbbells' | 'cables' | 'custom'>('recommended');
@@ -96,7 +99,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-white font-roman tracking-wide flex items-center gap-2">
-                SWAP MOVEMENT
+                {t('swap.title', language)}
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   Gym Floor Instant
                 </span>

@@ -29,6 +29,7 @@ interface HeaderProps {
   weeklyPlan: WorkoutDay[];
   todayWorkout: TodayWorkout;
   currentUser: UserAccount;
+  isProSubscriber?: boolean;
   language?: SupportedLanguage;
   onLanguageChange?: (lang: SupportedLanguage) => void;
   onOpenAiCoach: () => void;
@@ -45,6 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   weeklyPlan,
   todayWorkout,
   currentUser,
+  isProSubscriber = false,
   language = 'en',
   onLanguageChange,
   onOpenAiCoach,
@@ -205,11 +207,15 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Imperivm Pro Badge Button */}
             <button
               onClick={onOpenPro}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 hover:text-white border border-amber-500/40 text-xs font-roman font-bold transition-all shadow-sm"
-              title="Unlock Imperivm Pro"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-roman font-bold transition-all shadow-sm ${
+                isProSubscriber
+                  ? 'bg-gradient-to-r from-amber-500/35 via-yellow-400/35 to-amber-500/35 text-amber-200 hover:text-white border-2 border-amber-400/80 shadow-md shadow-amber-500/20'
+                  : 'bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-300 hover:text-white border border-amber-500/40'
+              }`}
+              title={isProSubscriber ? "Emperor Pro Active" : "Unlock Imperivm Pro"}
             >
-              <Crown className="w-3.5 h-3.5 text-amber-400" />
-              <span>{t('nav.pro', language)}</span>
+              <Crown className={`w-3.5 h-3.5 ${isProSubscriber ? 'text-amber-300 fill-amber-400' : 'text-amber-400'}`} />
+              <span>{isProSubscriber ? t('nav.proActive', language) : t('nav.pro', language)}</span>
             </button>
 
             {/* User Account / Switcher Badge */}
@@ -242,7 +248,7 @@ export const Header: React.FC<HeaderProps> = ({
                 title="View Training Ledger & Past History"
               >
                 <History className="w-3.5 h-3.5 text-amber-400" />
-                <span>Ledger</span>
+                <span>{t('nav.ledger', language)}</span>
               </button>
             )}
 
@@ -293,10 +299,14 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Pro Button */}
             <button
               onClick={onOpenPro}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-roman font-bold"
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-roman font-bold ${
+                isProSubscriber
+                  ? 'bg-amber-500/30 text-amber-200 border-2 border-amber-400/80 shadow-sm'
+                  : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+              }`}
             >
-              <Crown className="w-3.5 h-3.5 text-amber-400" />
-              <span>Pro</span>
+              <Crown className={`w-3.5 h-3.5 ${isProSubscriber ? 'text-amber-300 fill-amber-400' : 'text-amber-400'}`} />
+              <span>{isProSubscriber ? t('nav.proActive', language) : t('nav.pro', language)}</span>
             </button>
 
             {/* Hamburger Button */}
@@ -395,10 +405,10 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <div className="flex items-center gap-3">
                     <Crown className="w-4 h-4 text-amber-400" />
-                    <span>Imperivm Pro</span>
+                    <span>{isProSubscriber ? t('nav.proActive', language) : t('nav.pro', language)}</span>
                   </div>
                   <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold uppercase">
-                    VIP
+                    {isProSubscriber ? 'PRO' : 'VIP'}
                   </span>
                 </button>
 
@@ -412,7 +422,7 @@ export const Header: React.FC<HeaderProps> = ({
                   >
                     <div className="flex items-center gap-3">
                       <History className="w-4 h-4 text-amber-400" />
-                      <span>Training Ledger</span>
+                      <span>{t('nav.ledger', language)}</span>
                     </div>
                     <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold uppercase">
                       History

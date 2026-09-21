@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Crown, Sparkles, Map } from 'lucide-react';
 import { ASCENSION_TIERS, EvolutionRoadmapModal } from './EvolutionRoadmapModal';
 
+import { SupportedLanguage, t } from '../logic/i18n';
+
 export interface OlympianEvolutionCardProps {
   totalTonnageKg: number;
   completedSetsCount: number;
   totalSetsCount: number;
   onOpenGymTools: () => void;
+  language?: SupportedLanguage;
 }
 
 export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
@@ -14,6 +17,7 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
   completedSetsCount: _completedSetsCount,
   totalSetsCount: _totalSetsCount,
   onOpenGymTools,
+  language = 'en',
 }) => {
   const [showRoadmap, setShowRoadmap] = useState(false);
 
@@ -48,7 +52,7 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="text-[10px] uppercase font-bold text-amber-500 font-roman tracking-wider">
-                  Tier {currentRank.romanNumeral} / XIII
+                  {t('ascension.tier', language)} {currentRank.romanNumeral} / XIII
                 </span>
                 <h3 className="text-lg font-black text-white font-roman flex items-center gap-1.5 tracking-wide">
                   {currentRank.name}
@@ -67,14 +71,14 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-between md:justify-end pt-3 md:pt-0 border-t md:border-t-0 border-slate-800">
             <div className="text-left md:text-right">
               <span className="block text-[10px] uppercase font-bold text-slate-400 font-roman tracking-wider">
-                Total Iron Forged
+                {t('ascension.totalForged', language)}
               </span>
               <div className="text-xl sm:text-2xl font-black text-white mono-font flex items-baseline md:justify-end gap-1.5">
                 <span className="text-amber-300">{totalTonnageKg.toLocaleString()}</span>
-                <span className="text-xs font-normal text-slate-400">kg volume</span>
+                <span className="text-xs font-normal text-slate-400">kg {t('ascension.volume', language)}</span>
               </div>
               <span className="text-[11px] text-amber-400/80 mono-font">
-                🏺 {amphoraeCount.toLocaleString()} Amphorae
+                🏺 {amphoraeCount.toLocaleString()} {t('ascension.amphorae', language)}
               </span>
             </div>
 
@@ -85,7 +89,7 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
                 title="View Full XIII Tiers of Ascension"
               >
                 <Map className="w-3.5 h-3.5 text-amber-400" />
-                <span>Pantheon</span>
+                <span>{t('ascension.pantheon', language)}</span>
               </button>
 
               <button
@@ -93,7 +97,7 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
                 className="px-3.5 py-2 rounded-2xl bg-gradient-to-r from-amber-500/20 to-yellow-500/20 hover:from-amber-500/30 hover:to-yellow-500/30 text-amber-200 hover:text-white border border-amber-500/40 text-xs font-roman font-bold transition-all flex items-center gap-1.5 shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>Plate & 1RM</span>
+                <span>{t('ascension.plate1rm', language)}</span>
               </button>
             </div>
           </div>
@@ -104,11 +108,11 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
           <div className="mt-4 pt-3 border-t border-slate-800/80">
             <div className="flex items-center justify-between text-xs mb-1.5 font-roman">
               <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                <span>Next Ascension:</span>
+                <span>{t('ascension.next', language)}</span>
                 <strong className="text-amber-200">{nextRank.name} ({nextRank.romanNumeral}) {nextRank.emoji}</strong>
               </span>
               <span className="mono-font text-amber-400 font-bold">
-                {(nextRank.minKg - totalTonnageKg).toLocaleString()} kg to advance
+                {(nextRank.minKg - totalTonnageKg).toLocaleString()} kg {t('ascension.toAdvance', language)}
               </span>
             </div>
 

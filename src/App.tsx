@@ -340,6 +340,7 @@ export const App: React.FC = () => {
         weeklyPlan={appState.weeklyPlan}
         todayWorkout={appState.todayWorkout}
         currentUser={appState.userAccount}
+        isProSubscriber={appState.isProSubscriber}
         language={language}
         onLanguageChange={setLanguage}
         onOpenAiCoach={() => setIsAiModalOpen(true)}
@@ -462,7 +463,7 @@ export const App: React.FC = () => {
           className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-emerald-400 hover:text-white transition-colors"
         >
           <Dumbbell className="w-4 h-4" />
-          <span>Today</span>
+          <span>{t('nav.today', language)}</span>
         </button>
 
         <button
@@ -473,7 +474,7 @@ export const App: React.FC = () => {
           className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-cyan-400 hover:text-white transition-colors"
         >
           <Calendar className="w-4 h-4" />
-          <span>Week</span>
+          <span>{t('nav.week', language)}</span>
         </button>
 
         <button
@@ -483,7 +484,7 @@ export const App: React.FC = () => {
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/30">
             <Calculator className="w-5 h-5 stroke-[2.5]" />
           </div>
-          <span>Tools</span>
+          <span>{t('nav.tools', language)}</span>
         </button>
 
         <button
@@ -491,7 +492,7 @@ export const App: React.FC = () => {
           className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-purple-400 hover:text-white transition-colors"
         >
           <Sparkles className="w-4 h-4" />
-          <span>Oracle AI</span>
+          <span>{t('nav.oracle', language)}</span>
         </button>
 
         <button
@@ -502,7 +503,7 @@ export const App: React.FC = () => {
           className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-slate-400 hover:text-white transition-colors"
         >
           <User className="w-4 h-4" />
-          <span>Profile</span>
+          <span>{t('nav.profile', language)}</span>
         </button>
       </nav>
 
@@ -523,12 +524,14 @@ export const App: React.FC = () => {
         isOpen={isGymToolsOpen}
         onClose={() => setIsGymToolsOpen(false)}
         initialWeight={80}
+        language={language}
       />
 
       {/* Workout History Ledger Modal */}
       <WorkoutHistoryModal
         isOpen={isHistoryModalOpen}
         onClose={() => setIsHistoryModalOpen(false)}
+        language={language}
       />
 
       {/* Lore Intro Modal */}

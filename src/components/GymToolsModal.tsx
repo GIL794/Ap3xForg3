@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { X, Dumbbell, Calculator, ArrowRight, Check, Award } from 'lucide-react';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface GymToolsModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialWeight?: number;
+  language?: SupportedLanguage;
 }
 
 export const GymToolsModal: React.FC<GymToolsModalProps> = ({
   isOpen,
   onClose,
   initialWeight = 80,
+  language = 'en',
 }) => {
   const [activeTab, setActiveTab] = useState<'plates' | 'one_rm'>('plates');
 
@@ -102,7 +105,7 @@ export const GymToolsModal: React.FC<GymToolsModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                Barbell Plate & 1RM Calculator
+                {t('tools.plateCalc', language)} & {t('tools.oneRm', language)}
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   Zero Paywall
                 </span>
@@ -129,7 +132,7 @@ export const GymToolsModal: React.FC<GymToolsModalProps> = ({
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
-            <Dumbbell className="w-4 h-4" /> Plate Loader per Side
+            <Dumbbell className="w-4 h-4" /> {t('tools.plateCalc', language)}
           </button>
 
           <button
@@ -140,7 +143,7 @@ export const GymToolsModal: React.FC<GymToolsModalProps> = ({
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
-            <Award className="w-4 h-4" /> 1-Rep Max & % Table
+            <Award className="w-4 h-4" /> {t('tools.oneRm', language)}
           </button>
         </div>
 
@@ -152,7 +155,7 @@ export const GymToolsModal: React.FC<GymToolsModalProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                    Target Total Weight (kg)
+                    {t('tools.targetWeight', language)}
                   </label>
                   <div className="flex items-center gap-2">
                     <input

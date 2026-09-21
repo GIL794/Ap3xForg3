@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { WorkoutDay, UserProfile, LoggedSetRecord } from '../types';
 import { Award, Trophy, Clock, Dumbbell, Sparkles, Check, Share2, Flame, ShieldCheck, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface WorkoutSummaryModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface WorkoutSummaryModalProps {
   totalSetsCount: number;
   prCount?: number;
   onSaveToHistory: () => void;
+  language?: SupportedLanguage;
 }
 
 export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
@@ -27,6 +29,7 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
   totalSetsCount,
   prCount = 1,
   onSaveToHistory,
+  language = 'en',
 }) => {
   const [shared, setShared] = useState(false);
 
@@ -97,11 +100,11 @@ Workout: ${workoutPlan.name}
           </div>
 
           <span className="text-xs font-roman font-black uppercase tracking-widest text-amber-400 flex items-center gap-1.5 mb-1">
-            <Sparkles className="w-3.5 h-3.5" /> ARENA VICTORY CONQUERED
+            <Sparkles className="w-3.5 h-3.5" /> {t('summary.title', language)}
           </span>
 
           <h2 className="text-2xl sm:text-3xl font-black text-white font-roman tracking-tight mb-2">
-            GLORIA IN EXCELSIS
+            {t('summary.gloria', language)}
           </h2>
 
           <p className="text-xs text-slate-300 max-w-xs mb-6">
@@ -112,7 +115,7 @@ Workout: ${workoutPlan.name}
           <div className="grid grid-cols-2 gap-3 w-full mb-4">
             <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30 text-center">
               <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1">
-                Total Iron Tonnage
+                {t('summary.tonnage', language)}
               </span>
               <span className="text-xl sm:text-2xl font-black text-amber-400 mono-font">
                 {totalTonnageKg.toLocaleString()} <span className="text-xs font-normal text-slate-400">kg</span>
@@ -124,7 +127,7 @@ Workout: ${workoutPlan.name}
 
             <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
               <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1">
-                Session Time
+                {t('summary.duration', language)}
               </span>
               <span className="text-xl sm:text-2xl font-black text-cyan-400 mono-font">
                 {durationMinutes} <span className="text-xs font-normal text-slate-400">min</span>
@@ -136,7 +139,7 @@ Workout: ${workoutPlan.name}
 
             <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 text-center">
               <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1">
-                Working Sets
+                {t('today.workingSets', language)}
               </span>
               <span className="text-xl sm:text-2xl font-black text-emerald-400 mono-font">
                 {completedSetsCount}/{totalSetsCount}
@@ -148,7 +151,7 @@ Workout: ${workoutPlan.name}
 
             <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-amber-500/30 text-center">
               <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1">
-                Olympian Ascension
+                {t('summary.xp', language)}
               </span>
               <span className="text-xl sm:text-2xl font-black text-yellow-300 mono-font">
                 +{xpEarned} <span className="text-xs font-normal text-slate-400">XP</span>
@@ -191,7 +194,7 @@ Workout: ${workoutPlan.name}
               className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-roman font-black tracking-wide transition-all shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5"
             >
               <Check className="w-4 h-4 stroke-[3]" />
-              <span>Seal Session</span>
+              <span>{t('summary.sealBtn', language)}</span>
             </button>
           </div>
         </div>

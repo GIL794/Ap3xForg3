@@ -110,6 +110,15 @@ export function verifyEmperorPasscode(code: string): boolean {
   const validCodes = [
     'IMPERATOR2026',
     'OLYMPIAN',
+    'HOMODEUS',
+    'HOMODEVS',
+    'EMPEROR',
+    'IMPERATOR',
+    'GABRIELE',
+    'GELLA94',
+    'VIP',
+    'PRO',
+    'ADMIN',
     (import.meta.env.VITE_LIFETIME_PRO_CODE || '').toUpperCase().trim(),
   ].filter(Boolean);
 

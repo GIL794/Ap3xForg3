@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Timer, Plus, FastForward, X, Volume2, VolumeX, Maximize2 } from 'lucide-react';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface FloatingRestTimerProps {
   initialSeconds: number;
@@ -7,6 +8,7 @@ interface FloatingRestTimerProps {
   isOpen: boolean;
   onClose: () => void;
   onExpand: () => void;
+  language?: SupportedLanguage;
 }
 
 export const FloatingRestTimer: React.FC<FloatingRestTimerProps> = ({
@@ -15,6 +17,7 @@ export const FloatingRestTimer: React.FC<FloatingRestTimerProps> = ({
   isOpen,
   onClose,
   onExpand,
+  language = 'en',
 }) => {
   const [totalSeconds, setTotalSeconds] = useState(initialSeconds);
   const [remaining, setRemaining] = useState(initialSeconds);
@@ -154,7 +157,7 @@ export const FloatingRestTimer: React.FC<FloatingRestTimerProps> = ({
                   ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40' 
                   : 'bg-amber-500/20 text-amber-300 border-amber-500/40'
               }`}>
-                {isFinished ? 'Rest Done! Lift!' : 'Resting'}
+                {isFinished ? t('timer.done', language) : t('rest.resting', language)}
               </span>
             </div>
             <p className="text-xs text-slate-300 truncate max-w-[150px] sm:max-w-[200px]">
@@ -171,7 +174,7 @@ export const FloatingRestTimer: React.FC<FloatingRestTimerProps> = ({
             title="Add 30 seconds"
           >
             <Plus className="w-3 h-3" />
-            <span>30s</span>
+            <span>{t('rest.plus30', language)}</span>
           </button>
 
           <button
@@ -180,7 +183,7 @@ export const FloatingRestTimer: React.FC<FloatingRestTimerProps> = ({
             title="Skip rest"
           >
             <FastForward className="w-3.5 h-3.5" />
-            <span className="hidden xs:inline">Skip</span>
+            <span className="hidden xs:inline">{t('rest.skip', language)}</span>
           </button>
 
           <button

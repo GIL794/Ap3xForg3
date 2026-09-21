@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { WorkoutHistorySession } from '../types';
 import { getWorkoutHistory } from '../logic/storage';
 import { History, X, Dumbbell, Calendar, Clock, Trophy, Trash2, ChevronDown, ChevronUp, Award } from 'lucide-react';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 interface WorkoutHistoryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  language?: SupportedLanguage;
 }
 
 export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
   isOpen,
   onClose,
+  language = 'en',
 }) => {
   const [history, setHistory] = useState<WorkoutHistorySession[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -49,7 +52,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
             </div>
             <div>
               <h3 className="text-base sm:text-lg font-black text-white font-roman tracking-wide flex items-center gap-2">
-                OLYMPIAN TRAINING LEDGER
+                {t('history.title', language)}
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
                   {history.length} Sessions
                 </span>
@@ -73,7 +76,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
           <div className="p-4 border-b border-slate-850 bg-slate-950/60 grid grid-cols-3 gap-2 text-center">
             <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
               <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-0.5">
-                Lifetime Tonnage
+                {t('history.lifetimeTonnage', language)}
               </span>
               <span className="text-sm sm:text-base font-black text-amber-400 mono-font">
                 {lifetimeTonnage.toLocaleString()} <span className="text-[10px] font-normal text-slate-400">kg</span>
@@ -82,7 +85,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
 
             <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
               <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-0.5">
-                Sets Conquered
+                {t('today.workingSets', language)}
               </span>
               <span className="text-sm sm:text-base font-black text-emerald-400 mono-font">
                 {totalSetsCompleted} <span className="text-[10px] font-normal text-slate-400">sets</span>
@@ -91,7 +94,7 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
 
             <div className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
               <span className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-0.5">
-                Personal Records
+                {t('history.prsBroken', language)}
               </span>
               <span className="text-sm sm:text-base font-black text-yellow-300 mono-font">
                 {totalPrs} <span className="text-[10px] font-normal text-slate-400">PRs</span>
@@ -107,10 +110,9 @@ export const WorkoutHistoryModal: React.FC<WorkoutHistoryModalProps> = ({
               <div className="w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 text-amber-400/60 flex items-center justify-center mx-auto mb-3">
                 <Dumbbell className="w-6 h-6" />
               </div>
-              <h4 className="text-sm font-bold text-white font-roman mb-1">No Completed Sessions Yet</h4>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                Check off your working sets in Today's Workout and tap 'Finish Workout' to etch your first session into the Olympian Ledger.
-              </p>
+              <h4 className="text-sm font-bold text-white font-roman mb-1">
+                {t('history.empty', language)}
+              </h4>
             </div>
           ) : (
             history.map((session) => {
