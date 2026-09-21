@@ -3,15 +3,40 @@
 // Called by the frontend as POST /api/ai-coach
 
 export default async function handler(req, res) {
-  // Only allow POST
+  // CORS Headers
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+  );
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  const apiKey = (process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || '').trim();
+
+  // GET Health Check
+  if (req.method === 'GET') {
+    return res.status(200).json({
+      status: 'ok',
+      hasApiKey: Boolean(apiKey),
+      keyLength: apiKey.length,
+      message: 'HOMO DEUS Oracle AI Serverless Proxy Active',
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  // Only allow POST for completions
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    // No key configured — return a signal to use rule-based fallback
-    return res.status(200).json({ useFallback: true });
+    // No key configured in Vercel environment variables — return signal to use rule-based fallback
+    return res.status(200).json({ useFallback: true, reason: 'GEMINI_API_KEY not set in Vercel env' });
   }
 
   try {
