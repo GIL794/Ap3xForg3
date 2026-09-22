@@ -50,11 +50,96 @@ export async function generateAiCoachingRecommendations(
       }
     }
   } catch (err) {
-    console.warn('Oracle AI proxy unavailable, using built-in sport-science engine:', err);
+    console.warn('Oracle AI serverless proxy unavailable, checking client fallback:', err);
   }
 
-  // Built-in intelligent fallback — always works even without Gemini key
+  // If serverless proxy returned 404 or failed, check for direct client-side Gemini key
+  try {
+    const clientKey = (getSavedGeminiKey() || (import.meta as any).env?.VITE_GEMINI_API_KEY || '').trim();
+    if (clientKey) {
+      const direct = await callGeminiDirectly(profile, todayWorkout, clientKey);
+      if (direct) return direct;
+    }
+  } catch (err) {
+    console.warn('Direct client Gemini call failed:', err);
+  }
+
+  // Built-in intelligent fallback — always works reliably with zero errors
   return generateRuleBasedAudit(profile, todayWorkout);
+}
+
+async function callGeminiDirectly(
+  profile: UserProfile,
+  todayWorkout: TodayWorkout,
+  apiKey: string
+): Promise<AiCoachRecommendation | null> {
+  const plan = todayWorkout.plan;
+  const injuryText = profile.injuries?.trim() || 'None';
+
+  const prompt = `You are an elite strength & conditioning specialist and sports medicine physiologist.
+Analyse this athlete's workout plan and provide concise, high-value, plain-English coaching recommendations.
+Pay SPECIAL attention to any listed injuries and provide explicit exercise modifications.
+
+Athlete Profile:
+- Name: ${profile.name}
+- Age: ${profile.ageYears ? profile.ageYears + ' years' : 'Adult'}
+- Height: ${profile.heightCm ? profile.heightCm + ' cm' : 'Standard'}
+- Current Weight: ${profile.currentWeightKg ? profile.currentWeightKg + ' kg' : 'Standard'}
+- Goal Weight: ${profile.goalWeightKg ? profile.goalWeightKg + ' kg' : 'Not specified'}
+- Experience: ${profile.experience}
+- Primary Goal: ${(profile.primaryGoal || '').replace(/_/g, ' ')}
+- Secondary Goals: ${(profile.secondaryGoals || []).join(', ') || 'None'}
+- Session Length: ${profile.sessionLengthMinutes} minutes
+- Equipment: ${(profile.equipment || []).join(', ')}
+- Active Injuries / Limitations: ${injuryText}
+- Preferences: ${profile.preferences || 'None'}
+- Target Gym Time: ${profile.targetWorkoutTime}
+
+Today's Scheduled Session:
+- Title: ${plan.name}
+- Estimated Duration: ${plan.estimatedDurationMinutes} min
+- Exercises:
+${(plan.exercises || []).map((e, idx) => `  ${idx + 1}. ${e.name} (${e.sets} sets x ${e.reps}, Rest: ${e.restSeconds}s, Target Effort: ${e.targetRpe}/10)`).join('\n')}
+
+MANDATORY RULES:
+1. Use British English spelling throughout (optimise, prioritise, colour, programme, minimise, calibre).
+2. Plain, clear, conversational English easily understood by any gym-goer.
+3. Greet athlete warmly by name (${profile.name}).
+4. If an injury is present (${injuryText}), explicitly name it, explain safe angles, and provide substitutions.
+
+Format your response strictly as JSON with this structure:
+{
+  "summary": "Warm 1-2 sentence overview addressing ${profile.name} and how today's session moves them towards their goal",
+  "intensityCritique": "Clear advice on how hard to push on main compounds vs accessories",
+  "volumeEvaluation": "Plain-English assessment of the ${plan.exercises.length} movements and sets",
+  "injuryAdaptations": "${injuryText !== 'None' ? 'Explicit protection protocol for ' + injuryText : 'No active injuries reported. Full clearance.'}",
+  "suggestedSwaps": [
+    {"original": "Exercise Name", "suggested": "Alternative Name", "reason": "Plain-English reason"}
+  ],
+  "preWorkoutTip": "Actionable hydration and fueling tip timed for their ${profile.targetWorkoutTime} session"
+}`;
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.4,
+          responseMimeType: 'application/json',
+        },
+      }),
+    }
+  );
+
+  if (!res.ok) return null;
+  const data = await res.json();
+  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!rawText) return null;
+  const parsed = JSON.parse(rawText);
+  return { ...parsed, isAiGenerated: true };
 }
 
 function generateRuleBasedAudit(profile: UserProfile, todayWorkout: TodayWorkout): AiCoachRecommendation {

@@ -130,6 +130,7 @@ export interface UserProfile {
   currentWeightKg?: number;
   goalWeightKg?: number;
   bodyFatPercent?: number;
+  lifetimeTonnageKg?: number;
 }
 
 export interface TodayWorkout {

@@ -194,11 +194,23 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
     while (current.length < totalSets) {
       current.push(false);
     }
-    current[setIndex] = !current[setIndex];
+    const isNowComplete = !current[setIndex];
+    current[setIndex] = isNowComplete;
     onUpdateCompletedSets({
       ...completedSets,
       [exerciseId]: current,
     });
+
+    // Auto-start rest timer on set completion (Hevy & Strong style)
+    if (isNowComplete) {
+      const targetEx = exercises.find(e => e.id === exerciseId);
+      const restSeconds = targetEx?.restSeconds || 90;
+      setActiveTimer({
+        isOpen: true,
+        seconds: restSeconds,
+        exerciseName: targetEx?.name || 'Rest Interval',
+      });
+    }
   };
 
   const handleAddSet = (exerciseIndex: number) => {

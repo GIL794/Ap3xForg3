@@ -329,9 +329,14 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                     )}
                   </div>
 
-                  {/* Previous / Target Ghost Reference */}
-                  <div className="col-span-3 text-[11px] mono-font text-slate-400 truncate">
-                    {row.targetWeightKg}kg × {row.targetReps}
+                  {/* Previous / Target Ghost Reference & Live 1RM */}
+                  <div className="col-span-3 text-[11px] mono-font text-slate-400 truncate text-left pl-1">
+                    <div>{row.targetWeightKg}kg × {row.targetReps}</div>
+                    {row.weightKg > 0 && row.reps > 0 && (
+                      <div className="text-[9px] text-amber-400/90 flex items-center gap-1 font-semibold">
+                        <span>1RM: ~{Math.round(row.weightKg * (1 + row.reps / 30))}kg</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* Weight Input (KG) */}

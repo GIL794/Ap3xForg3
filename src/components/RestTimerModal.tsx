@@ -78,6 +78,9 @@ export const RestTimerModal: React.FC<RestTimerModalProps> = ({
         if (prev <= 1) {
           clearInterval(interval);
           setIsRunning(false);
+          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            navigator.vibrate([250, 120, 250]);
+          }
           if (imperialHype) {
             playImperialFanfare();
           } else {

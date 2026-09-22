@@ -3,6 +3,7 @@ import { WorkoutDay, UserProfile, LoggedSetRecord } from '../types';
 import { Award, Trophy, Clock, Dumbbell, Sparkles, Check, Share2, Flame, ShieldCheck, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { ASCENSION_TIERS } from './EvolutionRoadmapModal';
 
 interface WorkoutSummaryModalProps {
   isOpen: boolean;
@@ -57,6 +58,8 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
     return 'A valiant offering of blood and iron to the Pantheon!';
   };
 
+  const athleteLifetimeKg = (profile.lifetimeTonnageKg || 0) + totalTonnageKg;
+  const currentTier = ASCENSION_TIERS.find(t => athleteLifetimeKg >= t.minKg && athleteLifetimeKg < t.maxKg) || ASCENSION_TIERS[0];
   const xpEarned = Math.round(completedSetsCount * 25 + totalTonnageKg * 0.02 + 100);
 
   const handleShare = async () => {
@@ -157,7 +160,7 @@ Workout: ${workoutPlan.name}
                 +{xpEarned} <span className="text-xs font-normal text-slate-400">XP</span>
               </span>
               <span className="text-[10px] text-amber-300 block mt-1 font-roman font-bold">
-                Centurion Tier III Rank
+                {currentTier.emoji} {currentTier.name} ({t('ascension.tier', language)} {currentTier.romanNumeral})
               </span>
             </div>
           </div>

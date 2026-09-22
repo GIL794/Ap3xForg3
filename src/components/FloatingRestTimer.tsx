@@ -37,6 +37,9 @@ export const FloatingRestTimer: React.FC<FloatingRestTimerProps> = ({
   const playChime = () => {
     if (isMuted) return;
     try {
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        navigator.vibrate([250, 120, 250]);
+      }
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
       const ctx = new AudioCtx();

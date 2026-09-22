@@ -278,6 +278,10 @@ export const App: React.FC = () => {
         ...prev,
         totalTonnageKg: newTonnage,
         xp: newXp,
+        profile: {
+          ...prev.profile,
+          lifetimeTonnageKg: newTonnage,
+        },
       };
       if (currentUserId) {
         saveUserState(currentUserId, updated);
