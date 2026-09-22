@@ -30,7 +30,8 @@ import { EvolutionRoadmapModal } from './components/EvolutionRoadmapModal';
 import { ImperivmProModal } from './components/ImperivmProModal';
 import { GymToolsModal } from './components/GymToolsModal';
 import { WorkoutHistoryModal } from './components/WorkoutHistoryModal';
-import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown, Calendar, User, Calculator } from 'lucide-react';
+import { WorkoutHistoryView } from './components/WorkoutHistoryView';
+import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown, Calendar, User, Calculator, History } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SupportedLanguage, getSavedLanguage, t } from './logic/i18n';
 
@@ -80,6 +81,7 @@ export const App: React.FC = () => {
   const [regenNotification, setRegenNotification] = useState<string | null>(null);
   const [proWelcomeNotice, setProWelcomeNotice] = useState<string | null>(null);
   const [language, setLanguage] = useState<SupportedLanguage>(getSavedLanguage());
+  const [activeTab, setActiveTab] = useState<'today' | 'weekly' | 'history' | 'profile'>('today');
 
   // Modals state
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
@@ -267,6 +269,23 @@ export const App: React.FC = () => {
     }));
   };
 
+  // Handle workout session finished & XP calculation
+  const handleWorkoutFinished = (sessionTonnage: number, xpEarned: number) => {
+    setAppState((prev) => {
+      const newTonnage = (prev.totalTonnageKg || 0) + sessionTonnage;
+      const newXp = (prev.xp || 0) + xpEarned;
+      const updated: AppState = {
+        ...prev,
+        totalTonnageKg: newTonnage,
+        xp: newXp,
+      };
+      if (currentUserId) {
+        saveUserState(currentUserId, updated);
+      }
+      return updated;
+    });
+  };
+
   // Handle completing onboarding
   const handleOnboardingComplete = (completedProfile: UserProfile) => {
     setLoadingMessage('FORGING YOUR PERSONAL OLYMPIAN SPLIT');
@@ -348,7 +367,7 @@ export const App: React.FC = () => {
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onOpenLore={() => setIsLoreModalOpen(true)}
         onOpenPro={() => setIsProModalOpen(true)}
-        onOpenHistory={() => setIsHistoryModalOpen(true)}
+        onOpenHistory={() => setActiveTab('history')}
         onSignOut={handleSignOut}
       />
 
@@ -368,43 +387,136 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-10">
-        {/* Section 1: Today's 19:00 Gym Session */}
-        <section id="today-workout" aria-label="Today's Workout Session">
-          <TodayWorkoutView
-            todayWorkout={appState.todayWorkout}
-            profile={appState.profile}
-            completedSets={appState.completedSets}
-            onUpdateCompletedSets={handleUpdateCompletedSets}
-            onOverridePlan={handleOverrideTodayPlan}
-            onOpenPro={() => setIsProModalOpen(true)}
-            language={language}
-          />
-        </section>
+      {/* Tab Navigation Sub-Header (Hevy / Strong / Fitbod Calibre) */}
+      <div className="sticky top-16 sm:top-20 z-20 bg-[#0c0e17]/95 backdrop-blur-xl border-b border-slate-800/80 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 py-2.5">
+          {/* Main View Tabs */}
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
+            <button
+              onClick={() => setActiveTab('today')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-roman font-bold transition-all ${
+                activeTab === 'today'
+                  ? 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 shadow-sm shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent'
+              }`}
+            >
+              <Dumbbell className={`w-4 h-4 ${activeTab === 'today' ? 'text-emerald-400' : 'text-slate-400'}`} />
+              <span>{t('tab.today', language)}</span>
+            </button>
 
-        {/* Section 2: Weekly Overview & Split */}
-        <section id="weekly-overview" aria-label="Weekly Routine Overview" className="pt-2">
-          <WeeklyOverview
-            weeklyPlan={appState.weeklyPlan}
-            todayWorkout={appState.todayWorkout}
-            profile={appState.profile}
-            onToggleDayActive={handleToggleDayActive}
-            onUpdateDayFocus={handleUpdateDayFocus}
-            language={language}
-          />
-        </section>
+            <button
+              onClick={() => setActiveTab('weekly')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-roman font-bold transition-all ${
+                activeTab === 'weekly'
+                  ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/40 shadow-sm shadow-cyan-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent'
+              }`}
+            >
+              <Calendar className={`w-4 h-4 ${activeTab === 'weekly' ? 'text-cyan-400' : 'text-slate-400'}`} />
+              <span>{t('tab.weekly', language)}</span>
+            </button>
 
-        {/* Section 3: Profile & Goals Configuration */}
-        <section id="profile-configuration" aria-label="Athlete Profile & Configuration" className="pt-2">
-          <ProfileForm
-            profile={appState.profile}
-            onSaveProfile={handleSaveProfile}
-            onGeneratePlan={handleGeneratePlan}
-            onResetDefaults={handleResetDefaults}
-            language={language}
-          />
-        </section>
+            <button
+              onClick={() => setActiveTab('history')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-roman font-bold transition-all ${
+                activeTab === 'history'
+                  ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow-sm shadow-amber-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent'
+              }`}
+            >
+              <History className={`w-4 h-4 ${activeTab === 'history' ? 'text-amber-400' : 'text-slate-400'}`} />
+              <span>{t('tab.ledger', language)}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-roman font-bold transition-all ${
+                activeTab === 'profile'
+                  ? 'bg-purple-500/15 text-purple-300 border border-purple-500/40 shadow-sm shadow-purple-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60 border border-transparent'
+              }`}
+            >
+              <User className={`w-4 h-4 ${activeTab === 'profile' ? 'text-purple-400' : 'text-slate-400'}`} />
+              <span>{t('tab.profile', language)}</span>
+            </button>
+          </div>
+
+          {/* Quick Athlete Stats Badge (Desktop) */}
+          <div className="hidden md:flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab('profile')}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-amber-500/30 hover:border-amber-400 text-xs font-roman font-bold text-amber-300 transition-all shadow-sm hover:scale-105"
+              title="Click to view Athlete Dossier"
+            >
+              <Dumbbell className="w-3.5 h-3.5 text-amber-400" />
+              <span>{(appState.totalTonnageKg || 0).toLocaleString()} kg</span>
+              <span className="text-slate-600">•</span>
+              <span className="text-cyan-300 font-normal">{(appState.xp || 0).toLocaleString()} XP</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Container - Dedicated Multi-View Display */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* View 1: Today's Arena Workout Session */}
+        {activeTab === 'today' && (
+          <section id="today-workout" aria-label="Today's Workout Session">
+            <TodayWorkoutView
+              todayWorkout={appState.todayWorkout}
+              profile={appState.profile}
+              completedSets={appState.completedSets}
+              onUpdateCompletedSets={handleUpdateCompletedSets}
+              onOverridePlan={handleOverrideTodayPlan}
+              onOpenPro={() => setIsProModalOpen(true)}
+              language={language}
+              lifetimeTonnageKg={appState.totalTonnageKg}
+              onWorkoutFinished={handleWorkoutFinished}
+            />
+          </section>
+        )}
+
+        {/* View 2: Weekly Split & Battle Schedule */}
+        {activeTab === 'weekly' && (
+          <section id="weekly-overview" aria-label="Weekly Routine Overview">
+            <WeeklyOverview
+              weeklyPlan={appState.weeklyPlan}
+              todayWorkout={appState.todayWorkout}
+              profile={appState.profile}
+              onToggleDayActive={handleToggleDayActive}
+              onUpdateDayFocus={handleUpdateDayFocus}
+              language={language}
+            />
+          </section>
+        )}
+
+        {/* View 3: Dedicated Full-Screen Training Ledger & History */}
+        {activeTab === 'history' && (
+          <section id="workout-history" aria-label="Training Ledger">
+            <WorkoutHistoryView
+              language={language}
+              onOpenPro={() => setIsProModalOpen(true)}
+            />
+          </section>
+        )}
+
+        {/* View 4: Athlete Dossier & Calibration Profile */}
+        {activeTab === 'profile' && (
+          <section id="profile-configuration" aria-label="Athlete Profile & Configuration">
+            <ProfileForm
+              profile={appState.profile}
+              userAccount={appState.userAccount}
+              isProSubscriber={appState.isProSubscriber}
+              totalTonnageKg={appState.totalTonnageKg}
+              xp={appState.xp}
+              isStandaloneView={true}
+              onSaveProfile={handleSaveProfile}
+              onGeneratePlan={handleGeneratePlan}
+              onResetDefaults={handleResetDefaults}
+              language={language}
+            />
+          </section>
+        )}
       </main>
 
       {/* Modern Romanvm Impervm Footer */}
@@ -456,22 +568,20 @@ export const App: React.FC = () => {
         className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0c0e17]/95 backdrop-blur-xl border-t border-amber-500/20 px-3 py-2 flex items-center justify-around shadow-2xl pb-[max(0.5rem,env(safe-area-inset-bottom))]"
       >
         <button
-          onClick={() => {
-            const el = document.getElementById('today-workout');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-emerald-400 hover:text-white transition-colors"
+          onClick={() => setActiveTab('today')}
+          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'today' ? 'text-emerald-400' : 'text-slate-400 hover:text-white'
+          }`}
         >
           <Dumbbell className="w-4 h-4" />
           <span>{t('nav.today', language)}</span>
         </button>
 
         <button
-          onClick={() => {
-            const el = document.getElementById('weekly-overview');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-cyan-400 hover:text-white transition-colors"
+          onClick={() => setActiveTab('weekly')}
+          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'weekly' ? 'text-cyan-400' : 'text-slate-400 hover:text-white'
+          }`}
         >
           <Calendar className="w-4 h-4" />
           <span>{t('nav.week', language)}</span>
@@ -488,19 +598,20 @@ export const App: React.FC = () => {
         </button>
 
         <button
-          onClick={() => setIsAiModalOpen(true)}
-          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-purple-400 hover:text-white transition-colors"
+          onClick={() => setActiveTab('history')}
+          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'history' ? 'text-amber-400' : 'text-slate-400 hover:text-white'
+          }`}
         >
-          <Sparkles className="w-4 h-4" />
-          <span>{t('nav.oracle', language)}</span>
+          <History className="w-4 h-4" />
+          <span>{t('nav.ledger', language)}</span>
         </button>
 
         <button
-          onClick={() => {
-            const el = document.getElementById('profile-configuration');
-            if (el) el.scrollIntoView({ behavior: 'smooth' });
-          }}
-          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-slate-400 hover:text-white transition-colors"
+          onClick={() => setActiveTab('profile')}
+          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'profile' ? 'text-purple-400' : 'text-slate-400 hover:text-white'
+          }`}
         >
           <User className="w-4 h-4" />
           <span>{t('nav.profile', language)}</span>

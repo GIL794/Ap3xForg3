@@ -38,6 +38,8 @@ interface TodayWorkoutViewProps {
   onOverridePlan: (newDayPlan: WorkoutDay) => void;
   onOpenPro?: () => void;
   language?: SupportedLanguage;
+  lifetimeTonnageKg?: number;
+  onWorkoutFinished?: (sessionTonnage: number, xpEarned: number) => void;
 }
 
 export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
@@ -48,6 +50,8 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
   onOverridePlan,
   onOpenPro,
   language = 'en',
+  lifetimeTonnageKg = 0,
+  onWorkoutFinished,
 }) => {
   const [useCatchUp, setUseCatchUp] = useState(false);
   const [warmupDone, setWarmupDone] = useState(false);
@@ -318,6 +322,10 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
       })),
     };
     saveWorkoutSession(session);
+    const xpEarned = Math.round(totalTonnageKg * 0.05 + completedSetsCount * 25 + 150);
+    if (onWorkoutFinished) {
+      onWorkoutFinished(totalTonnageKg, xpEarned);
+    }
   };
 
   return (
@@ -481,7 +489,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
 
       {/* OLYMPIAN ASCENSION CARD */}
       <OlympianEvolutionCard
-        totalTonnageKg={totalTonnageKg}
+        totalTonnageKg={(lifetimeTonnageKg || 0) + totalTonnageKg}
         completedSetsCount={completedSetsCount}
         totalSetsCount={totalSetsCount}
         onOpenGymTools={() => setGymTools({ isOpen: true, weight: 80 })}

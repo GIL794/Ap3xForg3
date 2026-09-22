@@ -200,12 +200,29 @@ export async function signOutAthlete(): Promise<void> {
   setActiveUserId(null);
 }
 
+function getLocalWorkoutHistoryStats(): { tonnage: number; sets: number; count: number } {
+  try {
+    const raw = localStorage.getItem('homodevs_workout_history_v1');
+    if (raw) {
+      const list = JSON.parse(raw);
+      if (Array.isArray(list)) {
+        const tonnage = list.reduce((acc: number, s: any) => acc + (s.totalTonnageKg || 0), 0);
+        const sets = list.reduce((acc: number, s: any) => acc + (s.completedSetsCount || 0), 0);
+        return { tonnage, sets, count: list.length };
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return { tonnage: 0, sets: 0, count: 0 };
+}
+
 /**
  * Generates an initial clean state for a new user account (unfilled/fresh)
  */
 export function createInitialStateForUser(account: UserAccount): AppState {
   // If this is Gabriele, provide his curated profile; otherwise provide fresh blank template
-  const isGabriele = account.name.toLowerCase() === 'gabriele';
+  const isGabriele = Boolean(account.name.toLowerCase() === 'gabriele' || account.email?.toLowerCase().includes('gabriele'));
 
   const profile: UserProfile = isGabriele
     ? { ...GABRIELE_PROFILE_TEMPLATE }
@@ -216,6 +233,9 @@ export function createInitialStateForUser(account: UserAccount): AppState {
 
   const weeklyPlan = generateWeeklyPlan(profile);
   const todayWorkout = resolveTodayWorkout(weeklyPlan, profile);
+  const historyStats = getLocalWorkoutHistoryStats();
+  const totalTonnageKg = historyStats.tonnage;
+  const xp = Math.round(totalTonnageKg * 0.05 + historyStats.sets * 25 + historyStats.count * 150);
 
   return {
     userId: account.id,
@@ -226,7 +246,8 @@ export function createInitialStateForUser(account: UserAccount): AppState {
     completedSets: {},
     setTypes: {},
     loggedWeights: {},
-    totalTonnageKg: 0,
+    totalTonnageKg,
+    xp,
     lastGeneratedAt: new Date().toISOString(),
     onboardingCompleted: isGabriele, // New users will see onboarding
     loreRead: false,
@@ -255,11 +276,16 @@ export function loadUserState(userId: string): AppState {
       if (parsed.profile && parsed.weeklyPlan) {
         const todayWorkout = resolveTodayWorkout(parsed.weeklyPlan, parsed.profile);
         const isVip = isLifetimeVipUser(account) || isPasscodeUnlocked();
+        const historyStats = getLocalWorkoutHistoryStats();
+        const totalTonnageKg = Math.max(parsed.totalTonnageKg || 0, historyStats.tonnage);
+        const xp = parsed.xp || Math.round(totalTonnageKg * 0.05 + historyStats.sets * 25 + historyStats.count * 150);
         return {
           ...parsed,
           userId,
           userAccount: account,
           todayWorkout,
+          totalTonnageKg,
+          xp,
           isProSubscriber: isVip ? true : Boolean(parsed.isProSubscriber),
         };
       }

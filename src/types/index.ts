@@ -192,6 +192,7 @@ export interface AppState {
   loggedWeights: Record<string, number>;    // exerciseId -> weight in kg
   detailedSets?: Record<string, LoggedSetRecord[]>; // exerciseId -> array of LoggedSetRecord
   totalTonnageKg: number;
+  xp?: number;
   lastGeneratedAt: string;
   onboardingCompleted: boolean;
   loreRead: boolean;

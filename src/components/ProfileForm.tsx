@@ -5,7 +5,8 @@ import {
   PrimaryGoal, 
   SecondaryGoal, 
   EquipmentType,
-  MythologicalArchetype
+  MythologicalArchetype,
+  UserAccount
 } from '../types';
 import { 
   User, 
@@ -23,13 +24,21 @@ import {
   ChevronUp,
   Crown,
   Scale,
-  Activity
+  Activity,
+  Zap,
+  Award
 } from 'lucide-react';
 import { DAY_NAMES, DAY_NAMES_SHORT, DEFAULT_PROFILE } from '../data/defaultProfile';
+import { ASCENSION_TIERS } from './EvolutionRoadmapModal';
 import { SupportedLanguage, t } from '../logic/i18n';
 
 interface ProfileFormProps {
   profile: UserProfile;
+  userAccount?: UserAccount;
+  isProSubscriber?: boolean;
+  totalTonnageKg?: number;
+  xp?: number;
+  isStandaloneView?: boolean;
   onSaveProfile: (updatedProfile: UserProfile) => void;
   onGeneratePlan: (updatedProfile: UserProfile) => void;
   onResetDefaults: () => void;
@@ -38,13 +47,18 @@ interface ProfileFormProps {
 
 export const ProfileForm: React.FC<ProfileFormProps> = ({
   profile,
+  userAccount,
+  isProSubscriber = false,
+  totalTonnageKg = 0,
+  xp = 0,
+  isStandaloneView = false,
   onSaveProfile,
   onGeneratePlan,
   onResetDefaults,
   language = 'en',
 }) => {
   const [formData, setFormData] = useState<UserProfile>(profile);
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(isStandaloneView ? true : false);
   const [saveToast, setSaveToast] = useState(false);
 
   // Sync internal state if profile prop changes outside
@@ -144,51 +158,177 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
     }
   };
 
-  return (
-    <div className="rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl overflow-hidden transition-all">
-      {/* Header bar / accordion toggle */}
-      <div 
-        onClick={() => setIsOpen(!isOpen)}
-        className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-800/40 transition-colors"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400">
-            <User className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="text-base sm:text-lg font-bold text-white">
-                {t('profile.title', language)}
-              </h3>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
-                {formData.name} • {formData.experience}
-              </span>
-            </div>
-            <p className="text-xs text-slate-400">
-              {formData.availableDays.length} days/week • {formData.sessionLengthMinutes} min sessions • Target: {formData.targetWorkoutTime}
-            </p>
-          </div>
-        </div>
+  const currentTier = ASCENSION_TIERS.find(
+    (t) => totalTonnageKg >= t.minKg && totalTonnageKg < t.maxKg
+  ) || ASCENSION_TIERS[0];
 
-        <div className="flex items-center gap-3">
-          {saveToast && (
-            <span className="text-xs font-semibold text-emerald-400 animate-in fade-in">
-              Settings Applied! ✓
-            </span>
-          )}
-          <button 
-            type="button" 
-            className="p-1 text-slate-400 hover:text-white"
-            aria-label="Toggle profile details"
-          >
-            {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-          </button>
+  return (
+    <div className="space-y-6">
+      {/* Olympian Athlete Dossier Hero Card */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-amber-950/40 border border-amber-500/30 p-6 sm:p-8 shadow-2xl">
+        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/4 -mb-12 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative z-10 space-y-6">
+          {/* Athlete Profile Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="relative shrink-0">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-amber-600 via-yellow-400 to-amber-500 p-0.5 shadow-xl shadow-amber-500/20">
+                  <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center text-2xl font-black font-roman text-amber-300">
+                    {(userAccount?.name || formData.name || 'A').charAt(0).toUpperCase()}
+                  </div>
+                </div>
+                {isProSubscriber && (
+                  <div className="absolute -bottom-1.5 -right-1.5 p-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 text-slate-950 shadow-md">
+                    <Crown className="w-3.5 h-3.5 fill-slate-950" />
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-black text-white font-roman tracking-wide">
+                    {userAccount?.name || formData.name}
+                  </h2>
+                  <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full font-roman border ${
+                    isProSubscriber
+                      ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                      : 'bg-slate-800 text-slate-300 border-slate-700'
+                  }`}>
+                    {isProSubscriber ? t('profile.proActiveBadge', language) : t('profile.gladiatorBadge', language)}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {userAccount?.email || 'gella94@gmail.com'} • {formData.location || 'London, UK'}
+                </p>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  <span className="text-[11px] font-bold text-amber-400 font-roman flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
+                    <span>{currentTier.emoji}</span>
+                    <span>{currentTier.name}</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-amber-200">{t('ascension.tier', language)} {currentTier.romanNumeral}</span>
+                    <span className="text-slate-500">•</span>
+                    <span className="text-slate-300">{currentTier.badge}</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Top Action Buttons */}
+            <div className="flex items-center gap-2.5 self-stretch sm:self-auto">
+              {saveToast && (
+                <span className="text-xs font-bold text-emerald-400 animate-in fade-in">
+                  {t('profile.savedSuccess', language)}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={handleSaveOnly}
+                className="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold transition-all border border-slate-700 shadow-sm"
+              >
+                <Save className="w-3.5 h-3.5 text-amber-400" />
+                <span>{t('profile.saveBtn', language)}</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Key Stat Cards: Lifetime Tonnage, XP, Body Stats, Split Cadence */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-amber-500/30 shadow-inner">
+              <div className="flex items-center gap-1.5 text-amber-400 text-xs mb-1 font-roman">
+                <Dumbbell className="w-3.5 h-3.5" />
+                <span>{t('profile.lifetimeTonnage', language)}</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-amber-300 mono-font">
+                {(totalTonnageKg || 0).toLocaleString()} <span className="text-xs font-normal text-slate-400">kg</span>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-0.5">Iron moved across all sessions</p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-cyan-500/30 shadow-inner">
+              <div className="flex items-center gap-1.5 text-cyan-400 text-xs mb-1 font-roman">
+                <Zap className="w-3.5 h-3.5" />
+                <span>{t('profile.totalXp', language)}</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-cyan-300 mono-font">
+                {(xp || 0).toLocaleString()} <span className="text-xs font-normal text-slate-400">XP</span>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-0.5">Gladiatorial ascension score</p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-emerald-500/30 shadow-inner">
+              <div className="flex items-center gap-1.5 text-emerald-400 text-xs mb-1 font-roman">
+                <Scale className="w-3.5 h-3.5" />
+                <span>Weight Target</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-emerald-300 mono-font">
+                {formData.currentWeightKg || 80} <span className="text-xs font-normal text-slate-400">→ {formData.goalWeightKg || 75} kg</span>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-0.5">{formData.heightCm || 180} cm • {formData.bodyFatPercent || 12}% BF</p>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-purple-500/30 shadow-inner">
+              <div className="flex items-center gap-1.5 text-purple-400 text-xs mb-1 font-roman">
+                <Calendar className="w-3.5 h-3.5" />
+                <span>Weekly Cadence</span>
+              </div>
+              <div className="text-xl sm:text-2xl font-black text-purple-300 mono-font">
+                {formData.availableDays.length} <span className="text-xs font-normal text-slate-400">days/week</span>
+              </div>
+              <p className="text-[10px] text-slate-500 mt-0.5">{formData.sessionLengthMinutes}m sessions • {formData.targetWorkoutTime}</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Expanded Form Content */}
-      {isOpen && (
-        <form onSubmit={handleSubmit} className="p-5 sm:p-7 border-t border-slate-800 space-y-6 animate-in fade-in duration-200">
+      {/* Main Settings Card */}
+      <div className="rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl overflow-hidden transition-all">
+        {/* Accordion header if not standalone view */}
+        {!isStandaloneView && (
+          <div 
+            onClick={() => setIsOpen(!isOpen)}
+            className="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-800/40 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400">
+                <User className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="text-base sm:text-lg font-bold text-white">
+                    {t('profile.title', language)}
+                  </h3>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
+                    {formData.name} • {formData.experience}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400">
+                  {formData.availableDays.length} days/week • {formData.sessionLengthMinutes} min sessions • Target: {formData.targetWorkoutTime}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {saveToast && (
+                <span className="text-xs font-semibold text-emerald-400 animate-in fade-in">
+                  Settings Applied! ✓
+                </span>
+              )}
+              <button 
+                type="button" 
+                className="p-1 text-slate-400 hover:text-white"
+                aria-label="Toggle profile details"
+              >
+                {isOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Expanded Form Content */}
+        {(isOpen || isStandaloneView) && (
+          <form onSubmit={handleSubmit} className={`p-5 sm:p-7 space-y-6 ${!isStandaloneView ? 'border-t border-slate-800' : ''}`}>
           {/* Olympian Mythological Archetype Selector (Male & Female Inclusive) */}
           <div className="space-y-3">
             <label className="block text-xs font-roman font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -615,6 +755,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           </div>
         </form>
       )}
+      </div>
     </div>
   );
 };
