@@ -43,11 +43,14 @@ interface ExerciseCardProps {
   language?: SupportedLanguage;
 }
 
+const EMPTY_SET_TYPES: SetType[] = [];
+const EMPTY_COMPLETED_SETS: boolean[] = [];
+
 export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   exercise,
   index,
-  completedSets,
-  setTypes = [],
+  completedSets = EMPTY_COMPLETED_SETS,
+  setTypes = EMPTY_SET_TYPES,
   weightKg = 60,
   onUpdateWeight,
   onToggleSet,
@@ -87,6 +90,10 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
     }));
   });
 
+  // Create primitive stable keys so reference shifts don't cause infinite re-render loops
+  const completedKey = (completedSets || []).map(Boolean).join(',');
+  const setTypesKey = (setTypes || []).join(',');
+
   // Keep rows in sync if exercise.sets or completedSets change
   useEffect(() => {
     setRows(prev => {
@@ -105,7 +112,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
       });
       return updated;
     });
-  }, [exercise.sets, completedSets, weightKg, setTypes, defaultRepsNumber]);
+  }, [exercise.sets, completedKey, weightKg, setTypesKey, defaultRepsNumber]);
 
   const completedCount = completedSets.filter(Boolean).length;
   const isAllComplete = completedCount >= exercise.sets && exercise.sets > 0;

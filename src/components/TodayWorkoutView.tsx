@@ -42,6 +42,8 @@ interface TodayWorkoutViewProps {
   onWorkoutFinished?: (sessionTonnage: number, xpEarned: number) => void;
 }
 
+const EMPTY_SETS_ARRAY: boolean[] = [];
+
 export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
   todayWorkout,
   profile,
@@ -655,7 +657,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               key={exercise.id}
               exercise={exercise}
               index={index}
-              completedSets={completedSets[exercise.id] || []}
+              completedSets={completedSets[exercise.id] || EMPTY_SETS_ARRAY}
               weightKg={exerciseWeights[exercise.id] || 50}
               onUpdateWeight={(newW) => {
                 setExerciseWeights(prev => ({ ...prev, [exercise.id]: newW }));
