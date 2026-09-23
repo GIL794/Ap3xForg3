@@ -11,6 +11,11 @@ import { OlympianEvolutionCard } from './OlympianEvolutionCard';
 import { MuscleRecoveryGauge } from './MuscleRecoveryGauge';
 import { copyWorkoutToClipboard, saveWorkoutSession } from '../logic/storage';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { 
+  translateWorkoutName, 
+  translateMuscle, 
+  translateWarmupItem 
+} from '../logic/exerciseTranslations';
 import confetti from 'canvas-confetti';
 import { 
   Flame, 
@@ -392,7 +397,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
           </div>
 
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white tracking-tight mb-2">
-            {activePlan.name}
+            {translateWorkoutName(activePlan.name, language)}
           </h2>
 
           <p className="text-sm text-slate-300 max-w-2xl mb-6">
@@ -433,7 +438,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 <Activity className="w-3.5 h-3.5 text-pink-400" /> {t('today.focus', language)}
               </div>
               <div className="text-xs font-semibold text-slate-200 capitalize truncate mt-1">
-                {activePlan.focus.slice(0, 3).join(', ')}
+                {activePlan.focus.slice(0, 3).map(f => translateMuscle(f, language)).join(', ')}
               </div>
             </div>
           </div>
@@ -591,7 +596,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 {activePlan.warmup.general.map((g, idx) => (
                   <li key={idx} className="flex items-start gap-1.5">
                     <span className="text-amber-400">•</span>
-                    <span>{g}</span>
+                    <span>{translateWarmupItem(g, language)}</span>
                   </li>
                 ))}
               </ul>
@@ -605,7 +610,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 {activePlan.warmup.specificActivation.map((s, idx) => (
                   <li key={idx} className="flex items-start gap-1.5">
                     <span className="text-cyan-400">•</span>
-                    <span>{s}</span>
+                    <span>{translateWarmupItem(s, language)}</span>
                   </li>
                 ))}
               </ul>
@@ -724,7 +729,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
             {activePlan.cooldown.activities.map((act, idx) => (
               <li key={idx} className="flex items-start gap-1.5">
                 <span className="text-emerald-400">•</span>
-                <span>{act}</span>
+                <span>{translateWarmupItem(act, language)}</span>
               </li>
             ))}
           </ul>

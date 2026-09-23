@@ -26,6 +26,15 @@ import {
   Activity
 } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { 
+  translateExerciseName, 
+  translateCategory, 
+  translateTier, 
+  translateEquipment, 
+  translateBiomechanicalFocus, 
+  translateBiomechanicalSteps, 
+  translatePersonalizationReason 
+} from '../logic/exerciseTranslations';
 import { getExerciseNote, saveExerciseNote } from '../logic/storage';
 
 interface ExerciseCardProps {
@@ -222,13 +231,13 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
                 <h3 className={`text-base sm:text-lg font-black font-roman tracking-wide ${isAllComplete ? 'text-emerald-200' : 'text-white'}`}>
-                  {exercise.name}
+                  {translateExerciseName(exercise.id || exercise.name, language)}
                 </h3>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border ${categoryColors[exercise.category] || 'bg-slate-800 text-slate-300'}`}>
-                  {exercise.category}
+                  {translateCategory(exercise.category, language)}
                 </span>
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${tierColors[exercise.tier]}`}>
-                  {exercise.tier}
+                  {translateTier(exercise.tier, language)}
                 </span>
 
                 {/* Engine Source Badge (Clear Distinction: Free Library vs Pro AI) */}
@@ -288,7 +297,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
 
               <p className="text-xs text-slate-400 flex items-center gap-1.5 flex-wrap">
                 <Dumbbell className="w-3.5 h-3.5 text-amber-500/70" />
-                <span>{exercise.equipment.map(e => e.replace('_', ' ')).join(', ')}</span>
+                <span>{exercise.equipment.map(e => translateEquipment(e, language)).join(', ')}</span>
                 {exercise.tempo && (
                   <>
                     <span>•</span>
@@ -307,7 +316,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                     <span className="font-bold text-amber-300 font-roman mr-1.5 uppercase text-[10px] tracking-wider">
                       {t('exercise.whyInPlan', language)}:
                     </span>
-                    <span className="text-slate-300">{exercise.personalizationReason}</span>
+                    <span className="text-slate-300">{translatePersonalizationReason(exercise.personalizationReason, language)}</span>
                   </div>
                 </div>
               )}
@@ -328,7 +337,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
             )}
 
             <button
-              onClick={() => onOpenRestTimer(exercise.restSeconds, exercise.name)}
+              onClick={() => onOpenRestTimer(exercise.restSeconds, translateExerciseName(exercise.id || exercise.name, language))}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-amber-200 hover:text-white text-xs font-roman font-bold transition-colors border border-amber-500/30"
               title="Start Rest Timer"
             >
@@ -518,70 +527,73 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
                   <span className="text-xs font-bold text-white font-roman">
-                    Biomechanical Focus:
+                    {language === 'it' ? 'Focus Biomeccanico:' : language === 'es' ? 'Enfoque Biomecánico:' : language === 'fr' ? 'Focus Biomécanique:' : language === 'de' ? 'Biomechanischer Fokus:' : language === 'la' ? 'Focus Biomechanicus:' : 'Biomechanical Focus:'}
                   </span>
                   <span className="text-xs text-cyan-300 font-medium">
-                    {exercise.biomechanicalFocus}
+                    {translateBiomechanicalFocus(exercise.biomechanicalFocus, language)}
                   </span>
                 </div>
 
                 <span className="text-[10px] font-roman uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-slate-300">
-                  {isProSubscriber || exercise.engineSource === 'ai_oracle' ? '👑 AI Oracle Optimized' : '📚 Verified Sports Science'}
+                  {isProSubscriber || exercise.engineSource === 'ai_oracle' ? '👑 AI Oracle' : '📚 Sport Science'}
                 </span>
               </div>
             )}
 
             {/* 4-Step Biomechanical Execution Guide */}
-            {exercise.executionSteps ? (
-              <div className="space-y-2.5">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 font-roman flex items-center gap-1.5">
-                  <BookOpen className="w-3.5 h-3.5 text-amber-400" />
-                  <span>{t('exercise.bioExecution', language)} (4-Phase Biomechanics)</span>
-                </span>
+            {exercise.executionSteps ? (() => {
+              const steps = translateBiomechanicalSteps(exercise.id, exercise.executionSteps, language);
+              return (
+                <div className="space-y-2.5">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 font-roman flex items-center gap-1.5">
+                    <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{t('exercise.bioExecution', language)} (4-Phase Biomechanics)</span>
+                  </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                  {/* Step 1: Setup & Stance */}
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-amber-300 block mb-1">
-                      {t('exercise.setupPhase', language)}
-                    </span>
-                    <p className="text-slate-300 leading-relaxed text-[11px]">
-                      {exercise.executionSteps.setup}
-                    </p>
-                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                    {/* Step 1: Setup & Stance */}
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                      <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-amber-300 block mb-1">
+                        {t('exercise.setupPhase', language)}
+                      </span>
+                      <p className="text-slate-300 leading-relaxed text-[11px]">
+                        {steps?.setup}
+                      </p>
+                    </div>
 
-                  {/* Step 2: Eccentric */}
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-cyan-300 block mb-1">
-                      {t('exercise.eccentricPhase', language)}
-                    </span>
-                    <p className="text-slate-300 leading-relaxed text-[11px]">
-                      {exercise.executionSteps.eccentric}
-                    </p>
-                  </div>
+                    {/* Step 2: Eccentric */}
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                      <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-cyan-300 block mb-1">
+                        {t('exercise.eccentricPhase', language)}
+                      </span>
+                      <p className="text-slate-300 leading-relaxed text-[11px]">
+                        {steps?.eccentric}
+                      </p>
+                    </div>
 
-                  {/* Step 3: Concentric */}
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-emerald-300 block mb-1">
-                      {t('exercise.concentricPhase', language)}
-                    </span>
-                    <p className="text-slate-300 leading-relaxed text-[11px]">
-                      {exercise.executionSteps.concentric}
-                    </p>
-                  </div>
+                    {/* Step 3: Concentric */}
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                      <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-emerald-300 block mb-1">
+                        {t('exercise.concentricPhase', language)}
+                      </span>
+                      <p className="text-slate-300 leading-relaxed text-[11px]">
+                        {steps?.concentric}
+                      </p>
+                    </div>
 
-                  {/* Step 4: Common Pitfalls */}
-                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
-                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-rose-300 block mb-1">
-                      {t('exercise.pitfalls', language)}
-                    </span>
-                    <p className="text-rose-200/90 leading-relaxed text-[11px]">
-                      {exercise.executionSteps.commonMistakes}
-                    </p>
+                    {/* Step 4: Common Pitfalls */}
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                      <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-rose-300 block mb-1">
+                        {t('exercise.pitfalls', language)}
+                      </span>
+                      <p className="text-rose-200/90 leading-relaxed text-[11px]">
+                        {steps?.commonMistakes}
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : exercise.techniqueCues && exercise.techniqueCues.length > 0 && (
+              );
+            })() : exercise.techniqueCues && exercise.techniqueCues.length > 0 ? (
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 font-roman block mb-1">
                   {t('exercise.bioExecution', language)}
@@ -595,7 +607,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                   ))}
                 </ul>
               </div>
-            )}
+            ) : null}
 
             {/* Double Progression Rule */}
             {exercise.progressionRule && (

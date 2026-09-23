@@ -12,6 +12,13 @@ import {
 } from 'lucide-react';
 import { DAY_NAMES, DAY_NAMES_SHORT } from '../data/defaultProfile';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { 
+  translateWorkoutName, 
+  translateMuscle, 
+  translateExerciseName, 
+  translateGoal,
+  translateDayName 
+} from '../logic/exerciseTranslations';
 
 interface WeeklyOverviewProps {
   weeklyPlan: WorkoutDay[];
@@ -64,7 +71,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
         <div className="flex items-center gap-2">
           <span className="text-xs px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300">
-            Split: <strong className="text-cyan-400 capitalize">{profile.primaryGoal.replace(/_/g, ' ')}</strong>
+            Split: <strong className="text-cyan-400 capitalize">{translateGoal(profile.primaryGoal, language)}</strong>
           </span>
         </div>
       </div>
@@ -101,7 +108,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm font-bold text-white mono-font">
-                      {DAY_NAMES_SHORT[dayIdx]}
+                      {translateDayName(dayIdx, language, true)}
                     </span>
                     {isToday && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-emerald-500 text-slate-950 uppercase tracking-wider animate-pulse">
@@ -129,7 +136,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
                 {/* Day name / routine */}
                 <h4 className={`text-xs font-bold mb-2 leading-tight ${isActive ? 'text-slate-100' : 'text-slate-500'}`}>
-                  {day.name}
+                  {translateWorkoutName(day.name, language)}
                 </h4>
 
                 {/* Focus Badges */}
@@ -143,7 +150,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                           : 'bg-slate-900 text-slate-600'
                       }`}
                     >
-                      {f}
+                      {translateMuscle(f, language)}
                     </span>
                   ))}
                 </div>
@@ -207,15 +214,15 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
 
             <div className="flex items-center gap-2 text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">
               <Sparkles className="w-4 h-4" />
-              {inspectDay.dayName} Routine
+              {translateDayName(inspectDay.dayIndex, language)} Routine
             </div>
 
-            <h3 className="text-xl font-black text-white mb-2">{inspectDay.name}</h3>
+            <h3 className="text-xl font-black text-white mb-2">{translateWorkoutName(inspectDay.name, language)}</h3>
 
             {/* Quick Focus Switcher */}
             <div className="my-4 p-3 rounded-2xl bg-slate-950/80 border border-slate-800">
               <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                Change Focus for {inspectDay.dayName}:
+                Change Focus for {translateDayName(inspectDay.dayIndex, language)}:
               </label>
               <select
                 className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-500"
@@ -232,10 +239,10 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   }
                 }}
               >
-                <option value="">Custom Focus ({inspectDay.name})</option>
+                <option value="">Custom Focus ({translateWorkoutName(inspectDay.name, language)})</option>
                 {focusPresets.map((preset, pIdx) => (
                   <option key={pIdx} value={preset.name}>
-                    {preset.label}
+                    {translateWorkoutName(preset.name, language)}
                   </option>
                 ))}
               </select>
@@ -252,7 +259,7 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
                   className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-3 text-xs"
                 >
                   <div>
-                    <span className="font-bold text-slate-200">{ex.name}</span>
+                    <span className="font-bold text-slate-200">{translateExerciseName(ex.id || ex.name, language)}</span>
                     <span className="block text-[11px] text-slate-400">{ex.notes}</span>
                   </div>
                   <div className="text-right shrink-0">

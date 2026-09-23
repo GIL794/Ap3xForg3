@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Activity, Sparkles, Layers, UserCheck, ShieldCheck, Flame, RotateCw, Zap, Target } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { translateMuscle, translateExerciseName } from '../logic/exerciseTranslations';
 
 interface MuscleRecoveryGaugeProps {
   primaryMuscles: string[];
@@ -931,7 +932,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
               <div className="mt-3 flex items-center justify-between w-full text-[10px] text-slate-400 font-mono px-2">
                 <span className="flex items-center gap-1 text-amber-300">
                   <Target className="w-3 h-3" />
-                  <span>{selectedMuscle.name}</span>
+                  <span>{translateMuscle(selectedMuscle.id, language) || selectedMuscle.name}</span>
                 </span>
                 <span className="text-slate-500 italic">
                   {t('recovery.tapTip', language)}
@@ -950,7 +951,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                       {t('recovery.selected', language)}
                     </span>
                     <h4 className="text-lg sm:text-xl font-black text-white font-roman flex items-center gap-2">
-                      {selectedMuscle.name}
+                      {translateMuscle(selectedMuscle.id, language) || selectedMuscle.name}
                     </h4>
                     <p className="text-[11px] text-slate-400 italic font-mono">
                       {selectedMuscle.latinName}
@@ -1025,7 +1026,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                         key={idx}
                         className="px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 text-xs font-roman font-bold shadow-sm"
                       >
-                        {move}
+                        {translateExerciseName(move, language)}
                       </span>
                     ))}
                   </div>
@@ -1078,7 +1079,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                 <div className="flex items-center justify-between text-xs">
                   <div>
                     <span className="font-bold text-slate-200 group-hover:text-amber-300 transition-colors block">
-                      {muscle.name}
+                      {translateMuscle(muscle.id, language) || muscle.name}
                     </span>
                     <span className="text-[10px] text-slate-500 italic font-mono">
                       {muscle.latinName}

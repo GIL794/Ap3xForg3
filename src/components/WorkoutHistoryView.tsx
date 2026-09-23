@@ -14,6 +14,7 @@ import {
   Download
 } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { translateWorkoutName, translateExerciseName, translateCategory } from '../logic/exerciseTranslations';
 
 interface WorkoutHistoryViewProps {
   language?: SupportedLanguage;
@@ -221,7 +222,7 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       <h3 className="text-base sm:text-lg font-black text-white font-roman truncate">
-                        {session.workoutName}
+                        {translateWorkoutName(session.workoutName, language)}
                       </h3>
                       {session.prCount > 0 && (
                         <span className="text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider bg-amber-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1 font-roman">
@@ -277,10 +278,10 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
                         >
                           <div className="flex items-center justify-between">
                             <span className="font-bold text-xs text-slate-200 truncate">
-                              {ex.name}
+                              {translateExerciseName(ex.name, language)}
                             </span>
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 uppercase font-mono">
-                              {ex.category}
+                              {translateCategory(ex.category as any, language)}
                             </span>
                           </div>
 

@@ -4,6 +4,7 @@ import { Award, Trophy, Clock, Dumbbell, Sparkles, Check, Share2, Flame, ShieldC
 import confetti from 'canvas-confetti';
 import { SupportedLanguage, t } from '../logic/i18n';
 import { ASCENSION_TIERS } from './EvolutionRoadmapModal';
+import { translateWorkoutName } from '../logic/exerciseTranslations';
 
 interface WorkoutSummaryModalProps {
   isOpen: boolean;
@@ -51,6 +52,20 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
 
   // Fun Roman mythological volume equivalencies
   const getVolumeMythology = (kg: number) => {
+    if (language === 'it') {
+      if (kg > 20000) return 'Più pesante di 15 Carri da Guerra Romani & 3 Arieti!';
+      if (kg > 15000) return 'Equivalente a sollevare 10 Carri da Guerra Romani in battaglia!';
+      if (kg > 10000) return 'Più pesante della saracinesca dei gladiatori del Colosseo!';
+      if (kg > 5000) return 'Equivalente a spostare 4 colonne di confine dei Centurioni!';
+      return 'Un valoroso tributo di sangue e ferro al Pantheon!';
+    }
+    if (language === 'es') {
+      if (kg > 20000) return '¡Más pesado que 15 Carros de Guerra Romanos y 3 Arietes!';
+      if (kg > 15000) return '¡Equivalente a levantar 10 Carros de Guerra Romanos en batalla!';
+      if (kg > 10000) return '¡Más pesado que el rastrillo de gladiadores del Coliseo!';
+      if (kg > 5000) return '¡Equivalente a mover 4 columnas de los Centuriones!';
+      return '¡Una valiente ofrenda de sangre y hierro al Panteón!';
+    }
     if (kg > 20000) return 'Heavier than 15 Roman War Chariots & 3 Battering Rams!';
     if (kg > 15000) return 'Equivalent to hoisting 10 Roman War Chariots into battle!';
     if (kg > 10000) return 'Heavier than the Colosseum gladiatorial portcullis!';
@@ -65,7 +80,7 @@ export const WorkoutSummaryModal: React.FC<WorkoutSummaryModalProps> = ({
   const handleShare = async () => {
     const text = `🏛️ HOMO DEUS — Arena Session Completed!
 Athlete: ${profile.name}
-Workout: ${workoutPlan.name}
+Workout: ${translateWorkoutName(workoutPlan.name, language)}
 🔥 Tonnage Moved: ${totalTonnageKg.toLocaleString()} kg
 ⏱️ Duration: ${durationMinutes} min
 ⚡ Sets Conquered: ${completedSetsCount}/${totalSetsCount}
@@ -111,7 +126,7 @@ Workout: ${workoutPlan.name}
           </h2>
 
           <p className="text-xs text-slate-300 max-w-xs mb-6">
-            Congratulations, <strong className="text-amber-300">{profile.name}</strong>. Your session has been permanently sealed into your Olympian Ledger.
+            {language === 'it' ? 'Congratulazioni' : language === 'es' ? 'Felicitaciones' : language === 'fr' ? 'Félicitations' : language === 'de' ? 'Glückwunsch' : language === 'la' ? 'Gratulamur' : 'Congratulations'}, <strong className="text-amber-300">{profile.name}</strong>. {language === 'it' ? 'La tua sessione è stata incisa per sempre nel tuo Registro Olimpico.' : language === 'es' ? 'Tu sesión ha quedado sellada permanentemente en tu Registro Olímpico.' : 'Your session has been permanently sealed into your Olympian Ledger.'}
           </p>
 
           {/* Stats Grid */}

@@ -3,6 +3,13 @@ import { PlannedExercise, ExerciseDefinition, ExerciseCategory, EquipmentType } 
 import { EXERCISE_LIBRARY } from '../data/exercises';
 import { X, Search, RefreshCw, Dumbbell, Sparkles, Check, Plus } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { 
+  translateExerciseName, 
+  translateCategory, 
+  translateTier, 
+  translateEquipment, 
+  translateMuscle 
+} from '../logic/exerciseTranslations';
 
 interface ExerciseSwapModalProps {
   isOpen: boolean;
@@ -105,7 +112,8 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                 </span>
               </h3>
               <p className="text-xs text-slate-400">
-                Replacing <strong className="text-amber-300">{currentExercise.name}</strong> • Equipment taken or tweaking joints?
+                {language === 'it' ? 'Sostituzione di' : language === 'es' ? 'Sustituyendo' : language === 'fr' ? 'Remplacement de' : language === 'de' ? 'Ersetzt' : language === 'la' ? 'Substitutio pro' : 'Replacing'}{' '}
+                <strong className="text-amber-300">{translateExerciseName(currentExercise.id || currentExercise.name, language)}</strong> • {language === 'it' ? 'Attrezzo occupato o fastidio articolare?' : language === 'es' ? '¿Máquina ocupada o molestia articular?' : language === 'fr' ? 'Matériel occupé ou gêne articulaire ?' : language === 'de' ? 'Gerät belegt oder Gelenkbeschwerden?' : language === 'la' ? 'Instrumentum occupatum vel dolor?' : 'Equipment taken or tweaking joints?'}
               </p>
             </div>
           </div>
@@ -141,7 +149,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                   : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
-              Recommended (Same Category)
+              {language === 'it' ? 'Consigliati (Stessa Categoria)' : language === 'es' ? 'Recomendados' : language === 'fr' ? 'Recommandés' : language === 'de' ? 'Empfohlen' : language === 'la' ? 'Commendata' : 'Recommended (Same Category)'}
             </button>
 
             <button
@@ -152,7 +160,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                   : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
-              Machines
+              {translateEquipment('machines', language)}
             </button>
 
             <button
@@ -163,7 +171,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                   : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
-              Free Weights
+              {translateEquipment('free_weights', language)}
             </button>
 
             <button
@@ -174,7 +182,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                   : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
-              Cables
+              {translateEquipment('cables', language)}
             </button>
 
             <button
@@ -185,7 +193,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                   : 'bg-slate-900 text-slate-400 border-slate-800 hover:text-white'
               }`}
             >
-              All Movements
+              {language === 'it' ? 'Tutti i Movimenti' : language === 'es' ? 'Todos los Ejercicios' : language === 'fr' ? 'Tous les Mouvements' : language === 'de' ? 'Alle Übungen' : language === 'la' ? 'Omnes Motus' : 'All Movements'}
             </button>
 
             <button
@@ -197,7 +205,9 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
               }`}
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Custom Movement</span>
+              <span>
+                {language === 'it' ? 'Movimento Personalizzato' : language === 'es' ? 'Movimiento Personalizado' : language === 'fr' ? 'Mouvement Personnalisé' : language === 'de' ? 'Eigene Übung' : language === 'la' ? 'Motus Proprius' : 'Custom Movement'}
+              </span>
             </button>
           </div>
         </div>
@@ -312,26 +322,26 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         <h4 className="text-sm font-bold text-white group-hover:text-amber-300 font-roman transition-colors">
-                          {exercise.name}
+                          {translateExerciseName(exercise.id || exercise.name, language)}
                         </h4>
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
-                          {exercise.category}
+                          {translateCategory(exercise.category, language)}
                         </span>
                         <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-amber-950/60 text-amber-300 border border-amber-800/40">
-                          {exercise.tier}
+                          {translateTier(exercise.tier, language)}
                         </span>
                         {isSameCategory && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            Biomechanical Match
+                            {language === 'it' ? 'Match Biomeccanico' : language === 'es' ? 'Coincidencia Biomecánica' : language === 'fr' ? 'Correspondance Biomécanique' : language === 'de' ? 'Biomechanischer Treffer' : language === 'la' ? 'Congruentia Biomechanica' : 'Biomechanical Match'}
                           </span>
                         )}
                       </div>
 
                       <p className="text-xs text-slate-400 flex items-center gap-2">
                         <Dumbbell className="w-3.5 h-3.5 text-amber-400/80" />
-                        <span>{exercise.equipment.map(e => e.replace('_', ' ')).join(', ')}</span>
+                        <span>{exercise.equipment.map(e => translateEquipment(e, language)).join(', ')}</span>
                         <span>•</span>
-                        <span>Targets: {exercise.primaryMuscles.join(', ')}</span>
+                        <span>Targets: {exercise.primaryMuscles.map(m => translateMuscle(m, language)).join(', ')}</span>
                       </p>
 
                       {exercise.techniqueCues && exercise.techniqueCues.length > 0 && (
@@ -349,7 +359,7 @@ export const ExerciseSwapModal: React.FC<ExerciseSwapModalProps> = ({
                       className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-black font-roman tracking-wide transition-all shadow-md shrink-0 flex items-center gap-1.5"
                     >
                       <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      <span>Swap</span>
+                      <span>{language === 'it' ? 'Sostituisci' : language === 'es' ? 'Cambiar' : language === 'fr' ? 'Remplacer' : language === 'de' ? 'Tauschen' : language === 'la' ? 'Commuta' : 'Swap'}</span>
                     </button>
                   </div>
                 );

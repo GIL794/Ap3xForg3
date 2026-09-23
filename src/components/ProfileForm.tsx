@@ -31,6 +31,13 @@ import {
 import { DAY_NAMES, DAY_NAMES_SHORT, DEFAULT_PROFILE } from '../data/defaultProfile';
 import { ASCENSION_TIERS } from './EvolutionRoadmapModal';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { 
+  translateGoal, 
+  translateSecondaryGoal, 
+  translateEquipment, 
+  translateArchetype,
+  translateDayName 
+} from '../logic/exerciseTranslations';
 
 interface ProfileFormProps {
   profile: UserProfile;
@@ -67,27 +74,27 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   }, [profile]);
 
   const primaryGoalOptions: { value: PrimaryGoal; label: string }[] = [
-    { value: 'upper_body_hypertrophy', label: 'Upper-Body Hypertrophy (Muscle Growth)' },
-    { value: 'full_body_hypertrophy', label: 'Full-Body Hypertrophy' },
-    { value: 'strength', label: 'Strength Focus (Upper & Lower Overload)' },
-    { value: 'fat_loss', label: 'Fat Loss + Muscle Maintenance' },
-    { value: 'general_fitness', label: 'General Fitness & Athleticism' },
+    { value: 'upper_body_hypertrophy', label: translateGoal('upper_body_hypertrophy', language) },
+    { value: 'full_body_hypertrophy', label: translateGoal('full_body_hypertrophy', language) },
+    { value: 'strength', label: translateGoal('strength', language) },
+    { value: 'fat_loss', label: translateGoal('fat_loss', language) },
+    { value: 'general_fitness', label: translateGoal('general_fitness', language) },
   ];
 
   const secondaryGoalOptions: { value: SecondaryGoal; label: string }[] = [
-    { value: 'strength', label: 'Raw Strength' },
-    { value: 'aesthetics', label: 'Aesthetics & Proportions' },
-    { value: 'endurance', label: 'Work Capacity / Conditioning' },
-    { value: 'mobility', label: 'Joint Mobility & Longevity' },
-    { value: 'core_stability', label: 'Core Stability' },
+    { value: 'strength', label: translateSecondaryGoal('strength', language) },
+    { value: 'aesthetics', label: translateSecondaryGoal('aesthetics', language) },
+    { value: 'endurance', label: translateSecondaryGoal('endurance', language) },
+    { value: 'mobility', label: translateSecondaryGoal('mobility', language) },
+    { value: 'core_stability', label: translateSecondaryGoal('core_stability', language) },
   ];
 
   const equipmentOptions: { value: EquipmentType; label: string }[] = [
-    { value: 'free_weights', label: 'Free Weights (Barbells & DBs)' },
-    { value: 'machines', label: 'Gym Machines' },
-    { value: 'cables', label: 'Cable Towers' },
-    { value: 'bodyweight', label: 'Bodyweight / Calisthenics' },
-    { value: 'bands', label: 'Resistance Bands' },
+    { value: 'free_weights', label: translateEquipment('free_weights', language) },
+    { value: 'machines', label: translateEquipment('machines', language) },
+    { value: 'cables', label: translateEquipment('cables', language) },
+    { value: 'bodyweight', label: translateEquipment('bodyweight', language) },
+    { value: 'bands', label: translateEquipment('bands', language) },
   ];
 
   const timezoneOptions = [
@@ -254,13 +261,17 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
               <div className="text-xl sm:text-2xl font-black text-cyan-300 mono-font">
                 {(xp || 0).toLocaleString()} <span className="text-xs font-normal text-slate-400">XP</span>
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">Gladiatorial ascension score</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                {language === 'it' ? 'Punteggio di ascensione gladiatoria' : language === 'es' ? 'Puntuación de ascensión gladiatoria' : language === 'fr' ? "Score d'ascension gladiatoire" : language === 'de' ? 'Gladiatoren-Aufstiegs-Wertung' : language === 'la' ? 'Puncta ascensionis gladiatoriae' : 'Gladiatorial ascension score'}
+              </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-emerald-500/30 shadow-inner">
               <div className="flex items-center gap-1.5 text-emerald-400 text-xs mb-1 font-roman">
                 <Scale className="w-3.5 h-3.5" />
-                <span>Weight Target</span>
+                <span>
+                  {language === 'it' ? 'Obiettivo Peso' : language === 'es' ? 'Peso Objetivo' : language === 'fr' ? 'Poids Cible' : language === 'de' ? 'Zielgewicht' : language === 'la' ? 'Pondus Petitum' : 'Weight Target'}
+                </span>
               </div>
               <div className="text-xl sm:text-2xl font-black text-emerald-300 mono-font">
                 {formData.currentWeightKg || 80} <span className="text-xs font-normal text-slate-400">→ {formData.goalWeightKg || 75} kg</span>
@@ -271,10 +282,14 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
             <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-purple-500/30 shadow-inner">
               <div className="flex items-center gap-1.5 text-purple-400 text-xs mb-1 font-roman">
                 <Calendar className="w-3.5 h-3.5" />
-                <span>Weekly Cadence</span>
+                <span>
+                  {language === 'it' ? 'Frequenza Settimanale' : language === 'es' ? 'Frecuencia Semanal' : language === 'fr' ? 'Fréquence Hebdo' : language === 'de' ? 'Wöchentliche Frequenz' : language === 'la' ? 'Frequentia Hebdomadalis' : 'Weekly Cadence'}
+                </span>
               </div>
               <div className="text-xl sm:text-2xl font-black text-purple-300 mono-font">
-                {formData.availableDays.length} <span className="text-xs font-normal text-slate-400">days/week</span>
+                {formData.availableDays.length} <span className="text-xs font-normal text-slate-400">
+                  {language === 'it' ? 'giorni/settimana' : language === 'es' ? 'días/semana' : language === 'fr' ? 'jours/semaine' : language === 'de' ? 'Tage/Woche' : language === 'la' ? 'dies/hebdomas' : 'days/week'}
+                </span>
               </div>
               <p className="text-[10px] text-slate-500 mt-0.5">{formData.sessionLengthMinutes}m sessions • {formData.targetWorkoutTime}</p>
             </div>
@@ -333,23 +348,26 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           <div className="space-y-3">
             <label className="block text-xs font-roman font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
               <Crown className="w-4 h-4 text-amber-400" />
-              <span>Olympian Physique Archetype</span>
+              <span>
+                {language === 'it' ? 'Archetipo Fisico Olimpico' : language === 'es' ? 'Arquetipo Físico Olímpico' : language === 'fr' ? 'Archétype Physique Olympien' : language === 'de' ? 'Olympischer Körperbau-Archetyp' : language === 'la' ? 'Archetypus Physicus Olympicus' : 'Olympian Physique Archetype'}
+              </span>
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
               {[
-                { id: 'hercules_mass', name: 'The Titan', god: 'Hercules', emoji: '🏛️', gender: 'Masc', focus: 'Mass & Power' },
-                { id: 'artemis_power', name: 'The Huntress', god: 'Artemis', emoji: '🏹', gender: 'Fem', focus: 'Glutes & Speed' },
-                { id: 'adonis_aesthetic', name: 'The Olympian', god: 'Adonis', emoji: '⚡', gender: 'Masc', focus: 'V-Taper Symmetry' },
-                { id: 'athena_sculpt', name: 'The War Goddess', god: 'Athena', emoji: '🛡️', gender: 'Fem', focus: 'Delts & Posture' },
-                { id: 'ares_combat', name: 'The Centurion', god: 'Ares', emoji: '⚔️', gender: 'Masc', focus: 'Warrior Stamina' },
-                { id: 'aphrodite_curves', name: 'The Sovereign', god: 'Aphrodite', emoji: '👑', gender: 'Fem', focus: 'Hourglass Curves' },
-              ].map((arch) => {
-                const isSelected = (formData.archetype || 'hercules_mass') === arch.id;
+                { id: 'hercules_mass', emoji: '🏛️' },
+                { id: 'artemis_power', emoji: '🏹' },
+                { id: 'adonis_aesthetic', emoji: '⚡' },
+                { id: 'athena_sculpt', emoji: '🛡️' },
+                { id: 'ares_combat', emoji: '⚔️' },
+                { id: 'aphrodite_curves', emoji: '👑' },
+              ].map((item) => {
+                const arch = translateArchetype(item.id as MythologicalArchetype, language);
+                const isSelected = (formData.archetype || 'hercules_mass') === item.id;
                 return (
                   <button
-                    key={arch.id}
+                    key={item.id}
                     type="button"
-                    onClick={() => setFormData({ ...formData, archetype: arch.id as MythologicalArchetype })}
+                    onClick={() => setFormData({ ...formData, archetype: item.id as MythologicalArchetype })}
                     className={`p-3 rounded-2xl border text-left transition-all ${
                       isSelected
                         ? 'border-amber-400 bg-amber-500/15 shadow-md shadow-amber-500/10'
@@ -357,7 +375,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xl">{arch.emoji}</span>
+                      <span className="text-xl">{item.emoji}</span>
                       <span className="text-[9px] px-1.5 py-0.2 rounded font-bold uppercase bg-slate-900 text-slate-400">
                         {arch.gender}
                       </span>
@@ -610,8 +628,8 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                         : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
                     }`}
                   >
-                    <span>{DAY_NAMES_SHORT[dayIdx]}</span>
-                    {isSunday && <span className="text-[9px] font-bold uppercase">Today</span>}
+                    <span>{translateDayName(dayIdx, language, true)}</span>
+                    {isSunday && <span className="text-[9px] font-bold uppercase">{t('weekly.today', language)}</span>}
                   </button>
                 );
               })}
