@@ -10,7 +10,7 @@ import {
   DEFAULT_GABRIELE_ACCOUNT,
   getAllUserAccounts 
 } from './logic/auth';
-import { generateWeeklyPlan } from './logic/planGenerator';
+import { generateWeeklyPlan, personalizeExercise } from './logic/planGenerator';
 import { resolveTodayWorkout } from './logic/todayDetector';
 import { parseSharedUrl } from './logic/supabase';
 import { Header } from './components/Header';
@@ -193,10 +193,22 @@ export const App: React.FC = () => {
   // Handle profile save only
   const handleSaveProfile = (updatedProfile: UserProfile) => {
     setAppState((prev) => {
-      const todayWorkout = resolveTodayWorkout(prev.weeklyPlan, updatedProfile);
+      // Re-personalize the existing weekly plan with the updated profile (so height, weight, archetype, injuries take effect immediately)
+      const updatedWeeklyPlan = (prev.weeklyPlan || []).map((day) => {
+        if (!day.isRestDay && day.exercises) {
+          return {
+            ...day,
+            exercises: day.exercises.map((ex) => personalizeExercise(ex, updatedProfile)),
+          };
+        }
+        return day;
+      });
+
+      const todayWorkout = resolveTodayWorkout(updatedWeeklyPlan, updatedProfile);
       return {
         ...prev,
         profile: updatedProfile,
+        weeklyPlan: updatedWeeklyPlan,
         todayWorkout,
       };
     });
@@ -391,8 +403,8 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Tab Navigation Sub-Header (Hevy / Strong / Fitbod Calibre) */}
-      <div className="sticky top-16 sm:top-20 z-20 bg-[#0c0e17]/95 backdrop-blur-xl border-b border-slate-800/80 shadow-md">
+      {/* Tab Navigation Sub-Header (Desktop & Tablet: Hevy / Strong / Fitbod Calibre) */}
+      <div className="hidden md:block sticky top-16 sm:top-20 z-20 bg-[#0c0e17]/95 backdrop-blur-xl border-b border-slate-800/80 shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-2 py-2.5">
           {/* Main View Tabs */}
           <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar py-0.5">
@@ -461,8 +473,8 @@ export const App: React.FC = () => {
         </div>
       </div>
 
-      {/* Main Container - Dedicated Multi-View Display */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+      {/* Main Container - Dedicated Multi-View Display with Safe Bottom Padding */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 pb-32 sm:pb-16">
         {/* View 1: Today's Arena Workout Session */}
         {activeTab === 'today' && (
           <section id="today-workout" aria-label="Today's Workout Session">
@@ -476,6 +488,7 @@ export const App: React.FC = () => {
               language={language}
               lifetimeTonnageKg={appState.totalTonnageKg}
               onWorkoutFinished={handleWorkoutFinished}
+              isProSubscriber={appState.isProSubscriber}
             />
           </section>
         )}
@@ -566,59 +579,124 @@ export const App: React.FC = () => {
         </div>
       </footer>
 
-      {/* Mobile Sticky Bottom Tab Bar (Hevy / Strong / Fitbod Caliber) */}
+      {/* Mobile Sticky Bottom Tab Bar (Hevy / Strong / Fitbod Calibre Ergonomics) */}
       <nav 
         aria-label="Mobile Bottom Navigation"
-        className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0c0e17]/95 backdrop-blur-xl border-t border-amber-500/20 px-3 py-2 flex items-center justify-around shadow-2xl pb-[max(0.5rem,env(safe-area-inset-bottom))]"
+        className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#0c0e17]/95 backdrop-blur-2xl border-t border-amber-500/25 px-2 py-1 flex items-center justify-around shadow-[0_-8px_30px_rgba(0,0,0,0.8)] pb-[max(0.6rem,env(safe-area-inset-bottom))]"
       >
+        {/* Tab 1: Today's Arena */}
         <button
-          onClick={() => setActiveTab('today')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
-            activeTab === 'today' ? 'text-emerald-400' : 'text-slate-400 hover:text-white'
-          }`}
+          onClick={() => {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try { navigator.vibrate(10); } catch {}
+            }
+            setActiveTab('today');
+          }}
+          className="min-h-[48px] min-w-[54px] flex flex-col items-center justify-center gap-1 transition-all"
         >
-          <Dumbbell className="w-4 h-4" />
-          <span>{t('nav.today', language)}</span>
+          <div className={`p-1.5 rounded-xl transition-all ${
+            activeTab === 'today'
+              ? 'bg-emerald-500/20 text-emerald-300 ring-1 ring-emerald-500/40 shadow-sm shadow-emerald-500/20 scale-105'
+              : 'text-slate-400 hover:text-white'
+          }`}>
+            <Dumbbell className="w-4 h-4" />
+          </div>
+          <span className={`text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'today' ? 'text-emerald-300' : 'text-slate-400'
+          }`}>
+            {t('nav.today', language)}
+          </span>
         </button>
 
+        {/* Tab 2: Weekly Split */}
         <button
-          onClick={() => setActiveTab('weekly')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
-            activeTab === 'weekly' ? 'text-cyan-400' : 'text-slate-400 hover:text-white'
-          }`}
+          onClick={() => {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try { navigator.vibrate(10); } catch {}
+            }
+            setActiveTab('weekly');
+          }}
+          className="min-h-[48px] min-w-[54px] flex flex-col items-center justify-center gap-1 transition-all"
         >
-          <Calendar className="w-4 h-4" />
-          <span>{t('nav.week', language)}</span>
+          <div className={`p-1.5 rounded-xl transition-all ${
+            activeTab === 'weekly'
+              ? 'bg-cyan-500/20 text-cyan-300 ring-1 ring-cyan-500/40 shadow-sm shadow-cyan-500/20 scale-105'
+              : 'text-slate-400 hover:text-white'
+          }`}>
+            <Calendar className="w-4 h-4" />
+          </div>
+          <span className={`text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'weekly' ? 'text-cyan-300' : 'text-slate-400'
+          }`}>
+            {t('nav.week', language)}
+          </span>
         </button>
 
+        {/* Center Action: Gym Tools Medallion (Plate Loader & 1RM) */}
         <button
-          onClick={() => setIsGymToolsOpen(true)}
-          className="flex flex-col items-center gap-1 text-[10px] font-roman font-bold text-amber-400 hover:text-white transition-colors -mt-3"
+          onClick={() => {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try { navigator.vibrate(15); } catch {}
+            }
+            setIsGymToolsOpen(true);
+          }}
+          className="min-h-[48px] min-w-[54px] flex flex-col items-center justify-center -mt-3.5 group"
+          title="Open Gym Tools (Plate Loader & 1RM Calculator)"
         >
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-yellow-300 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/30">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-amber-500 via-yellow-400 to-amber-300 text-slate-950 flex items-center justify-center shadow-lg shadow-amber-500/40 group-active:scale-95 transition-transform border border-amber-200/50">
             <Calculator className="w-5 h-5 stroke-[2.5]" />
           </div>
-          <span>{t('nav.tools', language)}</span>
+          <span className="text-[10px] font-roman font-bold text-amber-400 mt-1">
+            {t('nav.tools', language)}
+          </span>
         </button>
 
+        {/* Tab 3: Training Ledger */}
         <button
-          onClick={() => setActiveTab('history')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
-            activeTab === 'history' ? 'text-amber-400' : 'text-slate-400 hover:text-white'
-          }`}
+          onClick={() => {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try { navigator.vibrate(10); } catch {}
+            }
+            setActiveTab('history');
+          }}
+          className="min-h-[48px] min-w-[54px] flex flex-col items-center justify-center gap-1 transition-all"
         >
-          <History className="w-4 h-4" />
-          <span>{t('nav.ledger', language)}</span>
+          <div className={`p-1.5 rounded-xl transition-all ${
+            activeTab === 'history'
+              ? 'bg-amber-500/20 text-amber-300 ring-1 ring-amber-500/40 shadow-sm shadow-amber-500/20 scale-105'
+              : 'text-slate-400 hover:text-white'
+          }`}>
+            <History className="w-4 h-4" />
+          </div>
+          <span className={`text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'history' ? 'text-amber-300' : 'text-slate-400'
+          }`}>
+            {t('nav.ledger', language)}
+          </span>
         </button>
 
+        {/* Tab 4: Athlete Dossier */}
         <button
-          onClick={() => setActiveTab('profile')}
-          className={`flex flex-col items-center gap-1 text-[10px] font-roman font-bold transition-colors ${
-            activeTab === 'profile' ? 'text-purple-400' : 'text-slate-400 hover:text-white'
-          }`}
+          onClick={() => {
+            if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+              try { navigator.vibrate(10); } catch {}
+            }
+            setActiveTab('profile');
+          }}
+          className="min-h-[48px] min-w-[54px] flex flex-col items-center justify-center gap-1 transition-all"
         >
-          <User className="w-4 h-4" />
-          <span>{t('nav.profile', language)}</span>
+          <div className={`p-1.5 rounded-xl transition-all ${
+            activeTab === 'profile'
+              ? 'bg-purple-500/20 text-purple-300 ring-1 ring-purple-500/40 shadow-sm shadow-purple-500/20 scale-105'
+              : 'text-slate-400 hover:text-white'
+          }`}>
+            <User className="w-4 h-4" />
+          </div>
+          <span className={`text-[10px] font-roman font-bold transition-colors ${
+            activeTab === 'profile' ? 'text-purple-300' : 'text-slate-400'
+          }`}>
+            {t('nav.profile', language)}
+          </span>
         </button>
       </nav>
 

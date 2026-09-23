@@ -17,7 +17,13 @@ import {
   ArrowUp,
   ArrowDown,
   Trophy,
-  Award
+  Award,
+  BookOpen,
+  Crown,
+  Target,
+  Shield,
+  Zap,
+  Activity
 } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
 import { getExerciseNote, saveExerciseNote } from '../logic/storage';
@@ -41,6 +47,8 @@ interface ExerciseCardProps {
   isFirst?: boolean;
   isLast?: boolean;
   language?: SupportedLanguage;
+  isProSubscriber?: boolean;
+  onOpenPro?: () => void;
 }
 
 const EMPTY_SET_TYPES: SetType[] = [];
@@ -65,6 +73,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
   isFirst = false,
   isLast = false,
   language = 'en',
+  isProSubscriber = false,
+  onOpenPro,
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showNotes, setShowNotes] = useState(false);
@@ -210,7 +220,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
               {index + 1}
             </span>
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2 mb-1">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-1">
                 <h3 className={`text-base sm:text-lg font-black font-roman tracking-wide ${isAllComplete ? 'text-emerald-200' : 'text-white'}`}>
                   {exercise.name}
                 </h3>
@@ -220,6 +230,27 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${tierColors[exercise.tier]}`}>
                   {exercise.tier}
                 </span>
+
+                {/* Engine Source Badge (Clear Distinction: Free Library vs Pro AI) */}
+                {isProSubscriber || exercise.engineSource === 'ai_oracle' ? (
+                  <span className="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider bg-gradient-to-r from-amber-500/20 to-yellow-500/20 text-amber-300 border border-amber-500/40 flex items-center gap-1">
+                    <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />
+                    <span>{t('exercise.aiEngine', language)}</span>
+                  </span>
+                ) : (
+                  <span className="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider bg-slate-900/90 text-slate-300 border border-slate-700 flex items-center gap-1">
+                    <BookOpen className="w-3 h-3 text-cyan-400" />
+                    <span>{t('exercise.libraryEngine', language)}</span>
+                  </span>
+                )}
+
+                {/* Joint-Protection Substitution Badge */}
+                {exercise.isInjurySubstituted && (
+                  <span className="text-[9px] px-2 py-0.5 rounded-md font-bold uppercase tracking-wider bg-rose-500/20 text-rose-300 border border-rose-500/40 flex items-center gap-1" title={exercise.originalExerciseName ? `Substituted from ${exercise.originalExerciseName}` : 'Substituted for joint safety'}>
+                    <Shield className="w-3 h-3 text-rose-400" />
+                    <span>{t('exercise.jointSafe', language)}</span>
+                  </span>
+                )}
 
                 {/* Swap Movement Action Button */}
                 {onOpenSwapModal && (
@@ -267,6 +298,19 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <span>•</span>
                 <span className="text-rose-300 font-bold mono-font">RPE {exercise.targetRpe}</span>
               </p>
+
+              {/* Personalised Athlete Rationale Callout */}
+              {exercise.personalizationReason && (
+                <div className="mt-2.5 px-3 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs flex items-start gap-2 shadow-sm animate-in fade-in">
+                  <Target className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="text-[11px] leading-relaxed">
+                    <span className="font-bold text-amber-300 font-roman mr-1.5 uppercase text-[10px] tracking-wider">
+                      {t('exercise.whyInPlan', language)}:
+                    </span>
+                    <span className="text-slate-300">{exercise.personalizationReason}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -465,10 +509,79 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
           </div>
         )}
 
-        {/* Expanded Form Cues & Progression Details */}
+        {/* Expanded Form Cues & Biomechanical Execution Guide */}
         {showDetails && (
-          <div className="mt-3 p-4 rounded-2xl bg-slate-950/90 border border-slate-800 space-y-2.5 animate-in fade-in duration-150">
-            {exercise.techniqueCues && exercise.techniqueCues.length > 0 && (
+          <div className="mt-3 p-4 rounded-2xl bg-slate-950/95 border border-slate-800 space-y-3.5 animate-in fade-in duration-150">
+            {/* Biomechanical Focus Header */}
+            {exercise.biomechanicalFocus && (
+              <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-slate-800/80">
+                <div className="flex items-center gap-2">
+                  <Activity className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <span className="text-xs font-bold text-white font-roman">
+                    Biomechanical Focus:
+                  </span>
+                  <span className="text-xs text-cyan-300 font-medium">
+                    {exercise.biomechanicalFocus}
+                  </span>
+                </div>
+
+                <span className="text-[10px] font-roman uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-900 border border-slate-700 text-slate-300">
+                  {isProSubscriber || exercise.engineSource === 'ai_oracle' ? '👑 AI Oracle Optimized' : '📚 Verified Sports Science'}
+                </span>
+              </div>
+            )}
+
+            {/* 4-Step Biomechanical Execution Guide */}
+            {exercise.executionSteps ? (
+              <div className="space-y-2.5">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 font-roman flex items-center gap-1.5">
+                  <BookOpen className="w-3.5 h-3.5 text-amber-400" />
+                  <span>{t('exercise.bioExecution', language)} (4-Phase Biomechanics)</span>
+                </span>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+                  {/* Step 1: Setup & Stance */}
+                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-amber-300 block mb-1">
+                      {t('exercise.setupPhase', language)}
+                    </span>
+                    <p className="text-slate-300 leading-relaxed text-[11px]">
+                      {exercise.executionSteps.setup}
+                    </p>
+                  </div>
+
+                  {/* Step 2: Eccentric */}
+                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-cyan-300 block mb-1">
+                      {t('exercise.eccentricPhase', language)}
+                    </span>
+                    <p className="text-slate-300 leading-relaxed text-[11px]">
+                      {exercise.executionSteps.eccentric}
+                    </p>
+                  </div>
+
+                  {/* Step 3: Concentric */}
+                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-emerald-300 block mb-1">
+                      {t('exercise.concentricPhase', language)}
+                    </span>
+                    <p className="text-slate-300 leading-relaxed text-[11px]">
+                      {exercise.executionSteps.concentric}
+                    </p>
+                  </div>
+
+                  {/* Step 4: Common Pitfalls */}
+                  <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                    <span className="text-[10px] font-bold font-roman uppercase tracking-wider text-rose-300 block mb-1">
+                      {t('exercise.pitfalls', language)}
+                    </span>
+                    <p className="text-rose-200/90 leading-relaxed text-[11px]">
+                      {exercise.executionSteps.commonMistakes}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : exercise.techniqueCues && exercise.techniqueCues.length > 0 && (
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-wider text-amber-400 font-roman block mb-1">
                   {t('exercise.bioExecution', language)}
@@ -484,10 +597,31 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
               </div>
             )}
 
+            {/* Double Progression Rule */}
             {exercise.progressionRule && (
               <div className="pt-2 border-t border-slate-800/80 flex items-start gap-1.5 text-xs text-amber-300">
                 <TrendingUp className="w-3.5 h-3.5 shrink-0 mt-0.5 text-amber-400" />
                 <span><strong className="text-amber-200 font-roman">{t('exercise.progressionRule', language)}</strong> {exercise.progressionRule}</span>
+              </div>
+            )}
+
+            {/* Pro AI Distinction Banner for Free Users */}
+            {!isProSubscriber && (
+              <div className="mt-2.5 p-3 rounded-xl bg-gradient-to-r from-purple-950/40 to-slate-900 border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs">
+                <div className="flex items-start gap-2">
+                  <Sparkles className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                  <p className="text-slate-300 text-[11px] leading-relaxed">
+                    {t('exercise.proAiUpgradePrompt', language)}
+                  </p>
+                </div>
+                {onOpenPro && (
+                  <button
+                    onClick={onOpenPro}
+                    className="self-start sm:self-auto px-3 py-1 rounded-lg bg-gradient-to-r from-purple-500/30 to-amber-500/30 hover:from-purple-500/50 hover:to-amber-500/50 text-amber-200 font-roman font-bold text-[10px] border border-amber-500/40 shrink-0 shadow-sm"
+                  >
+                    Unlock Pro AI
+                  </button>
+                )}
               </div>
             )}
           </div>

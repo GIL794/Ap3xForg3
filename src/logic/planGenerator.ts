@@ -8,6 +8,7 @@ import {
 } from '../types';
 import { EXERCISE_LIBRARY } from '../data/exercises';
 import { DAY_NAMES } from '../data/defaultProfile';
+import { getBiomechanicalExecution } from '../data/exerciseBiomechanics';
 
 /**
  * Filter exercises by available user equipment
@@ -65,6 +66,7 @@ function pickExercise(
 }
 
 function exerciseDefToPlanned(def: ExerciseDefinition, customSets?: number, customReps?: string): PlannedExercise {
+  const bio = getBiomechanicalExecution(def.id, def.name);
   return {
     id: def.id,
     name: def.name,
@@ -79,8 +81,169 @@ function exerciseDefToPlanned(def: ExerciseDefinition, customSets?: number, cust
     tempo: def.tempo,
     equipment: def.equipment,
     primaryMuscles: def.primaryMuscles,
-    progressionRule: def.progressionRule || 'Add 2.5 kg (compound) or 1 kg (accessory) when hitting top reps for all sets.'
+    progressionRule: def.progressionRule || 'Add 2.5 kg (compound) or 1 kg (accessory) when hitting top reps for all sets.',
+    executionSteps: bio.execution,
+    biomechanicalFocus: bio.focus,
+    engineSource: 'library'
   };
+}
+
+/**
+ * Deeply personalizes a planned exercise using the athlete's complete profile
+ */
+export function personalizeExercise(ex: PlannedExercise, profile: UserProfile): PlannedExercise {
+  const finalEx: PlannedExercise = { ...ex };
+  const injuryStr = (profile.injuries || '').toLowerCase();
+  let isSubstituted = false;
+  const originalName = ex.name;
+
+  // 1. Comprehensive Biomechanical Injury Substitutions
+  if (injuryStr.includes('shoulder') || injuryStr.includes('rotator') || injuryStr.includes('impingement')) {
+    if (finalEx.id === 'barbell_bench_press') {
+      finalEx.id = 'incline_db_neutral_press';
+      finalEx.name = 'Incline Dumbbell Neutral Press (Shoulder Safe)';
+      finalEx.notes = 'Neutral palms-in grip at 30° eliminates subacromial impingement.';
+      isSubstituted = true;
+    } else if (finalEx.id === 'overhead_press') {
+      finalEx.id = 'incline_db_neutral_press';
+      finalEx.name = 'Seated Incline Neutral Dumbbell Press (Shoulder Safe)';
+      finalEx.notes = 'Neutral grip eliminates acromial impingement under overhead load.';
+      isSubstituted = true;
+    } else if (finalEx.id === 'dips_chest') {
+      finalEx.id = 'machine_chest_press';
+      finalEx.name = 'Machine Chest Press (Shoulder Safe)';
+      finalEx.notes = 'Guided trajectory stabilizes glenohumeral joint.';
+      isSubstituted = true;
+    }
+  }
+
+  if (injuryStr.includes('lower back') || injuryStr.includes('lumbar') || injuryStr.includes('sciatica') || injuryStr.includes('disc')) {
+    if (finalEx.id === 'barbell_bent_over_row') {
+      finalEx.id = 'chest_supported_row';
+      finalEx.name = 'Chest-Supported Incline DB Row (Lumbar Safe)';
+      finalEx.notes = 'Chest pad support completely relieves axial shear on lumbar vertebrae.';
+      isSubstituted = true;
+    } else if (finalEx.id === 'barbell_squat') {
+      finalEx.id = 'leg_press';
+      finalEx.name = '45-Degree Leg Press (Lumbar Supported)';
+      finalEx.notes = 'Rigid back support pad prevents spinal compression and pelvic tilt.';
+      isSubstituted = true;
+    }
+  }
+
+  if (injuryStr.includes('knee') || injuryStr.includes('patellar') || injuryStr.includes('meniscus') || injuryStr.includes('acl')) {
+    if (finalEx.id === 'leg_extension') {
+      finalEx.id = 'romanian_deadlift';
+      finalEx.name = 'Romanian Deadlift (Hamstring / Knee Sparing)';
+      finalEx.notes = 'Posterior-chain hip hinge eliminates anterior patellofemoral shear.';
+      isSubstituted = true;
+    } else if (finalEx.id === 'walking_lunges') {
+      finalEx.id = 'box_squats';
+      finalEx.name = 'Box Squat with Vertical Shin (Patellar Safe)';
+      finalEx.notes = 'Vertical shin angle minimizes patellar tendon shear.';
+      isSubstituted = true;
+    }
+  }
+
+  if (injuryStr.includes('elbow') || injuryStr.includes('tennis') || injuryStr.includes('golfer')) {
+    if (finalEx.id === 'skull_crushers') {
+      finalEx.id = 'triceps_rope_pushdown';
+      finalEx.name = 'Cable Rope Pushdown (Elbow Safe)';
+      finalEx.notes = 'Neutral rope separation eliminates medial elbow torque.';
+      isSubstituted = true;
+    } else if (finalEx.id === 'barbell_curl') {
+      finalEx.id = 'hammer_curl';
+      finalEx.name = 'Dumbbell Hammer Curls (Neutral Grip / Elbow Safe)';
+      finalEx.notes = 'Neutral wrist alignment eliminates epicondylar tension.';
+      isSubstituted = true;
+    }
+  }
+
+  if (injuryStr.includes('wrist') || injuryStr.includes('carpal')) {
+    if (finalEx.id === 'barbell_curl') {
+      finalEx.id = 'hammer_curl';
+      finalEx.name = 'Dumbbell Hammer Curls (Wrist Sparing)';
+      finalEx.notes = 'Neutral grip avoids wrist hyperextension under load.';
+      isSubstituted = true;
+    }
+  }
+
+  // 2. Load Sports-Science Biomechanical Execution Guide
+  const bio = getBiomechanicalExecution(finalEx.id, finalEx.name);
+  finalEx.executionSteps = bio.execution;
+  finalEx.biomechanicalFocus = bio.focus;
+  finalEx.engineSource = 'library';
+
+  if (isSubstituted) {
+    finalEx.isInjurySubstituted = true;
+    finalEx.originalExerciseName = originalName;
+  }
+
+  // 3. Synthesize Rich Personalized Rationale
+  const archetype = profile.archetype || 'hercules_mass';
+  const height = profile.heightCm || 180;
+  const currW = profile.currentWeightKg || 80;
+  const goalW = profile.goalWeightKg || currW;
+  const isDeficit = profile.primaryGoal === 'fat_loss' || goalW < currW - 2;
+  const isSurplus = profile.primaryGoal === 'upper_body_hypertrophy' || profile.primaryGoal === 'full_body_hypertrophy' || goalW > currW + 2;
+
+  const rationaleParts: string[] = [];
+
+  // Archetype rationale
+  if (archetype === 'adonis_aesthetic') {
+    if (finalEx.primaryMuscles.includes('chest') || finalEx.primaryMuscles.includes('shoulders')) {
+      rationaleParts.push('Adonis V-Taper Priority: Clavicular upper chest and lateral delt volume to forge the 1.618 Golden Ratio');
+    } else if (finalEx.primaryMuscles.includes('back')) {
+      rationaleParts.push('Adonis V-Taper Priority: Lat width expansion for a tapered silhouette flowing into a narrow waist');
+    } else {
+      rationaleParts.push('Adonis Aesthetic Calibration: Proportional hypertrophy and structural balance');
+    }
+  } else if (archetype === 'hercules_mass') {
+    rationaleParts.push('Hercules Mass Protocol: Heavy compound overload engineered for maximum myofibrillar mass and colossal strength');
+  } else if (archetype === 'artemis_power') {
+    if (finalEx.primaryMuscles.includes('glutes') || finalEx.primaryMuscles.includes('hamstrings')) {
+      rationaleParts.push('Artemis Huntress Priority: Powerful posterior-chain recruitment for explosive athletic power and glute drive');
+    } else {
+      rationaleParts.push('Artemis Athletic Conditioning: Functional kinetic energy transfer and core stability');
+    }
+  } else if (archetype === 'aphrodite_curves') {
+    if (finalEx.primaryMuscles.includes('glutes') || finalEx.primaryMuscles.includes('hamstrings') || finalEx.primaryMuscles.includes('shoulders')) {
+      rationaleParts.push('Aphrodite Sovereign Focus: Targeted glute and lateral delt tension to craft a sculpted hourglass aesthetic');
+    } else {
+      rationaleParts.push('Aphrodite Conditioning: High metabolic muscle tone with minimal waist thickening');
+    }
+  } else if (archetype === 'ares_combat') {
+    rationaleParts.push('Ares Centurion Protocol: High work capacity and functional unilateral strength for battle-ready stamina');
+  } else if (archetype === 'athena_sculpt') {
+    rationaleParts.push('Athena Goddess Focus: Postural scapular alignment and 3D shoulder capping for symmetry');
+  }
+
+  // Height lever biomechanical adjustment
+  if (height >= 185) {
+    if (finalEx.category === 'legs') {
+      rationaleParts.push(`Tall Lever Calibration (${height}cm): Longer femurs increase knee torque—cueing wider stance and high foot placement`);
+    } else if (finalEx.category === 'push') {
+      rationaleParts.push(`Tall Lever Calibration (${height}cm): Longer humeri create high shoulder moment arms—tuck elbows at ~45° to protect acromion`);
+    }
+  } else if (height <= 165) {
+    rationaleParts.push(`Compact Lever Advantage (${height}cm): Shorter moment arms allow full deep stretch and explosive concentric power`);
+  }
+
+  // Weight goal context
+  if (isDeficit) {
+    rationaleParts.push(`Caloric Deficit (${currW}kg → ${goalW}kg): Mechanical tension prioritized at RPE ${finalEx.targetRpe} to shield muscle against catabolism`);
+  } else if (isSurplus) {
+    rationaleParts.push(`Hypertrophic Surplus (${currW}kg → ${goalW}kg): Rest intervals (${finalEx.restSeconds}s) configured for ATP-CP replenishment and progressive volume`);
+  }
+
+  // Injury note
+  if (isSubstituted) {
+    rationaleParts.push(`Joint Safeguard: Substituted from ${originalName} to eliminate harmful shear forces`);
+  }
+
+  finalEx.personalizationReason = rationaleParts.join(' • ');
+
+  return finalEx;
 }
 
 /**
@@ -517,34 +680,10 @@ export function generateWeeklyPlan(profile: UserProfile, variationSeed: number =
     }
   }
 
-  // Handle injuries if specified
-  if (profile.injuries && profile.injuries.trim().length > 0) {
-    const injury = profile.injuries.toLowerCase();
-    for (const day of weeklyPlan) {
-      if (injury.includes('shoulder') || injury.includes('rotator')) {
-        day.exercises = day.exercises.map(ex => {
-          if (ex.name.toLowerCase().includes('overhead press')) {
-            return {
-              ...ex,
-              name: 'Incline Dumbbell Neutral Press (Shoulder Safe)',
-              notes: 'Neutral palms-in grip to avoid subacromial impingement.'
-            };
-          }
-          return ex;
-        });
-      }
-      if (injury.includes('lower back') || injury.includes('lumbar')) {
-        day.exercises = day.exercises.map(ex => {
-          if (ex.name.toLowerCase().includes('barbell bent-over row')) {
-            return {
-              ...ex,
-              name: 'Chest-Supported Row or Seated Cable Row',
-              notes: 'Pad support relieves axial load on lumbar spine.'
-            };
-          }
-          return ex;
-        });
-      }
+  // Apply deep sports-science personalization & biomechanical calibration across all days
+  for (const day of weeklyPlan) {
+    if (!day.isRestDay && day.exercises) {
+      day.exercises = day.exercises.map(ex => personalizeExercise(ex, profile));
     }
   }
 

@@ -41,6 +41,13 @@ export type ExerciseCategory =
   | 'arms' 
   | 'core';
 
+export interface BiomechanicalExecution {
+  setup: string;
+  eccentric: string;
+  concentric: string;
+  commonMistakes: string;
+}
+
 export interface ExerciseDefinition {
   id: string;
   name: string;
@@ -57,6 +64,8 @@ export interface ExerciseDefinition {
   tempo?: string;
   substitutes?: string[];
   progressionRule?: string;
+  executionSteps?: BiomechanicalExecution;
+  biomechanicalFocus?: string;
 }
 
 export interface PlannedExercise {
@@ -74,6 +83,12 @@ export interface PlannedExercise {
   equipment: EquipmentType[];
   primaryMuscles: MuscleGroup[];
   progressionRule?: string;
+  personalizationReason?: string;
+  executionSteps?: BiomechanicalExecution;
+  biomechanicalFocus?: string;
+  engineSource?: 'library' | 'ai_oracle';
+  isInjurySubstituted?: boolean;
+  originalExerciseName?: string;
 }
 
 export interface WarmupProtocol {

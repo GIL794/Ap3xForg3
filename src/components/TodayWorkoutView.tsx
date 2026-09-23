@@ -40,6 +40,7 @@ interface TodayWorkoutViewProps {
   language?: SupportedLanguage;
   lifetimeTonnageKg?: number;
   onWorkoutFinished?: (sessionTonnage: number, xpEarned: number) => void;
+  isProSubscriber?: boolean;
 }
 
 const EMPTY_SETS_ARRAY: boolean[] = [];
@@ -54,6 +55,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
   language = 'en',
   lifetimeTonnageKg = 0,
   onWorkoutFinished,
+  isProSubscriber = false,
 }) => {
   const [useCatchUp, setUseCatchUp] = useState(false);
   const [warmupDone, setWarmupDone] = useState(false);
@@ -685,6 +687,8 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               isFirst={index === 0}
               isLast={index === exercises.length - 1}
               language={language}
+              isProSubscriber={isProSubscriber}
+              onOpenPro={onOpenPro}
             />
           ))}
         </div>
