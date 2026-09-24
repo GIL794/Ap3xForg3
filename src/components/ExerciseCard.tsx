@@ -36,6 +36,7 @@ import {
   translatePersonalizationReason 
 } from '../logic/exerciseTranslations';
 import { getExerciseNote, saveExerciseNote } from '../logic/storage';
+import { generateExerciseDossierPdf } from '../logic/pdfExporter';
 
 interface ExerciseCardProps {
   exercise: PlannedExercise;
@@ -293,6 +294,16 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                     <ArrowDown className="w-3.5 h-3.5" />
                   </button>
                 )}
+
+                {/* Export Exercise Codex PDF Button */}
+                <button
+                  type="button"
+                  onClick={() => generateExerciseDossierPdf(exercise, language)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-amber-300 hover:bg-slate-800/80 transition-colors border border-transparent hover:border-amber-500/30"
+                  title="Download Biomechanical Exercise Codex (PDF)"
+                >
+                  <FileText className="w-3.5 h-3.5 text-amber-400" />
+                </button>
               </div>
 
               <p className="text-xs text-slate-400 flex items-center gap-1.5 flex-wrap">
@@ -616,6 +627,21 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({
                 <span><strong className="text-amber-200 font-roman">{t('exercise.progressionRule', language)}</strong> {exercise.progressionRule}</span>
               </div>
             )}
+
+            {/* Export Exercise Codex PDF Banner */}
+            <div className="pt-2.5 flex items-center justify-between border-t border-slate-800/80 flex-wrap gap-2">
+              <span className="text-[11px] text-slate-400 font-roman">
+                Imperial Biomechanics Codex & Form Checklist
+              </span>
+              <button
+                type="button"
+                onClick={() => generateExerciseDossierPdf(exercise, language)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-roman font-bold transition-all shadow-sm"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-400" />
+                <span>Export Exercise Codex (PDF)</span>
+              </button>
+            </div>
 
             {/* Pro AI Distinction Banner for Free Users */}
             {!isProSubscriber && (

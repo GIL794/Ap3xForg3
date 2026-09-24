@@ -82,6 +82,7 @@ export interface PlannedExercise {
   tempo?: string;
   equipment: EquipmentType[];
   primaryMuscles: MuscleGroup[];
+  secondaryMuscles?: MuscleGroup[];
   progressionRule?: string;
   personalizationReason?: string;
   executionSteps?: BiomechanicalExecution;

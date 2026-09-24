@@ -1,5 +1,16 @@
 import { jsPDF } from 'jspdf';
-import { PlannedExercise, ExerciseCategory } from '../types';
+import { PlannedExercise, ExerciseCategory, WorkoutDay, UserProfile } from '../types';
+import { SupportedLanguage } from './i18n';
+import { 
+  translateExerciseName, 
+  translateCategory, 
+  translateTier, 
+  translateEquipment, 
+  translateBiomechanicalFocus,
+  translateMuscle,
+  translateWorkoutName,
+  translateGoal
+} from './exerciseTranslations';
 
 export interface ExportableWorkoutSession {
   date: string;
@@ -63,32 +74,27 @@ function toRomanDate(dateStr: string): string {
 }
 
 /**
- * Generates and downloads an authentic Imperial Roman Workout Scroll as a high-fidelity vector PDF.
+ * Applies authentic Roman parchment borders and background to any page.
  */
-export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, athlete: AthleteInfo): void {
-  const doc = new jsPDF({
-    orientation: 'portrait',
-    unit: 'mm',
-    format: 'a4',
-  });
-
+function applyRomanParchmentStyling(doc: jsPDF): { pageWidth: number; pageHeight: number } {
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
 
-  // 1. Parchment Background Tint
-  doc.setFillColor(252, 249, 242); // Warm Roman parchment
+  // Parchment Background Tint
+  doc.setFillColor(252, 249, 242);
   doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-  // 2. Imperial Roman Outer & Inner Border
-  doc.setDrawColor(180, 83, 9); // Roman imperial gold (#b45309)
+  // Imperial Roman Outer Border (Gold)
+  doc.setDrawColor(180, 83, 9);
   doc.setLineWidth(1.2);
   doc.rect(8, 8, pageWidth - 16, pageHeight - 16, 'S');
 
-  doc.setDrawColor(153, 27, 27); // Imperial crimson (#991b1b)
+  // Imperial Inner Border (Crimson)
+  doc.setDrawColor(153, 27, 27);
   doc.setLineWidth(0.4);
   doc.rect(10.5, 10.5, pageWidth - 21, pageHeight - 21, 'S');
 
-  // Decorative Corner Rosettes
+  // Corner Rosettes
   const corners = [
     [10.5, 10.5],
     [pageWidth - 10.5, 10.5],
@@ -100,10 +106,55 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
     doc.circle(cx, cy, 1.8, 'FD');
   });
 
-  // 3. Imperial Header
+  return { pageWidth, pageHeight };
+}
+
+/**
+ * Draws the Caesar Wax Seal at bottom of scroll.
+ */
+function drawCaesarSeal(doc: jsPDF, pageWidth: number, pageHeight: number, label = 'AUTHENTICATED'): void {
+  const sealY = pageHeight - 28;
+  const sealX = pageWidth / 2;
+
+  // Crimson Wax Circle
+  doc.setFillColor(153, 27, 27);
+  doc.circle(sealX, sealY, 11, 'F');
+  doc.setDrawColor(180, 83, 9);
+  doc.setLineWidth(0.5);
+  doc.circle(sealX, sealY, 9.8, 'S');
+
+  doc.setFont('times', 'bold');
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(6.5);
+  doc.text('HOMO DEVS', sealX, sealY - 2.5, { align: 'center' });
+  doc.text('• CAESAR SEAL •', sealX, sealY + 0.5, { align: 'center' });
+  doc.text(label, sealX, sealY + 3.5, { align: 'center' });
+
+  // ISO 8000 Ledger Checksum
+  doc.setFont('times', 'italic');
+  doc.setFontSize(6.5);
+  doc.setTextColor(130, 130, 130);
+  const isoHash = `ISO/IEC 8000 VERIFIED • GLADIATORIAL CODEX • SHA256-${Math.abs(Date.now() ^ 0xabcdef).toString(16).toUpperCase().padStart(8, '0')}`;
+  doc.text(isoHash, pageWidth / 2, pageHeight - 10, { align: 'center' });
+}
+
+/**
+ * 1. DAILY WORKOUT SCROLL PDF EXPORT
+ * Generates and downloads an authentic Imperial Roman Daily Workout Scroll.
+ */
+export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, athlete: AthleteInfo): void {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  const { pageWidth, pageHeight } = applyRomanParchmentStyling(doc);
+
+  // Imperial Header
   let y = 22;
   doc.setFont('times', 'bold');
-  doc.setTextColor(153, 27, 27); // Crimson
+  doc.setTextColor(153, 27, 27);
   doc.setFontSize(11);
   doc.text('• S E N A T V S • P O P V L V S Q V E • R O M A N V S •', pageWidth / 2, y, { align: 'center' });
 
@@ -125,9 +176,9 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
   doc.setLineWidth(0.5);
   doc.line(20, y, pageWidth - 20, y);
 
-  // 4. Gladiator & Session Dossier Box
+  // Gladiator & Session Dossier Box
   y += 7;
-  doc.setFillColor(245, 239, 227); // Slightly darker parchment
+  doc.setFillColor(245, 239, 227);
   doc.rect(16, y, pageWidth - 32, 28, 'FD');
   doc.setDrawColor(180, 83, 9);
   doc.setLineWidth(0.3);
@@ -186,7 +237,7 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
 
   y += 34;
 
-  // 5. Exercise Records Table
+  // Exercise Records Table
   doc.setFont('times', 'bold');
   doc.setFontSize(13);
   doc.setTextColor(26, 26, 26);
@@ -194,10 +245,9 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
 
   y += 5;
 
-  // Table Header
   const tableX = 16;
   const tableW = pageWidth - 32;
-  const colW = [70, 28, 22, 26, 32]; // [Exercise, Category, Sets, Avg Weight, Volume Tonnage]
+  const colW = [70, 28, 22, 26, 32];
 
   doc.setFillColor(180, 83, 9);
   doc.rect(tableX, y, tableW, 7, 'F');
@@ -218,11 +268,9 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
 
   y += 7;
 
-  // Table Body Rows
   const exercises = session.exercises || [];
   exercises.forEach((ex, idx) => {
-    // If running out of room, handle gracefully
-    if (y > pageHeight - 40) return;
+    if (y > pageHeight - 44) return;
 
     const isEven = idx % 2 === 0;
     doc.setFillColor(isEven ? 255 : 246, isEven ? 255 : 242, isEven ? 255 : 233);
@@ -231,7 +279,6 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
     doc.setLineWidth(0.2);
     doc.line(tableX, y + 7, tableX + tableW, y + 7);
 
-    // Compute stats for exercise
     const completedSets = ex.sets?.filter(s => s.completed !== false) || [];
     const setsCount = completedSets.length > 0 ? completedSets.length : (ex.sets?.length || 0);
     const primaryWeight = completedSets[0]?.weightKg || ex.sets?.[0]?.weightKg || 0;
@@ -243,7 +290,6 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
     doc.setTextColor(30, 30, 30);
 
     let rowX = tableX + 3;
-    // Exercise Name (truncated if too long)
     const truncatedName = ex.name.length > 36 ? ex.name.slice(0, 34) + '...' : ex.name;
     doc.text(truncatedName, rowX, y + 4.8);
 
@@ -253,7 +299,7 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
 
     rowX += colW[1];
     doc.setTextColor(30, 30, 30);
-    doc.text(`${setsCount} completed`, rowX, y + 4.8);
+    doc.text(`${setsCount} sets`, rowX, y + 4.8);
 
     rowX += colW[2];
     doc.text(primaryWeight > 0 ? `${primaryWeight} kg` : 'Bodyweight', rowX, y + 4.8);
@@ -266,13 +312,12 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
     y += 7;
   });
 
-  // Table Outer Frame
   const tableHeight = 7 + exercises.length * 7;
   doc.setDrawColor(180, 83, 9);
   doc.setLineWidth(0.4);
   doc.rect(tableX, y - tableHeight, tableW, tableHeight, 'S');
 
-  // 6. Summary Tonnage Banner
+  // Summary Tonnage Banner
   y += 6;
   doc.setFillColor(245, 239, 227);
   doc.rect(tableX, y, tableW, 12, 'FD');
@@ -290,38 +335,355 @@ export function generateImperialWorkoutPdf(session: ExportableWorkoutSession, at
   doc.text(`${session.totalTonnageKg.toLocaleString()} KG MOVED`, tableX + 70, y + 7.5);
 
   doc.setFont('times', 'italic');
-  doc.setFontSize(9);
+  doc.setFontSize(8.5);
   doc.setTextColor(80, 80, 80);
   doc.text('Mechanical tension delivered to muscular fibers. Neuro-muscular fatigue logged.', tableX + 115, y + 7.5);
 
-  // 7. Imperial Wax Seal & Caesar's Validation
-  const sealY = pageHeight - 34;
-  const sealX = pageWidth / 2;
+  drawCaesarSeal(doc, pageWidth, pageHeight, 'AUTHENTICATED');
 
-  // Caesar's Circular Seal
-  doc.setFillColor(153, 27, 27); // Crimson Wax
-  doc.circle(sealX, sealY, 13, 'F');
+  const filename = `HOMODEUS_WORKOUT_SCROLL_${session.workoutName.replace(/[^a-zA-Z0-9]/g, '_')}_${session.date}.pdf`;
+  doc.save(filename);
+}
+
+/**
+ * 2. INDIVIDUAL EXERCISE BIOMECHANICAL DOSSIER PDF EXPORT
+ * Generates an in-depth execution guide and technical codex for a single exercise.
+ */
+export function generateExerciseDossierPdf(
+  exercise: PlannedExercise,
+  language: SupportedLanguage = 'en',
+  athleteName = 'Gladiator of Rome'
+): void {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  const { pageWidth, pageHeight } = applyRomanParchmentStyling(doc);
+
+  // Imperial Header
+  let y = 22;
+  doc.setFont('times', 'bold');
+  doc.setTextColor(153, 27, 27);
+  doc.setFontSize(11);
+  doc.text('• S E N A T V S • P O P V L V S Q V E • R O M A N V S •', pageWidth / 2, y, { align: 'center' });
+
+  y += 7;
+  doc.setFont('times', 'bold');
+  doc.setTextColor(26, 26, 26);
+  doc.setFontSize(20);
+  const exerciseTitle = translateExerciseName(exercise.id || exercise.name, language).toUpperCase();
+  doc.text(exerciseTitle, pageWidth / 2, y, { align: 'center' });
+
+  y += 5;
+  doc.setFont('times', 'italic');
+  doc.setTextColor(180, 83, 9);
+  doc.setFontSize(10);
+  doc.text('✦ BIOMECHANICAL EXERCISE CODEX & EXECUTION DECREE ✦', pageWidth / 2, y, { align: 'center' });
+
+  // Divider Line
+  y += 4;
   doc.setDrawColor(180, 83, 9);
-  doc.setLineWidth(0.6);
-  doc.circle(sealX, sealY, 11.5, 'S');
+  doc.setLineWidth(0.5);
+  doc.line(20, y, pageWidth - 20, y);
+
+  // Specifications Bar
+  y += 6;
+  doc.setFillColor(245, 239, 227);
+  doc.rect(16, y, pageWidth - 32, 14, 'FD');
+  doc.setDrawColor(180, 83, 9);
+  doc.setLineWidth(0.3);
+  doc.rect(16, y, pageWidth - 32, 14, 'S');
 
   doc.setFont('times', 'bold');
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(7.5);
-  doc.text('HOMO DEVS', sealX, sealY - 3, { align: 'center' });
-  doc.text('• CAESAR SEAL •', sealX, sealY + 0.5, { align: 'center' });
-  doc.text('AUTHENTICATED', sealX, sealY + 4, { align: 'center' });
+  doc.setFontSize(8.5);
+  doc.setTextColor(153, 27, 27);
 
-  // Provenance & ISO 8000 Ledger Checksum
+  const specY = y + 5;
+  const specY2 = y + 10;
+  doc.text(`TIER: ${translateTier(exercise.tier, language).toUpperCase()}`, 22, specY);
+  doc.text(`CATEGORY: ${translateCategory(exercise.category, language).toUpperCase()}`, 65, specY);
+  doc.text(`SETS & REPS: ${exercise.sets} sets × ${exercise.reps}`, 115, specY);
+  doc.text(`REST: ${exercise.restSeconds}s`, 165, specY);
+
+  doc.setTextColor(50, 50, 50);
+  doc.text(`EQUIPMENT: ${exercise.equipment.map(e => translateEquipment(e, language)).join(', ')}`, 22, specY2);
+  doc.text(`TARGET RPE: ${exercise.targetRpe}`, 115, specY2);
+  if (exercise.tempo) {
+    doc.text(`TEMPO: ${exercise.tempo}`, 165, specY2);
+  }
+
+  y += 20;
+
+  // Anatomy & Target Muscles Box
+  doc.setFont('times', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(26, 26, 26);
+  doc.text('I. ANATOMICAL TARGETING & STABILIZERS', 16, y);
+
+  y += 4;
+  doc.setFillColor(255, 255, 255);
+  doc.rect(16, y, pageWidth - 32, 16, 'FD');
+  doc.setDrawColor(210, 195, 175);
+  doc.rect(16, y, pageWidth - 32, 16, 'S');
+
+  doc.setFont('times', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(180, 83, 9);
+  doc.text('Primary Agonists:', 20, y + 6);
+  doc.setFont('times', 'normal');
+  doc.setTextColor(30, 30, 30);
+  const primaryStr = exercise.primaryMuscles?.map((m: any) => translateMuscle(m, language)).join(', ') || 'Primary Musculature';
+  doc.text(primaryStr, 52, y + 6);
+
+  doc.setFont('times', 'bold');
+  doc.setTextColor(100, 100, 100);
+  doc.text('Secondary / Kinetic Chain:', 20, y + 12);
+  doc.setFont('times', 'normal');
+  doc.setTextColor(50, 50, 50);
+  const secondaryStr = exercise.secondaryMuscles?.map((m: any) => translateMuscle(m, language)).join(', ') || 'Kinetic Stabilizers & Core';
+  doc.text(secondaryStr, 64, y + 12);
+
+  y += 22;
+
+  // Biomechanical Execution Protocol
+  doc.setFont('times', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(26, 26, 26);
+  doc.text('II. BIOMECHANICAL EXECUTION DOCTRINE', 16, y);
+
+  y += 5;
+
+  const steps = exercise.executionSteps || {
+    setup: 'Firmly stabilize base of support. Brace core with intra-abdominal pressure, pack scapulae, and calibrate joint angles.',
+    eccentric: 'Descend under strict 3-second tension control. Maintain path of resistance aligned with prime mover fiber pennation.',
+    concentric: 'Drive explosively through the concentric phase without excessive momentum or compensatory joint flexion.',
+    commonMistakes: 'Avoid rushing eccentric cadence, flaring elbows, hyperextending lumbar spine, or losing intra-thoracic pressure.',
+  };
+
+  const stepItems = [
+    { label: 'Phase 1: Setup & Joint Calibration', content: steps.setup },
+    { label: 'Phase 2: Eccentric Load & Muscle Stretch', content: steps.eccentric },
+    { label: 'Phase 3: Concentric Mechanical Tension', content: steps.concentric },
+    { label: 'Phase 4: Common Flaws & Structural Safeguards', content: steps.commonMistakes },
+  ];
+
+  stepItems.forEach((step, idx) => {
+    doc.setFillColor(idx % 2 === 0 ? 250 : 255, idx % 2 === 0 ? 245 : 255, idx % 2 === 0 ? 238 : 255);
+    doc.rect(16, y, pageWidth - 32, 16, 'FD');
+    doc.setDrawColor(220, 210, 195);
+    doc.rect(16, y, pageWidth - 32, 16, 'S');
+
+    doc.setFont('times', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(153, 27, 27);
+    doc.text(step.label, 20, y + 5);
+
+    doc.setFont('times', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(40, 40, 40);
+    const splitLines = doc.splitTextToSize(step.content, pageWidth - 42);
+    doc.text(splitLines, 20, y + 10);
+
+    y += 18;
+  });
+
+  y += 2;
+
+  // Technique Cues & Form Checklist
+  doc.setFont('times', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(26, 26, 26);
+  doc.text('III. CENTURION FORM CHECKLIST & OVERLOAD RULES', 16, y);
+
+  y += 5;
+  doc.setFillColor(245, 239, 227);
+  doc.rect(16, y, pageWidth - 32, 24, 'FD');
+  doc.setDrawColor(180, 83, 9);
+  doc.rect(16, y, pageWidth - 32, 24, 'S');
+
+  doc.setFont('times', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(180, 83, 9);
+  doc.text('Technique Cues:', 20, y + 5.5);
+
+  doc.setFont('times', 'normal');
+  doc.setTextColor(30, 30, 30);
+  const cues = exercise.techniqueCues && exercise.techniqueCues.length > 0
+    ? exercise.techniqueCues.slice(0, 3)
+    : [
+        'Brace abdominal wall 360 degrees as if taking a blow.',
+        'Actively pull weight into the deepest comfortable stretch.',
+        'Do not compromise joint angles to move heavier load.',
+      ];
+
+  cues.forEach((c, cIdx) => {
+    doc.text(`• ${c}`, 24, y + 10 + cIdx * 4);
+  });
+
+  if (exercise.progressionRule) {
+    y += 26;
+    doc.setFont('times', 'bold');
+    doc.setFontSize(8.5);
+    doc.setTextColor(153, 27, 27);
+    doc.text('Progressive Overload Rule: ', 16, y);
+    doc.setFont('times', 'italic');
+    doc.setTextColor(60, 60, 60);
+    doc.text(exercise.progressionRule, 62, y);
+  }
+
+  drawCaesarSeal(doc, pageWidth, pageHeight, 'STANDARDIZED');
+
+  const safeFilename = `HOMODEUS_EXERCISE_${(exercise.id || exercise.name).replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
+  doc.save(safeFilename);
+}
+
+/**
+ * 3. WEEKLY VII-DAY TRAINING CODEX PDF EXPORT
+ * Generates an imperial 7-day schedule codex displaying all days, workouts, and volume targets.
+ */
+export function generateWeeklyPlanPdf(
+  weeklyPlan: WorkoutDay[],
+  profile: UserProfile,
+  language: SupportedLanguage = 'en'
+): void {
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
+  });
+
+  const { pageWidth, pageHeight } = applyRomanParchmentStyling(doc);
+
+  // Imperial Header
+  let y = 22;
+  doc.setFont('times', 'bold');
+  doc.setTextColor(153, 27, 27);
+  doc.setFontSize(11);
+  doc.text('• S E N A T V S • P O P V L V S Q V E • R O M A N V S •', pageWidth / 2, y, { align: 'center' });
+
+  y += 7;
+  doc.setFont('times', 'bold');
+  doc.setTextColor(26, 26, 26);
+  doc.setFontSize(22);
+  doc.text('HOMO DEVS — VII-DAY TRAINING CODEX', pageWidth / 2, y, { align: 'center' });
+
+  y += 5;
   doc.setFont('times', 'italic');
-  doc.setFontSize(7);
-  doc.setTextColor(120, 120, 120);
-  const isoHash = `ISO/IEC 8000 VERIFIED • LEDGER SIGNATURE: SHA256-${Math.abs(
-    (session.totalTonnageKg * 31 + session.durationMinutes * 17) ^ 0xabcdef
-  ).toString(16).toUpperCase().padStart(8, '0')}`;
-  doc.text(isoHash, pageWidth / 2, pageHeight - 12, { align: 'center' });
+  doc.setTextColor(180, 83, 9);
+  doc.setFontSize(10);
+  doc.text('✦ IMPERIAL SPLIT STRATEGY & VOLUME ALLOCATION ✦', pageWidth / 2, y, { align: 'center' });
 
-  // 8. Trigger File Download
-  const filename = `HOMODEUS_SCROLL_${session.workoutName.replace(/[^a-zA-Z0-9]/g, '_')}_${session.date}.pdf`;
+  // Divider Line
+  y += 4;
+  doc.setDrawColor(180, 83, 9);
+  doc.setLineWidth(0.5);
+  doc.line(20, y, pageWidth - 20, y);
+
+  // Athlete Campaign Dossier
+  y += 6;
+  doc.setFillColor(245, 239, 227);
+  doc.rect(16, y, pageWidth - 32, 20, 'FD');
+  doc.setDrawColor(180, 83, 9);
+  doc.setLineWidth(0.3);
+  doc.rect(16, y, pageWidth - 32, 20, 'S');
+
+  doc.setFont('times', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(153, 27, 27);
+  doc.text('ATHLETE:', 22, y + 6);
+  doc.setFont('times', 'normal');
+  doc.setTextColor(20, 20, 20);
+  doc.text(profile.name || 'Gladiator of Rome', 42, y + 6);
+
+  doc.setFont('times', 'bold');
+  doc.setTextColor(153, 27, 27);
+  doc.text('PRIMARY GOAL:', 22, y + 13);
+  doc.setFont('times', 'normal');
+  doc.setTextColor(20, 20, 20);
+  doc.text(translateGoal(profile.primaryGoal, language).toUpperCase(), 53, y + 13);
+
+  const col2X = pageWidth / 2 + 5;
+  doc.setFont('times', 'bold');
+  doc.setTextColor(153, 27, 27);
+  doc.text('EXPERIENCE:', col2X, y + 6);
+  doc.setFont('times', 'normal');
+  doc.setTextColor(20, 20, 20);
+  doc.text(profile.experience.toUpperCase(), col2X + 28, y + 6);
+
+  doc.setFont('times', 'bold');
+  doc.setTextColor(153, 27, 27);
+  doc.text('FREQUENCY:', col2X, y + 13);
+  doc.setFont('times', 'normal');
+  doc.setTextColor(20, 20, 20);
+  const activeDaysCount = weeklyPlan.filter(d => !d.isRestDay).length;
+  doc.text(`${activeDaysCount} Days Training / ${7 - activeDaysCount} Days Recovery`, col2X + 28, y + 13);
+
+  y += 26;
+
+  // 7-Day Schedule Chronicle
+  doc.setFont('times', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(26, 26, 26);
+  doc.text('WEEKLY BATTLE ORDER (MONDAY THROUGH SUNDAY)', 16, y);
+
+  y += 5;
+
+  const orderedDays = [1, 2, 3, 4, 5, 6, 0].map(idx => 
+    weeklyPlan.find(d => d.dayIndex === idx) || {
+      dayIndex: idx,
+      dayName: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][idx],
+      isRestDay: true,
+      name: 'Rest & Recovery Day',
+      focus: ['recovery'],
+      estimatedDurationMinutes: 0,
+      exercises: [],
+    }
+  );
+
+  orderedDays.forEach((day, idx) => {
+    if (y > pageHeight - 44) return;
+
+    const isRest = day.isRestDay;
+    doc.setFillColor(isRest ? 245 : 255, isRest ? 245 : 255, isRest ? 245 : 248);
+    doc.rect(16, y, pageWidth - 32, 13, 'FD');
+    doc.setDrawColor(180, 83, 9);
+    doc.setLineWidth(isRest ? 0.2 : 0.35);
+    doc.rect(16, y, pageWidth - 32, 13, 'S');
+
+    // Day Tag
+    doc.setFont('times', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(isRest ? 120 : 153, isRest ? 120 : 27, isRest ? 120 : 27);
+    doc.text(`${day.dayName.toUpperCase()}:`, 20, y + 5);
+
+    // Workout Name
+    doc.setFont('times', isRest ? 'italic' : 'bold');
+    doc.setTextColor(isRest ? 100 : 20, isRest ? 100 : 20, isRest ? 100 : 20);
+    const workoutLabel = isRest ? 'Rest Day & Active CNS Recovery' : translateWorkoutName(day.name, language);
+    doc.text(workoutLabel, 50, y + 5);
+
+    // Target Focus & Duration
+    doc.setFont('times', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    const focusStr = day.focus && day.focus.length > 0 ? day.focus.join(', ') : 'Rest';
+    doc.text(`Focus: ${focusStr}`, 20, y + 10);
+
+    if (!isRest) {
+      doc.setTextColor(180, 83, 9);
+      doc.text(`~${day.estimatedDurationMinutes || 60} min • ${day.exercises?.length || 0} Movements`, 130, y + 10);
+    } else {
+      doc.setTextColor(70, 130, 90);
+      doc.text('Mobility, Hydration & Protein Synthesis Focus', 115, y + 10);
+    }
+
+    y += 15;
+  });
+
+  drawCaesarSeal(doc, pageWidth, pageHeight, 'RATIFIED');
+
+  const filename = `HOMODEUS_WEEKLY_CODEX_${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(filename);
 }

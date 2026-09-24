@@ -8,8 +8,10 @@ import {
   ChevronRight, 
   Sparkles, 
   Flame, 
-  X 
+  X,
+  FileText
 } from 'lucide-react';
+import { generateWeeklyPlanPdf } from '../logic/pdfExporter';
 import { DAY_NAMES, DAY_NAMES_SHORT } from '../data/defaultProfile';
 import { SupportedLanguage, t } from '../logic/i18n';
 import { 
@@ -69,10 +71,20 @@ export const WeeklyOverview: React.FC<WeeklyOverviewProps> = ({
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-slate-300">
             Split: <strong className="text-cyan-400 capitalize">{translateGoal(profile.primaryGoal, language)}</strong>
           </span>
+
+          <button
+            type="button"
+            onClick={() => generateWeeklyPlanPdf(weeklyPlan, profile, language)}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/40 text-amber-300 text-xs font-roman font-bold transition-all shadow-sm hover:scale-105"
+            title="Download Imperial VII-Day Training Plan Codex (PDF)"
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-400" />
+            <span>Weekly Codex (PDF)</span>
+          </button>
         </div>
       </div>
 
