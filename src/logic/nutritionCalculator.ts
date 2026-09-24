@@ -10,10 +10,61 @@ export function calculateNutritionTarget(
   forcedMode?: PhysiqueGoalMode,
   language: SupportedLanguage = 'en'
 ): NutritionTarget {
-  const weight = profile.currentWeightKg || 80;
-  const goalWeight = profile.goalWeightKg || weight;
-  const height = profile.heightCm || 180;
-  const age = profile.ageYears || 28;
+  const missingFields: string[] = [];
+  if (!profile.currentWeightKg || profile.currentWeightKg <= 0) missingFields.push('currentWeightKg');
+  if (!profile.heightCm || profile.heightCm <= 0) missingFields.push('heightCm');
+  if (!profile.ageYears || profile.ageYears <= 0) missingFields.push('ageYears');
+
+  if (missingFields.length > 0) {
+    return {
+      isConfigured: false,
+      missingFields,
+      bmr: 0,
+      tdee: 0,
+      targetCalories: 0,
+      calorieDelta: 0,
+      goalMode: forcedMode || 'recomp',
+      modeLabel: language === 'it' ? 'Dati Biometrici Richiesti' : 'Biometrics Required',
+      weeklyRateKg: 0,
+      estimatedWeeks: 0,
+      targetDate: '',
+      proteinGrams: 0,
+      proteinPerKg: 0,
+      carbsGrams: 0,
+      fatsGrams: 0,
+      waterLiters: 0,
+      proteinKcal: 0,
+      carbsKcal: 0,
+      fatsKcal: 0,
+      proAiDirectives: {
+        macroTiming: [
+          language === 'it' 
+            ? 'Configura peso, altezza ed età nel dossier per calcolare la ripartizione dei macronutrienti secondo standard ISO.'
+            : 'Configure your current weight, height, and age in your Athlete Dossier to compute tailored macronutrient timing.'
+        ],
+        trainingCalibration: [
+          language === 'it'
+            ? 'La calibrazione dell\'intensità meccanica richiede peso attuale e peso obiettivo verificati.'
+            : 'Mechanical tension calibration requires verified current weight and goal weight.'
+        ],
+        cardioNeat: [
+          language === 'it'
+            ? 'Il calcolo del dispendio energetico giornaliero (TDEE) e i passi target richiedono parametri biometrici reali.'
+            : 'Daily energy expenditure (TDEE) and NEAT targets require verified biometric parameters.'
+        ],
+        recoverySupplements: [
+          language === 'it'
+            ? 'Il fabbisogno idrico e di integrazione si calcola sulla tua massa corporea reale.'
+            : 'Hydration and supplement dosage is computed from your verified body mass.'
+        ],
+      },
+    };
+  }
+
+  const weight = profile.currentWeightKg!;
+  const goalWeight = profile.goalWeightKg ?? weight;
+  const height = profile.heightCm!;
+  const age = profile.ageYears!;
   const isFeminine = profile.genderPreference === 'feminine';
   const bodyFat = profile.bodyFatPercent;
 
@@ -194,6 +245,8 @@ export function calculateNutritionTarget(
     carbsKcal,
     fatsKcal,
     proAiDirectives,
+    isConfigured: true,
+    missingFields: [],
   };
 }
 

@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Activity, Sparkles, Layers, UserCheck, ShieldCheck, Flame, RotateCw, Zap, Target } from 'lucide-react';
+import { Activity, Sparkles, Layers, UserCheck, ShieldCheck, Flame, RotateCw, Zap, Target, Box } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
 import { translateMuscle, translateExerciseName } from '../logic/exerciseTranslations';
+import { ThreeAnatomicalModel } from './ThreeAnatomicalModel';
 
 interface MuscleRecoveryGaugeProps {
   primaryMuscles: string[];
@@ -34,6 +35,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
   const [bodyOrientation, setBodyOrientation] = useState<'front' | 'back'>('front');
   const [selectedMuscleId, setSelectedMuscleId] = useState<string>('chest');
   const [hoveredMuscleId, setHoveredMuscleId] = useState<string | null>(null);
+  const [engineMode, setEngineMode] = useState<'3d_webgl' | '2d_svg'>('3d_webgl');
 
   // Dynamic calculation based on planned exercises and today's volume
   const muscleScores: Record<string, MuscleStatus> = {
@@ -275,38 +277,82 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            {/* 3D Anatomical Heatmap Canvas */}
-            <div className="lg:col-span-6 flex flex-col items-center justify-center p-5 rounded-3xl bg-[#06080f] border border-slate-800/80 shadow-inner relative">
-              {/* Orientation Switcher Ribbon */}
-              <div className="flex items-center justify-between w-full mb-3 px-2">
-                <div className="flex items-center gap-2 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-[11px] font-roman font-bold">
+            {/* 3D Anatomical Heatmap Canvas / 2D Vector Chart */}
+            <div className="lg:col-span-6 flex flex-col items-center justify-center p-3 sm:p-5 rounded-3xl bg-[#06080f] border border-slate-800/80 shadow-inner relative">
+              {/* Engine Switcher Ribbon */}
+              <div className="flex items-center justify-between w-full mb-3 px-1">
+                <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-[11px] font-roman font-bold">
                   <button
-                    onClick={() => setBodyOrientation('front')}
-                    className={`px-3 py-1 rounded-lg transition-all ${
-                      bodyOrientation === 'front'
-                        ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                    onClick={() => setEngineMode('3d_webgl')}
+                    className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
+                      engineMode === '3d_webgl'
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black shadow-sm'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    {t('recovery.anterior', language)}
+                    <Box className="w-3.5 h-3.5" />
+                    <span>3D WebGL Model</span>
                   </button>
                   <button
-                    onClick={() => setBodyOrientation('back')}
-                    className={`px-3 py-1 rounded-lg transition-all ${
-                      bodyOrientation === 'back'
-                        ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                    onClick={() => setEngineMode('2d_svg')}
+                    className={`px-2.5 py-1 rounded-lg transition-all flex items-center gap-1.5 ${
+                      engineMode === '2d_svg'
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 font-black shadow-sm'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
-                    {t('recovery.posterior', language)}
+                    <Layers className="w-3.5 h-3.5" />
+                    <span>2D Chart</span>
                   </button>
                 </div>
 
                 <div className="text-[10px] font-mono text-slate-500 flex items-center gap-1.5">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>3D BIOMETRIC LINK</span>
+                  <span>{engineMode === '3d_webgl' ? 'THREE.JS 3D ENGINE' : 'VECTOR 2D SVG'}</span>
                 </div>
               </div>
+
+              {engineMode === '3d_webgl' ? (
+                <div className="w-full">
+                  <ThreeAnatomicalModel
+                    muscleScores={muscleScores}
+                    selectedMuscleId={selectedMuscleId}
+                    onSelectMuscle={setSelectedMuscleId}
+                    orientation={bodyOrientation}
+                  />
+                </div>
+              ) : (
+                <>
+                  {/* Orientation Switcher Ribbon */}
+                  <div className="flex items-center justify-between w-full mb-3 px-2">
+                    <div className="flex items-center gap-2 bg-slate-950/80 p-1 rounded-xl border border-slate-800 text-[11px] font-roman font-bold">
+                      <button
+                        onClick={() => setBodyOrientation('front')}
+                        className={`px-3 py-1 rounded-lg transition-all ${
+                          bodyOrientation === 'front'
+                            ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {t('recovery.anterior', language)}
+                      </button>
+                      <button
+                        onClick={() => setBodyOrientation('back')}
+                        className={`px-3 py-1 rounded-lg transition-all ${
+                          bodyOrientation === 'back'
+                            ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {t('recovery.posterior', language)}
+                      </button>
+                    </div>
+
+                    <div className="text-[10px] font-mono text-slate-500 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>2D ANATOMICAL CHART</span>
+                    </div>
+                  </div>
 
               {/* High-Definition Biologically Authentic SVG Silhouette */}
               <div className="relative w-64 h-96 flex items-center justify-center">
@@ -938,7 +984,9 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                   {t('recovery.tapTip', language)}
                 </span>
               </div>
-            </div>
+            </>
+          )}
+        </div>
 
             {/* Selected Muscle Biomechanical Dossier (Right Side) */}
             <div className="lg:col-span-6 space-y-4">

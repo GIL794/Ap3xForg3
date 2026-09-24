@@ -277,9 +277,16 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 </span>
               </div>
               <div className="text-xl sm:text-2xl font-black text-emerald-300 mono-font">
-                {formData.currentWeightKg || 80} <span className="text-xs font-normal text-slate-400">→ {formData.goalWeightKg || 75} kg</span>
+                {formData.currentWeightKg ? (
+                  <span>{formData.currentWeightKg} <span className="text-xs font-normal text-slate-400">{formData.goalWeightKg ? `→ ${formData.goalWeightKg} kg` : 'kg'}</span></span>
+                ) : (
+                  <span className="text-sm font-normal text-slate-500 italic">Unconfigured</span>
+                )}
               </div>
-              <p className="text-[10px] text-slate-500 mt-0.5">{formData.heightCm || 180} cm • {formData.bodyFatPercent || 12}% BF</p>
+              <p className="text-[10px] text-slate-500 mt-0.5">
+                {formData.heightCm ? `${formData.heightCm} cm` : 'Height unset'}
+                {formData.bodyFatPercent ? ` • ${formData.bodyFatPercent}% BF` : ''}
+              </p>
             </div>
 
             <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-purple-500/30 shadow-inner">
@@ -562,6 +569,11 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                 isProSubscriber={isProSubscriber}
                 onOpenPro={onOpenPro}
                 language={language}
+                onUpdateBiometrics={(updated) => {
+                  const merged = { ...formData, ...updated };
+                  setFormData(merged);
+                  onSaveProfile(merged);
+                }}
               />
             </div>
           </div>

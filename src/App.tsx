@@ -511,6 +511,16 @@ export const App: React.FC = () => {
               todayWorkout={appState.todayWorkout}
               profile={appState.profile}
               completedSets={appState.completedSets}
+              loggedWeights={appState.loggedWeights}
+              onUpdateLoggedWeight={(exerciseId, weightKg) => {
+                setAppState((prev) => ({
+                  ...prev,
+                  loggedWeights: {
+                    ...prev.loggedWeights,
+                    [exerciseId]: weightKg,
+                  },
+                }));
+              }}
               onUpdateCompletedSets={handleUpdateCompletedSets}
               onOverridePlan={handleOverrideTodayPlan}
               onOpenPro={() => setIsProModalOpen(true)}

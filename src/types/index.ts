@@ -205,6 +205,8 @@ export type PhysiqueGoalMode =
   | 'hypertrophy_aggressive';
 
 export interface NutritionTarget {
+  isConfigured: boolean;
+  missingFields: string[];
   bmr: number;
   tdee: number;
   targetCalories: number;

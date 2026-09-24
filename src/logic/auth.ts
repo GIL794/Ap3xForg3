@@ -298,29 +298,59 @@ export function loadUserState(userId: string): AppState {
             const alreadyExists = existingHistory.some((s: any) => s.date === activeDate);
             
             if (!alreadyExists && completedCount > 0) {
-              const pastTonnage = parsed.totalTonnageKg || 3800;
+              const activeDateTime = new Date(activeDate);
+              const dayName = isNaN(activeDateTime.getTime()) 
+                ? 'Session Day' 
+                : activeDateTime.toLocaleDateString('en-US', { weekday: 'long' });
+              
+              // Resolve actual plan matching this day
+              const plan = generateWeeklyPlan(parsed.profile);
+              const dayOfWeek = isNaN(activeDateTime.getTime()) ? 1 : activeDateTime.getDay();
+              const scheduledWorkout = plan.find(w => w.dayIndex === dayOfWeek) || plan[0];
+              const workoutName = scheduledWorkout?.name || 'Logged Workout Session';
+              
+              const loggedWeights = parsed.loggedWeights || {};
+              let computedTonnageKg = 0;
+
+              const exerciseRecords = Object.entries(parsed.completedSets || {}).map(([id, sets]: any) => {
+                const weight = Number(loggedWeights[id]) || 0;
+                const completedSetsArray = Array.isArray(sets) ? sets : [];
+                const completedInThisEx = completedSetsArray.filter(Boolean).length;
+                
+                // Find exercise in schedule to get rep estimate
+                const matchedEx = scheduledWorkout?.exercises.find(e => e.id === id);
+                const repMatch = matchedEx?.reps?.match(/\d+/g);
+                const avgReps = repMatch ? (repMatch.length > 1 ? Math.round((Number(repMatch[0]) + Number(repMatch[1])) / 2) : Number(repMatch[0])) : 10;
+                
+                if (weight > 0 && completedInThisEx > 0) {
+                  computedTonnageKg += Math.round(weight * completedInThisEx * avgReps);
+                }
+
+                return {
+                  id,
+                  name: matchedEx?.name || id.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+                  category: matchedEx?.category || ('push' as const),
+                  sets: completedSetsArray.map((c: boolean, idx: number) => ({
+                    setNumber: idx + 1,
+                    type: 'normal' as const,
+                    weightKg: weight,
+                    reps: avgReps,
+                    completed: Boolean(c),
+                  })),
+                };
+              });
+
               const autoSession = {
                 id: `session_auto_${Date.now()}_${activeDate}`,
                 date: activeDate,
-                dayName: 'Monday',
-                workoutName: 'Upper Body A (Push Emphasis)',
-                durationMinutes: 65,
-                totalTonnageKg: pastTonnage,
+                dayName,
+                workoutName,
+                durationMinutes: scheduledWorkout?.estimatedDurationMinutes || 60,
+                totalTonnageKg: parsed.totalTonnageKg && parsed.totalTonnageKg > 0 ? parsed.totalTonnageKg : computedTonnageKg,
                 completedSetsCount: completedCount,
                 totalSetsCount: completedCount,
-                prCount: 1,
-                exercises: Object.entries(parsed.completedSets || {}).map(([id, sets]: any) => ({
-                  id,
-                  name: id.replace(/_/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
-                  category: 'push',
-                  sets: (sets || []).map((c: boolean, idx: number) => ({
-                    setNumber: idx + 1,
-                    type: 'normal',
-                    weightKg: 80,
-                    reps: 10,
-                    completed: c,
-                  })),
-                })),
+                prCount: 0,
+                exercises: exerciseRecords,
               };
               existingHistory.unshift(autoSession);
               localStorage.setItem('homodevs_workout_history_v1', JSON.stringify(existingHistory.slice(0, 100)));

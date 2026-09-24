@@ -35,8 +35,10 @@ import {
   History,
   Check,
   Scale,
-  X
+  X,
+  FileText
 } from 'lucide-react';
+import { generateImperialWorkoutPdf } from '../logic/pdfExporter';
 
 interface TodayWorkoutViewProps {
   todayWorkout: TodayWorkout;
@@ -49,6 +51,8 @@ interface TodayWorkoutViewProps {
   lifetimeTonnageKg?: number;
   onWorkoutFinished?: (sessionTonnage: number, xpEarned: number) => void;
   isProSubscriber?: boolean;
+  loggedWeights?: Record<string, number>;
+  onUpdateLoggedWeight?: (exerciseId: string, weightKg: number) => void;
 }
 
 const EMPTY_SETS_ARRAY: boolean[] = [];
@@ -64,36 +68,22 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
   lifetimeTonnageKg = 0,
   onWorkoutFinished,
   isProSubscriber = false,
+  loggedWeights,
+  onUpdateLoggedWeight,
 }) => {
   const [useCatchUp, setUseCatchUp] = useState(false);
   const [warmupDone, setWarmupDone] = useState(false);
   const [cooldownDone, setCooldownDone] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Exercise weight tracker for Tonnage & Plate Calculator
-  const [exerciseWeights, setExerciseWeights] = useState<Record<string, number>>({
-    barbell_bench_press: 80,
-    incline_db_press: 28,
-    machine_chest_press: 70,
-    overhead_press: 50,
-    lat_pulldown: 65,
-    seated_cable_row: 60,
-    pull_ups: 80,
-    db_lateral_raise: 12,
-    cable_lateral_raise: 7.5,
-    rear_delt_flyes: 10,
-    face_pulls: 25,
-    barbell_curl: 30,
-    incline_db_curl: 14,
-    hammer_curl: 16,
-    triceps_rope_pushdown: 25,
-    skull_crushers: 30,
-    barbell_squat: 100,
-    romanian_deadlift: 90,
-    leg_press: 160,
-    cable_crunch: 40,
-    hanging_leg_raise: 75,
-  });
+  // Exercise weight tracker strictly initialized from athlete's logged weights (Zero Assumptions)
+  const [exerciseWeights, setExerciseWeights] = useState<Record<string, number>>(loggedWeights || {});
+
+  useEffect(() => {
+    if (loggedWeights) {
+      setExerciseWeights(prev => ({ ...prev, ...loggedWeights }));
+    }
+  }, [loggedWeights]);
 
   // Docked Floating Rest Timer & Expanded Modal
   const [activeTimer, setActiveTimer] = useState<{ isOpen: boolean; seconds: number; exerciseName: string }>({
@@ -180,10 +170,10 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
     // Parse average reps
     const repMatch = ex.reps.match(/\d+/g);
     const avgReps = repMatch ? (repMatch.length > 1 ? (Number(repMatch[0]) + Number(repMatch[1])) / 2 : Number(repMatch[0])) : 10;
-    const weight = exerciseWeights[ex.id] || 40;
+    const weight = exerciseWeights[ex.id] || 0;
 
-    // If sets completed, add verified tonnage; otherwise add planned portion
-    if (completedCountForEx > 0) {
+    // If sets completed and weight entered, add verified tonnage
+    if (completedCountForEx > 0 && weight > 0) {
       totalTonnageKg += Math.round(completedCountForEx * weight * avgReps);
     }
   });
@@ -214,18 +204,22 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         exerciseWeights,
         totalTonnageKg,
         completedSetsCount,
-        exercises: exercises.map(ex => ({
-          id: ex.id,
-          name: ex.name,
-          category: ex.category,
-          sets: (completedSets[ex.id] || []).map((c, idx) => ({
-            setNumber: idx + 1,
-            type: 'normal',
-            weightKg: exerciseWeights[ex.id] || 50,
-            reps: 10,
-            completed: c,
-          })),
-        })),
+        exercises: exercises.map(ex => {
+          const repMatch = ex.reps.match(/\d+/g);
+          const repsVal = repMatch ? (repMatch.length > 1 ? Math.round((Number(repMatch[0]) + Number(repMatch[1])) / 2) : Number(repMatch[0])) : 10;
+          return {
+            id: ex.id,
+            name: ex.name,
+            category: ex.category,
+            sets: (completedSets[ex.id] || []).map((c, idx) => ({
+              setNumber: idx + 1,
+              type: 'normal' as const,
+              weightKg: exerciseWeights[ex.id] || 0,
+              reps: repsVal,
+              completed: c,
+            })),
+          };
+        }),
         lastUpdated: new Date().toISOString(),
       });
     }
@@ -369,7 +363,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         sets: (completedSets[ex.id] || []).map((c, idx) => ({
           setNumber: idx + 1,
           type: 'normal',
-          weightKg: exerciseWeights[ex.id] || 50,
+          weightKg: exerciseWeights[ex.id] || 0,
           reps: 10,
           completed: c,
         })),
@@ -381,6 +375,40 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
     if (onWorkoutFinished) {
       onWorkoutFinished(totalTonnageKg, xpEarned);
     }
+  };
+
+  const handleExportPdfScroll = () => {
+    generateImperialWorkoutPdf(
+      {
+        date: todayWorkout.date,
+        dayName: activePlan.dayName,
+        workoutName: activePlan.name,
+        durationMinutes: activePlan.estimatedDurationMinutes,
+        totalTonnageKg: totalTonnageKg,
+        completedSetsCount: completedSetsCount,
+        exercises: exercises.map(ex => {
+          const repMatch = ex.reps.match(/\d+/g);
+          const repsVal = repMatch ? (repMatch.length > 1 ? Math.round((Number(repMatch[0]) + Number(repMatch[1])) / 2) : Number(repMatch[0])) : 10;
+          return {
+            id: ex.id,
+            name: ex.name,
+            category: ex.category,
+            sets: (completedSets[ex.id] || []).map((c, idx) => ({
+              setNumber: idx + 1,
+              weightKg: exerciseWeights[ex.id] || 0,
+              reps: repsVal,
+              completed: c,
+            })),
+          };
+        }),
+      },
+      {
+        name: profile.name || 'Gladiator of Rome',
+        archetype: profile.archetype,
+        level: Math.max(1, Math.floor(lifetimeTonnageKg / 10000) + 1),
+        xp: Math.round(totalTonnageKg * 0.05 + completedSetsCount * 25 + 150),
+      }
+    );
   };
 
   return (
@@ -403,8 +431,18 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
               </span>
             </div>
 
-              {/* Top Right: Countdown, Target Weight Strategy & Finish Workout Trigger */}
-            <div className="flex items-center gap-2">
+            {/* Top Right: Countdown, Target Weight Strategy & Finish Workout Trigger */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <button
+                type="button"
+                onClick={handleExportPdfScroll}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-slate-750 border border-amber-500/40 text-amber-300 text-xs font-roman font-bold transition-all shadow-sm hover:scale-105"
+                title="Download Imperial Roman Workout Scroll (PDF)"
+              >
+                <FileText className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Imperial Scroll PDF</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setIsNutritionModalOpen(true)}

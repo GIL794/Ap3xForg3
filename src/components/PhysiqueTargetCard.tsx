@@ -25,6 +25,7 @@ interface PhysiqueTargetCardProps {
   isProSubscriber?: boolean;
   onOpenPro?: () => void;
   language?: SupportedLanguage;
+  onUpdateBiometrics?: (updated: Partial<UserProfile>) => void;
 }
 
 export const PhysiqueTargetCard: React.FC<PhysiqueTargetCardProps> = ({
@@ -32,14 +33,139 @@ export const PhysiqueTargetCard: React.FC<PhysiqueTargetCardProps> = ({
   isProSubscriber = false,
   onOpenPro,
   language = 'en',
+  onUpdateBiometrics,
 }) => {
   const [selectedMode, setSelectedMode] = useState<PhysiqueGoalMode | undefined>(undefined);
   const [activeStrategyTab, setActiveStrategyTab] = useState<'timing' | 'lifting' | 'cardio' | 'recovery'>('timing');
+  const [tempBiometrics, setTempBiometrics] = useState({
+    currentWeightKg: profile.currentWeightKg || '',
+    goalWeightKg: profile.goalWeightKg || '',
+    heightCm: profile.heightCm || '',
+    ageYears: profile.ageYears || '',
+  });
 
   const nutrition = calculateNutritionTarget(profile, selectedMode, language);
 
-  const currWeight = profile.currentWeightKg || 80;
-  const goalWeight = profile.goalWeightKg || currWeight;
+  // If biometrics are unconfigured, render ISO 8000 Compliant Data Configuration panel
+  if (!nutrition.isConfigured) {
+    return (
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/95 to-amber-950/20 border border-amber-500/40 p-6 sm:p-7 shadow-2xl space-y-5">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center shrink-0">
+            <Scale className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h3 className="text-lg font-black text-white font-roman tracking-wide">
+                {language === 'it' ? 'Dati Biometrici Richiesti' : 'Biometric Metrics Required'}
+              </h3>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-roman">
+                ISO 8000
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              {language === 'it'
+                ? 'Per garantire calcoli scientifici senza assunzioni fittizie, inserisci il tuo peso attuale, altezza ed età.'
+                : 'To calculate genuine BMR, TDEE, and macronutrient targets without arbitrary assumptions, enter your verified biometric data.'}
+            </p>
+          </div>
+        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (onUpdateBiometrics) {
+              onUpdateBiometrics({
+                currentWeightKg: tempBiometrics.currentWeightKg ? Number(tempBiometrics.currentWeightKg) : undefined,
+                goalWeightKg: tempBiometrics.goalWeightKg ? Number(tempBiometrics.goalWeightKg) : undefined,
+                heightCm: tempBiometrics.heightCm ? Number(tempBiometrics.heightCm) : undefined,
+                ageYears: tempBiometrics.ageYears ? Number(tempBiometrics.ageYears) : undefined,
+              });
+            }
+          }}
+          className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2"
+        >
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+              Current Weight (kg) *
+            </label>
+            <input
+              type="number"
+              step="0.5"
+              min="30"
+              max="300"
+              required
+              placeholder="e.g. 78"
+              value={tempBiometrics.currentWeightKg}
+              onChange={(e) => setTempBiometrics({ ...tempBiometrics, currentWeightKg: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-amber-300 font-bold mono-font focus:outline-none focus:border-amber-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+              Target Weight (kg)
+            </label>
+            <input
+              type="number"
+              step="0.5"
+              min="30"
+              max="300"
+              placeholder="e.g. 82"
+              value={tempBiometrics.goalWeightKg}
+              onChange={(e) => setTempBiometrics({ ...tempBiometrics, goalWeightKg: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-emerald-300 font-bold mono-font focus:outline-none focus:border-emerald-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+              Height (cm) *
+            </label>
+            <input
+              type="number"
+              min="100"
+              max="250"
+              required
+              placeholder="e.g. 178"
+              value={tempBiometrics.heightCm}
+              onChange={(e) => setTempBiometrics({ ...tempBiometrics, heightCm: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold mono-font focus:outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+              Age (years) *
+            </label>
+            <input
+              type="number"
+              min="14"
+              max="100"
+              required
+              placeholder="e.g. 28"
+              value={tempBiometrics.ageYears}
+              onChange={(e) => setTempBiometrics({ ...tempBiometrics, ageYears: e.target.value })}
+              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white font-bold mono-font focus:outline-none focus:border-cyan-400"
+            />
+          </div>
+
+          <div className="col-span-2 sm:col-span-4 pt-2">
+            <button
+              type="submit"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-roman font-black tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-105 transition-all"
+            >
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>Calibrate Scientific Biometrics</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  const currWeight = profile.currentWeightKg!;
+  const goalWeight = profile.goalWeightKg ?? currWeight;
   const deltaWeight = Number((goalWeight - currWeight).toFixed(1));
 
   // Mode Options for Interactive Selection

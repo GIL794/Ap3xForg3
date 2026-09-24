@@ -179,17 +179,17 @@ export function personalizeExercise(ex: PlannedExercise, profile: UserProfile): 
     finalEx.originalExerciseName = originalName;
   }
 
-  // 3. Synthesize Rich Personalized Rationale
-  const archetype = profile.archetype || 'hercules_mass';
-  const height = profile.heightCm || 180;
-  const currW = profile.currentWeightKg || 80;
-  const goalW = profile.goalWeightKg || currW;
-  const isDeficit = profile.primaryGoal === 'fat_loss' || goalW < currW - 2;
-  const isSurplus = profile.primaryGoal === 'upper_body_hypertrophy' || profile.primaryGoal === 'full_body_hypertrophy' || goalW > currW + 2;
+  // 3. Synthesize Rich Personalized Rationale (Strict ISO Data Quality — Zero Assumptions)
+  const archetype = profile.archetype;
+  const height = profile.heightCm;
+  const currW = profile.currentWeightKg;
+  const goalW = profile.goalWeightKg;
+  const isDeficit = profile.primaryGoal === 'fat_loss' || (typeof currW === 'number' && typeof goalW === 'number' && goalW < currW - 2);
+  const isSurplus = profile.primaryGoal === 'upper_body_hypertrophy' || profile.primaryGoal === 'full_body_hypertrophy' || (typeof currW === 'number' && typeof goalW === 'number' && goalW > currW + 2);
 
   const rationaleParts: string[] = [];
 
-  // Archetype rationale
+  // Archetype rationale (only if archetype is selected)
   if (archetype === 'adonis_aesthetic') {
     if (finalEx.primaryMuscles.includes('chest') || finalEx.primaryMuscles.includes('shoulders')) {
       rationaleParts.push('Adonis V-Taper Priority: Clavicular upper chest and lateral delt volume to forge the 1.618 Golden Ratio');
@@ -218,22 +218,26 @@ export function personalizeExercise(ex: PlannedExercise, profile: UserProfile): 
     rationaleParts.push('Athena Goddess Focus: Postural scapular alignment and 3D shoulder capping for symmetry');
   }
 
-  // Height lever biomechanical adjustment
-  if (height >= 185) {
-    if (finalEx.category === 'legs') {
-      rationaleParts.push(`Tall Lever Calibration (${height}cm): Longer femurs increase knee torque—cueing wider stance and high foot placement`);
-    } else if (finalEx.category === 'push') {
-      rationaleParts.push(`Tall Lever Calibration (${height}cm): Longer humeri create high shoulder moment arms—tuck elbows at ~45° to protect acromion`);
+  // Height lever biomechanical adjustment (strictly if height is provided)
+  if (typeof height === 'number' && height > 0) {
+    if (height >= 185) {
+      if (finalEx.category === 'legs') {
+        rationaleParts.push(`Tall Lever Calibration (${height}cm): Longer femurs increase knee torque—cueing wider stance and high foot placement`);
+      } else if (finalEx.category === 'push') {
+        rationaleParts.push(`Tall Lever Calibration (${height}cm): Longer humeri create high shoulder moment arms—tuck elbows at ~45° to protect acromion`);
+      }
+    } else if (height <= 165) {
+      rationaleParts.push(`Compact Lever Advantage (${height}cm): Shorter moment arms allow full deep stretch and explosive concentric power`);
     }
-  } else if (height <= 165) {
-    rationaleParts.push(`Compact Lever Advantage (${height}cm): Shorter moment arms allow full deep stretch and explosive concentric power`);
   }
 
-  // Weight goal context
-  if (isDeficit) {
-    rationaleParts.push(`Caloric Deficit (${currW}kg → ${goalW}kg): Mechanical tension prioritized at RPE ${finalEx.targetRpe} to shield muscle against catabolism`);
-  } else if (isSurplus) {
-    rationaleParts.push(`Hypertrophic Surplus (${currW}kg → ${goalW}kg): Rest intervals (${finalEx.restSeconds}s) configured for ATP-CP replenishment and progressive volume`);
+  // Weight goal context (strictly if weights are provided)
+  if (typeof currW === 'number' && typeof goalW === 'number' && currW > 0 && goalW > 0) {
+    if (isDeficit) {
+      rationaleParts.push(`Caloric Deficit (${currW}kg → ${goalW}kg): Mechanical tension prioritized at RPE ${finalEx.targetRpe} to shield muscle against catabolism`);
+    } else if (isSurplus) {
+      rationaleParts.push(`Hypertrophic Surplus (${currW}kg → ${goalW}kg): Rest intervals (${finalEx.restSeconds}s) configured for ATP-CP replenishment and progressive volume`);
+    }
   }
 
   // Injury note
