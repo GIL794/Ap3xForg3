@@ -900,3 +900,428 @@ export function translateDayName(dayIdx: number, lang: SupportedLanguage = 'en',
   }
   return DAY_NAMES_TRANSLATED[lang]?.[dayIdx] || DAY_NAMES_TRANSLATED.en[dayIdx] || '';
 }
+
+// ==========================================
+// 10. BIO-RECOVERY ANATOMICAL TRANSLATIONS
+// ==========================================
+export interface TranslatedMuscleRecoveryInfo {
+  id: string;
+  name: string;
+  latinName: string;
+  recommendation: string;
+  functionLore: string;
+}
+
+export const MUSCLE_RECOVERY_TRANSLATIONS: Record<string, Record<SupportedLanguage, TranslatedMuscleRecoveryInfo>> = {
+  chest: {
+    en: {
+      id: 'chest',
+      name: 'Pectorals (Chest)',
+      latinName: 'Pectoralis Major & Minor',
+      recommendation: 'Primed for high mechanical tension and compound barbell presses.',
+      functionLore: 'Horizontal adduction & shoulder flexion. High fast-twitch fiber density.',
+    },
+    it: {
+      id: 'chest',
+      name: 'Pettorali (Petto)',
+      latinName: 'Pectoralis Major & Minor',
+      recommendation: 'Pronti per alta tensione meccanica e distensioni pesanti su panca piana.',
+      functionLore: 'Adduzione orizzontale e flessione omerale. Alta densità di fibre rapide.',
+    },
+    es: {
+      id: 'chest',
+      name: 'Pectorales (Pecho)',
+      latinName: 'Pectoralis Major & Minor',
+      recommendation: 'Preparados para alta tensión mecánica y press de banca pesado.',
+      functionLore: 'Aducción horizontal y flexión del hombro. Gran densidad de fibras rápidas.',
+    },
+    fr: {
+      id: 'chest',
+      name: 'Pectoraux (Poitrine)',
+      latinName: 'Pectoralis Major & Minor',
+      recommendation: 'Prêts pour une forte tension mécanique et développé couché lourd.',
+      functionLore: 'Adduction horizontale et flexion de l\'épaule. Haute densité de fibres rapides.',
+    },
+    de: {
+      id: 'chest',
+      name: 'Brustmuskulatur (Pectoralis)',
+      latinName: 'Pectoralis Major & Minor',
+      recommendation: 'Bereit für maximale mechanische Spannung und schweres Bankdrücken.',
+      functionLore: 'Horizontale Adduktion und Schulterflexion. Hohe Dichte an schnell zuckenden Fasern.',
+    },
+    la: {
+      id: 'chest',
+      name: 'Pectorales',
+      latinName: 'Pectoralis Major & Minor',
+      recommendation: 'Parati ad summam tensionem mechanicam et vectis scanni impulsus.',
+      functionLore: 'Adductio horizontalis et flexio umeri. Densitas fibrarum celerium maxima.',
+    },
+  },
+  deltoids: {
+    en: {
+      id: 'deltoids',
+      name: 'Deltoids (Shoulders)',
+      latinName: 'Deltoideus (Anterior, Lateral, Posterior)',
+      recommendation: 'Full scapular stability available. Target overhead volume & lateral head.',
+      functionLore: 'Multi-pennate shoulder abductors. 3D cannonball symmetry.',
+    },
+    it: {
+      id: 'deltoids',
+      name: 'Deltoidi (Spalle)',
+      latinName: 'Deltoideus (Anterior, Lateralis, Posterior)',
+      recommendation: 'Completa stabilità scapolare pronta. Ottimo per overhead press e alzate laterali.',
+      functionLore: 'Abduttori scapolari multi-pennati per una simmetria 3D a palla di cannone.',
+    },
+    es: {
+      id: 'deltoids',
+      name: 'Deltoides (Hombros)',
+      latinName: 'Deltoideus (Anterior, Lateral, Posterior)',
+      recommendation: 'Estabilidad escapular completa. Ideal para press militar y elevaciones laterales.',
+      functionLore: 'Abductores multipenniformes del hombro. Simetría 3D de bala de cañón.',
+    },
+    fr: {
+      id: 'deltoids',
+      name: 'Deltoïdes (Épaules)',
+      latinName: 'Deltoideus (Anterior, Lateralis, Posterior)',
+      recommendation: 'Stabilité scapulaire totale disponible. Ciblez le développé militaire et élévations.',
+      functionLore: 'Abducteurs de l\'épaule multipennés pour une carrure 3D puissante.',
+    },
+    de: {
+      id: 'deltoids',
+      name: 'Schultermuskulatur (Deltoideus)',
+      latinName: 'Deltoideus (Anterior, Lateral, Posterior)',
+      recommendation: 'Volle Schulterblattstabilität bereit. Ideal für Überkopfdrücken und Seitheben.',
+      functionLore: 'Multipennate Schulterabduktoren für imposante 3D-Kanonenkugel-Symmetrie.',
+    },
+    la: {
+      id: 'deltoids',
+      name: 'Deltoidei (Umeri)',
+      latinName: 'Deltoideus (Anterior, Lateralis, Posterior)',
+      recommendation: 'Stabilitas scapularis integra. Opportunum ad vectis elationem et lateralia.',
+      functionLore: 'Abductores umerales multipennati ad coronam bellicam effingendam.',
+    },
+  },
+  triceps: {
+    en: {
+      id: 'triceps',
+      name: 'Triceps Brachii',
+      latinName: 'Triceps Brachii (Caput Longum, Laterale, Mediale)',
+      recommendation: 'Moderate neural fatigue. Focus on controlled eccentric tempo.',
+      functionLore: 'Primary elbow extensor accounting for 60% of total arm mass.',
+    },
+    it: {
+      id: 'triceps',
+      name: 'Tricipiti Brachiali',
+      latinName: 'Triceps Brachii (Caput Longum, Laterale, Mediale)',
+      recommendation: 'Fatica neurale moderata. Concentrati sul tempo eccentrico controllato.',
+      functionLore: 'Principale estensore del gomito, costituisce il 60% della massa del braccio.',
+    },
+    es: {
+      id: 'triceps',
+      name: 'Tríceps Braquial',
+      latinName: 'Triceps Brachii (Caput Longum, Laterale, Mediale)',
+      recommendation: 'Fatiga neural moderata. Enfatizar la fase excéntrica controlada.',
+      functionLore: 'Principal extensor del codo, conforma el 60% del volumen del brazo.',
+    },
+    fr: {
+      id: 'triceps',
+      name: 'Triceps Brachial',
+      latinName: 'Triceps Brachii (Caput Longum, Laterale, Mediale)',
+      recommendation: 'Fatigue neurale modérée. Privilégiez un tempo excentrique maîtrisé.',
+      functionLore: 'Extenseur principal du coude représentant 60% de la masse du bras.',
+    },
+    de: {
+      id: 'triceps',
+      name: 'Trizeps (Triceps Brachii)',
+      latinName: 'Triceps Brachii (Caput Longum, Laterale, Mediale)',
+      recommendation: 'Mittlere neuronale Ermüdung. Konzentriere dich auf kontrolliertes exzentrisches Tempo.',
+      functionLore: 'Hauptstrecker des Ellenbogens, macht 60% des Armvolumens aus.',
+    },
+    la: {
+      id: 'triceps',
+      name: 'Triceps Brachii',
+      latinName: 'Triceps Brachii (Caput Longum, Laterale, Mediale)',
+      recommendation: 'Fatigatio modica. Custodi motum eccentricum accurate.',
+      functionLore: 'Extensor cubiti praecipuus qui partem maiorem lacerti efficit.',
+    },
+  },
+  biceps: {
+    en: {
+      id: 'biceps',
+      name: 'Biceps & Forearms',
+      latinName: 'Biceps Brachii & Brachioradialis',
+      recommendation: 'Full elbow flexion power ready for Supinated Curls.',
+      functionLore: 'Supination and forearm flexion. Vital for heavy pulling mechanics.',
+    },
+    it: {
+      id: 'biceps',
+      name: 'Bicipiti & Avambracci',
+      latinName: 'Biceps Brachii & Brachioradialis',
+      recommendation: 'Piena potenza di flessione del gomito pronta per curl supinati pesanti.',
+      functionLore: 'Supinazione e flessione dell\'avambraccio. Fondamentale per tutte le trazioni.',
+    },
+    es: {
+      id: 'biceps',
+      name: 'Bíceps y Antebrazos',
+      latinName: 'Biceps Brachii & Brachioradialis',
+      recommendation: 'Potencia total de flexión de codo lista para curls pesados.',
+      functionLore: 'Supinación y flexión del antebrazo. Vital en tracciones pesadas.',
+    },
+    fr: {
+      id: 'biceps',
+      name: 'Biceps & Avant-bras',
+      latinName: 'Biceps Brachii & Brachioradialis',
+      recommendation: 'Puissance maximale de flexion du coude disponible pour les curls.',
+      functionLore: 'Supination et flexion de l\'avant-bras. Vital pour les tirages lourds.',
+    },
+    de: {
+      id: 'biceps',
+      name: 'Bizeps & Unterarme',
+      latinName: 'Biceps Brachii & Brachioradialis',
+      recommendation: 'Volle Beugekraft des Ellenbogens bereit für schwere Curls.',
+      functionLore: 'Supination und Beugung des Unterarms. Essentiell für Zugübungen.',
+    },
+    la: {
+      id: 'biceps',
+      name: 'Biceps et Brachioradiales',
+      latinName: 'Biceps Brachii & Brachioradialis',
+      recommendation: 'Potentia flexus cubiti integra ad tractus et curvationes.',
+      functionLore: 'Supinatio et flexio lacerti. Clavis virium ad trahendum.',
+    },
+  },
+  back: {
+    en: {
+      id: 'back',
+      name: 'Latissimus & Trapezius',
+      latinName: 'Latissimus Dorsi, Trapezius & Rhomboidei',
+      recommendation: 'Grip and lat motor recruitment fully regenerated for heavy pulls.',
+      functionLore: 'The colossal V-Taper wing expanse and scapular anchor of Olympian strength.',
+    },
+    it: {
+      id: 'back',
+      name: 'Dorsali & Trapezi',
+      latinName: 'Latissimus Dorsi, Trapezius & Rhomboidei',
+      recommendation: 'Presa e reclutamento motorio dei dorsali pienamente rigenerati per tirate pesanti.',
+      functionLore: 'La maestosa ampiezza alare a V e l\'ancoraggio scapolare della forza olimpica.',
+    },
+    es: {
+      id: 'back',
+      name: 'Dorsales y Trapecios',
+      latinName: 'Latissimus Dorsi, Trapezius & Rhomboidei',
+      recommendation: 'Agarre y reclutamiento dorsal completamente regenerados para tirones pesados.',
+      functionLore: 'La envergadura en V y el ancla escapular de la fuerza olímpica.',
+    },
+    fr: {
+      id: 'back',
+      name: 'Dorsaux & Trapèzes',
+      latinName: 'Latissimus Dorsi, Trapezius & Rhomboidei',
+      recommendation: 'Grip et recrutement moteur des dorsaux totalement régénérés.',
+      functionLore: 'L\'envergure dorsale en V et l\'ancrage scapulaire de la puissance olympienne.',
+    },
+    de: {
+      id: 'back',
+      name: 'Latissimus & Trapez',
+      latinName: 'Latissimus Dorsi, Trapezius & Rhomboidei',
+      recommendation: 'Griffkraft und Rückenmuskelrekrutierung für schwere Züge voll regeneriert.',
+      functionLore: 'Die gewaltige V-Form Flügelspanne und das scapuläre Fundament olympischer Kraft.',
+    },
+    la: {
+      id: 'back',
+      name: 'Latissimus et Trapezius',
+      latinName: 'Latissimus Dorsi, Trapezius & Rhomboidei',
+      recommendation: 'Prehensio et vires dorsales ad graves tractus paratae.',
+      functionLore: 'Alae dorsi expansae et ancora scapularis roboris olimpici.',
+    },
+  },
+  quads: {
+    en: {
+      id: 'quads',
+      name: 'Quadriceps',
+      latinName: 'Quadriceps Femoris (Vastus Medialis, Lateralis, Rectus)',
+      recommendation: 'Deep tissue recovery underway from preceding squat session.',
+      functionLore: 'Massive knee extensors featuring the iconic vastus medialis teardrop.',
+    },
+    it: {
+      id: 'quads',
+      name: 'Quadricipiti',
+      latinName: 'Quadriceps Femoris (Vastus Medialis, Lateralis, Rectus)',
+      recommendation: 'Recupero tissutale profondo in corso dalla sessione precedente di squat.',
+      functionLore: 'Potenti estensori del ginocchio con la celebre forma a goccia del vasto mediale.',
+    },
+    es: {
+      id: 'quads',
+      name: 'Cuádriceps',
+      latinName: 'Quadriceps Femoris (Vastus Medialis, Lateralis, Rectus)',
+      recommendation: 'Recuperación tisular profunda en curso tras la sesión de sentadillas.',
+      functionLore: 'Poderosos extensores de rodilla con la clásica gota del vasto medial.',
+    },
+    fr: {
+      id: 'quads',
+      name: 'Quadriceps',
+      latinName: 'Quadriceps Femoris (Vastus Medialis, Lateralis, Rectus)',
+      recommendation: 'Régénération tissulaire profonde en cours après la séance de squat.',
+      functionLore: 'Puissants extenseurs du genou arborant la fameuse goutte du vaste médial.',
+    },
+    de: {
+      id: 'quads',
+      name: 'Quadrizeps (Oberschenkel)',
+      latinName: 'Quadriceps Femoris (Vastus Medialis, Lateralis, Rectus)',
+      recommendation: 'Tiefe Gewebserholung nach vorangegangener Kniebeugen-Einheit im Gange.',
+      functionLore: 'Wuchtige Kniestrecker mit der ikonischen Vastus-Medialis-Tränenform.',
+    },
+    la: {
+      id: 'quads',
+      name: 'Quadriceps Femoris',
+      latinName: 'Quadriceps Femoris (Vastus Medialis, Lateralis, Rectus)',
+      recommendation: 'Recuperatio textuum procedit post flexiones graves crurum.',
+      functionLore: 'Extensores genuum maximi columnis marmoreis athletae similes.',
+    },
+  },
+  hamstrings: {
+    en: {
+      id: 'hamstrings',
+      name: 'Hamstrings & Glutes',
+      latinName: 'Biceps Femoris, Semitendinosus & Gluteus Maximus',
+      recommendation: 'Posterior chain primed for hinge patterns and controlled extension.',
+      functionLore: 'The athletic posterior engine driving hip extension and sprint locomotion.',
+    },
+    it: {
+      id: 'hamstrings',
+      name: 'Femorali & Glutei',
+      latinName: 'Biceps Femoris, Semitendinosus & Gluteus Maximus',
+      recommendation: 'Catena cinetica posteriore pronta per stacchi rumeni ed estensioni d\'anca.',
+      functionLore: 'Il motore posteriore atletico che genera la massima spinta propulsiva.',
+    },
+    es: {
+      id: 'hamstrings',
+      name: 'Isquiosurales y Glúteos',
+      latinName: 'Biceps Femoris, Semitendinosus & Gluteus Maximus',
+      recommendation: 'Cadena posterior lista para peso muerto rumano y extensión de cadera.',
+      functionLore: 'El motor posterior atlético que impulsa la extensión de cadera y la potencia.',
+    },
+    fr: {
+      id: 'hamstrings',
+      name: 'Ischio-jambiers & Fessiers',
+      latinName: 'Biceps Femoris, Semitendinosus & Gluteus Maximus',
+      recommendation: 'Chaîne postérieure prête pour les mouvements de charnière et soulevés de terre.',
+      functionLore: 'Le moteur athlétique postérieur propulsant l\'extension de la hanche.',
+    },
+    de: {
+      id: 'hamstrings',
+      name: 'Beinbeuger & Gesäß',
+      latinName: 'Biceps Femoris, Semitendinosus & Gluteus Maximus',
+      recommendation: 'Hintere Muskelkette bereit für Kreuzhebe-Varianten und Hüftstreckung.',
+      functionLore: 'Der athletische Heckantrieb für explosive Hüftstreckung und Sprintkraft.',
+    },
+    la: {
+      id: 'hamstrings',
+      name: 'Femorales et Glutei',
+      latinName: 'Biceps Femoris, Semitendinosus & Gluteus Maximus',
+      recommendation: 'Catena posterior parata ad mortiferos tractus et impulsionem coxae.',
+      functionLore: 'Machina posterior athletica cursum celerem et robur propulsionis gignens.',
+    },
+  },
+  core: {
+    en: {
+      id: 'core',
+      name: 'Rectus Abdominis & Obliques',
+      latinName: 'Rectus Abdominis & Obliquus Externus',
+      recommendation: 'Intra-abdominal bracing and spinal stabilization at peak capacity.',
+      functionLore: 'The segmented marble armor protecting visceral organs and anchoring compound loads.',
+    },
+    it: {
+      id: 'core',
+      name: 'Addominali & Obliqui',
+      latinName: 'Rectus Abdominis & Obliquus Externus',
+      recommendation: 'Pressione intra-addominale e stabilizzazione spinale al massimo del potenziale.',
+      functionLore: 'L\'armatura di marmo scolpito che protegge gli organi vitali e stabilizza i carichi pesanti.',
+    },
+    es: {
+      id: 'core',
+      name: 'Abdominales y Oblicuos',
+      latinName: 'Rectus Abdominis & Obliquus Externus',
+      recommendation: 'Presión intraabdominal y soporte espinal en su máxima capacidad.',
+      functionLore: 'La armadura de mármol que protege órganos vitales y sostiene cargas compuestas.',
+    },
+    fr: {
+      id: 'core',
+      name: 'Abdominaux & Obliques',
+      latinName: 'Rectus Abdominis & Obliquus Externus',
+      recommendation: 'Gainage intra-abdominal et stabilisation vertébrale à pleine capacité.',
+      functionLore: 'L\'armure de marbre sculptée protégeant les organes et stabilisant les charges.',
+    },
+    de: {
+      id: 'core',
+      name: 'Bauchmuskeln & Rumpf',
+      latinName: 'Rectus Abdominis & Obliquus Externus',
+      recommendation: 'Intra-abdominelle Stabilität und Wirbelsäulenstütze auf höchstem Niveau.',
+      functionLore: 'Der gemeißelte Marmorpanzer, der vitale Organe schützt und Grundübungen stabilisiert.',
+    },
+    la: {
+      id: 'core',
+      name: 'Abdominales et Obliqui',
+      latinName: 'Rectus Abdominis & Obliquus Externus',
+      recommendation: 'Firmitas interior et stabilimentum spinae ad summum vigorem.',
+      functionLore: 'Lorica marmorea viscera tuens et gravissima onera fulciens.',
+    },
+  },
+  calves: {
+    en: {
+      id: 'calves',
+      name: 'Calves (Gastrocnemius & Soleus)',
+      latinName: 'Gastrocnemius & Soleus',
+      recommendation: 'High-frequency endurance tissue ready for heavy calf raises.',
+      functionLore: 'Dense diamond plantar flexors built for unyielding resilience under high frequency.',
+    },
+    it: {
+      id: 'calves',
+      name: 'Polpacci (Gastrocnemio & Soleo)',
+      latinName: 'Gastrocnemius & Soleus',
+      recommendation: 'Tessuto resistente ad alta frequenza, pronto per calf raises pesanti.',
+      functionLore: 'Flessori plantari a diamante costruiti per resistere a carichi ripetuti e frequenti.',
+    },
+    es: {
+      id: 'calves',
+      name: 'Pantorrillas (Gemelos y Sóleo)',
+      latinName: 'Gastrocnemius & Soleus',
+      recommendation: 'Tejido de resistencia de alta frecuencia listo para elevaciones de talones pesadas.',
+      functionLore: 'Flexores plantares de diamante diseñados para una resistencia infatigable.',
+    },
+    fr: {
+      id: 'calves',
+      name: 'Mollets (Gastrocnémien & Soléaire)',
+      latinName: 'Gastrocnemius & Soleus',
+      recommendation: 'Tissu d\'endurance à haute fréquence prêt pour les extensions de mollets lourdes.',
+      functionLore: 'Fléchisseurs plantaires sculptés pour une endurance inébranlable.',
+    },
+    de: {
+      id: 'calves',
+      name: 'Waden (Gastrocnemius & Soleus)',
+      latinName: 'Gastrocnemius & Soleus',
+      recommendation: 'Hochfrequentes Ausdauergewebe bereit für schweres Wadenheben.',
+      functionLore: 'Dichte Diamant-Plantarflexoren für unnachgiebige Ausdauer unter hoher Frequenz.',
+    },
+    la: {
+      id: 'calves',
+      name: 'Surae (Gastrocnemius & Soleus)',
+      latinName: 'Gastrocnemius & Soleus',
+      recommendation: 'Fibrae perennes ad crebras surarum elationes paratae.',
+      functionLore: 'Flexores plantares adamantini perpetuae firmitatis.',
+    },
+  },
+};
+
+export function getTranslatedMuscleInfo(muscleId: string, lang: SupportedLanguage = 'en'): TranslatedMuscleRecoveryInfo {
+  const group = MUSCLE_RECOVERY_TRANSLATIONS[muscleId];
+  if (!group) {
+    return {
+      id: muscleId,
+      name: muscleId.toUpperCase(),
+      latinName: muscleId,
+      recommendation: 'Primed for systematic stimulus.',
+      functionLore: 'Biomechanical kinetic chain.',
+    };
+  }
+  return group[lang] || group.en;
+}
+

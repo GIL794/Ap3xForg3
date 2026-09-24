@@ -13,12 +13,19 @@ import {
   AlertCircle,
   Activity,
   Calculator,
-  Flame
+  Flame,
+  FileText,
+  Download
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { UserAccount } from '../types';
 import { isLifetimeVipUser, verifyEmperorPasscode } from '../logic/auth';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { 
+  verifyPaymentTransaction, 
+  generatePaymentReceiptPdf, 
+  PaymentReceipt 
+} from '../logic/paymentVerification';
 
 interface ImperivmProModalProps {
   isOpen: boolean;
@@ -46,6 +53,12 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
   const [passcode, setPasscode] = useState<string>('');
   const [passcodeError, setPasscodeError] = useState<string | null>(null);
+
+  // Authentic Payment Verification State
+  const [txIdInput, setTxIdInput] = useState<string>('');
+  const [payerEmailInput, setPayerEmailInput] = useState<string>(currentUser?.email || '');
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [verifiedReceipt, setVerifiedReceipt] = useState<PaymentReceipt | null>(null);
 
   if (!isOpen) return null;
 
@@ -77,12 +90,42 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
     }, 2500);
   };
 
-  const handleConfirmAirTM = () => {
+  const handleVerifyAirTM = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPaymentError(null);
     setIsProcessing(true);
-    setTimeout(() => {
-      setIsProcessing(false);
-      triggerCelebration(`AirTM transfer verified for ${AIRTM_RECIPIENT_EMAIL}! Welcome to Imperivm Pro.`);
-    }, 1000);
+
+    const res = await verifyPaymentTransaction({
+      transactionId: txIdInput,
+      payerEmail: payerEmailInput,
+      athleteName: currentUser?.name || 'Roman Gladiator',
+      tier: selectedPlan === 'lifetime' ? 'emperor_lifetime' : 'centurion',
+      method: 'airtm',
+    });
+
+    setIsProcessing(false);
+
+    if (!res.success) {
+      setPaymentError(res.message);
+      return;
+    }
+
+    if (res.receipt) {
+      setVerifiedReceipt(res.receipt);
+    }
+
+    confetti({
+      particleCount: 160,
+      spread: 90,
+      origin: { y: 0.6 },
+      colors: ['#d4af37', '#ffd700', '#f59e0b', '#ffffff']
+    });
+
+    if (onUpgradeSuccess) {
+      onUpgradeSuccess();
+    }
+
+    setSuccessMessage(res.message);
   };
 
   const handlePasscodeSubmit = (e: React.FormEvent) => {
@@ -327,33 +370,123 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                   </div>
                 </div>
 
-                {/* Instructions */}
-                <div className="space-y-1.5 text-xs text-slate-300">
-                  <div className="text-[11px] text-slate-400 font-medium">
-                    1. Send <strong className="text-amber-300">{selectedPlan === 'lifetime' ? '£99.99 (~$130 AirUSD)' : '£4.99 (~$6.50 AirUSD)'}</strong> to <strong className="text-cyan-300">{AIRTM_RECIPIENT_EMAIL}</strong>.
-                  </div>
-                  <div className="text-[11px] text-slate-400 font-medium">
-                    2. Include your athlete name <span className="text-white font-bold">({currentUser?.name || 'Your Name'})</span> in the transfer note.
-                  </div>
-                  <div className="text-[11px] text-slate-400 font-medium">
-                    3. Click the button below to confirm and activate your membership immediately.
-                  </div>
-                </div>
+                {verifiedReceipt ? (
+                  /* Verified Settlement Decree Card */
+                  <div className="p-4 rounded-2xl bg-emerald-950/30 border border-emerald-500/40 space-y-3 animate-in fade-in">
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400">
+                        <CheckCheck className="w-5 h-5 stroke-[2.5]" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-black font-roman uppercase tracking-wider text-emerald-300">
+                          Payment Verified & Settled
+                        </h4>
+                        <p className="text-[10px] text-emerald-400/80 font-mono">
+                          Receipt ID: {verifiedReceipt.receiptId}
+                        </p>
+                      </div>
+                    </div>
 
-                <button
-                  onClick={handleConfirmAirTM}
-                  disabled={isProcessing}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-roman font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2"
-                >
-                  {isProcessing ? (
-                    <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <>
-                      <Check className="w-4 h-4 stroke-[3]" />
-                      <span>{t('pro.confirmAirtm', language)}</span>
-                    </>
-                  )}
-                </button>
+                    <div className="p-3 rounded-xl bg-black/60 border border-emerald-900/50 space-y-1.5 text-[11px] font-mono text-slate-300">
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Tx Reference:</span>
+                        <span className="text-white font-bold">{verifiedReceipt.transactionId}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Plan Tier:</span>
+                        <span className="text-amber-300 font-bold capitalize">{verifiedReceipt.tier.replace('_', ' ')}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-500">Cryptographic Seal:</span>
+                        <span className="text-cyan-400 text-[10px] truncate max-w-[170px]">
+                          {verifiedReceipt.cryptographicSignature.slice(0, 24)}...
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => generatePaymentReceiptPdf(verifiedReceipt)}
+                      className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 font-roman font-black text-xs uppercase tracking-wider shadow-lg shadow-amber-500/25 transition-all flex items-center justify-center gap-2"
+                    >
+                      <FileText className="w-4 h-4 text-slate-950 stroke-[2.5]" />
+                      <span>Download Imperial Decree (PDF)</span>
+                      <Download className="w-4 h-4 ml-auto" />
+                    </button>
+                  </div>
+                ) : (
+                  /* Form to enter authentic transaction details */
+                  <form onSubmit={handleVerifyAirTM} className="space-y-3">
+                    {/* Instructions */}
+                    <div className="space-y-1 text-xs text-slate-300">
+                      <div className="text-[11px] text-slate-400 font-medium">
+                        1. Send <strong className="text-amber-300">{selectedPlan === 'lifetime' ? '£99.99 (~$130 AirUSD)' : '£4.99 (~$6.50 AirUSD)'}</strong> to <strong className="text-cyan-300">{AIRTM_RECIPIENT_EMAIL}</strong>.
+                      </div>
+                      <div className="text-[11px] text-slate-400 font-medium">
+                        2. Enter the transaction reference code and your sender email below to verify against the treasury ledger.
+                      </div>
+                    </div>
+
+                    {/* Inputs */}
+                    <div className="space-y-2">
+                      <div>
+                        <label className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1">
+                          AirTM Transaction Reference ID / Hash *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={txIdInput}
+                          onChange={(e) => {
+                            setTxIdInput(e.target.value);
+                            setPaymentError(null);
+                          }}
+                          placeholder="e.g. ATM-9482-7102 or TX-849204"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-500 tracking-wider placeholder:text-slate-600"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-roman uppercase font-bold text-slate-400 block mb-1">
+                          Your Sender AirTM Account / Email *
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={payerEmailInput}
+                          onChange={(e) => {
+                            setPayerEmailInput(e.target.value);
+                            setPaymentError(null);
+                          }}
+                          placeholder="e.g. athlete@domain.com"
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-white font-mono text-xs focus:outline-none focus:border-cyan-500 placeholder:text-slate-600"
+                        />
+                      </div>
+                    </div>
+
+                    {paymentError && (
+                      <div className="p-2.5 rounded-xl bg-rose-950/40 border border-rose-500/50 text-[11px] text-rose-300 flex items-start gap-2">
+                        <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                        <span>{paymentError}</span>
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={isProcessing}
+                      className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-slate-950 font-roman font-black text-xs uppercase tracking-wider shadow-lg shadow-cyan-500/25 transition-all flex items-center justify-center gap-2"
+                    >
+                      {isProcessing ? (
+                        <div className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4 stroke-[3]" />
+                          <span>Verify Transaction & Unlock Pro</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
               </div>
             )}
 

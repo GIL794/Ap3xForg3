@@ -78,6 +78,7 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
 
   // Exercise weight tracker strictly initialized from athlete's logged weights (Zero Assumptions)
   const [exerciseWeights, setExerciseWeights] = useState<Record<string, number>>(loggedWeights || {});
+  const [activeArenaTab, setActiveArenaTab] = useState<'lifts' | 'recovery' | 'ascension'>('lifts');
 
   useEffect(() => {
     if (loggedWeights) {
@@ -443,16 +444,6 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
                 <span className="hidden sm:inline">Imperial Scroll PDF</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setIsNutritionModalOpen(true)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/90 hover:bg-slate-750 border border-amber-500/40 text-amber-300 text-xs font-roman font-bold transition-all shadow-sm hover:scale-105"
-                title="Physique Target & Diet Calibration"
-              >
-                <Scale className="w-3.5 h-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Diet & Weight Target</span>
-              </button>
-
               <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-semibold">
                 <Clock className="w-3.5 h-3.5 text-cyan-400" />
                 {isPastTime ? (
@@ -590,48 +581,81 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
         </div>
       </div>
 
-      {/* OLYMPIAN ASCENSION CARD */}
-      <OlympianEvolutionCard
-        totalTonnageKg={(lifetimeTonnageKg || 0) + totalTonnageKg}
-        completedSetsCount={completedSetsCount}
-        totalSetsCount={totalSetsCount}
-        onOpenGymTools={() => setGymTools({ isOpen: true, weight: 80 })}
-        language={language}
-      />
+      {/* ARENA SEGMENTED VIEW SELECTOR (Simplicity Wins: Clean, Uncluttered Layout) */}
+      <div className="flex items-center justify-center p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800 shadow-xl max-w-2xl mx-auto backdrop-blur-md">
+        <button
+          type="button"
+          onClick={() => setActiveArenaTab('lifts')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold font-roman transition-all ${
+            activeArenaTab === 'lifts'
+              ? 'bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 shadow-md shadow-amber-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+          }`}
+        >
+          <Dumbbell className="w-4 h-4" />
+          <span>{t('tabs.workoutLifts', language)}</span>
+          <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+            activeArenaTab === 'lifts' ? 'bg-black/25 text-slate-950 font-black' : 'bg-slate-800 text-slate-300'
+          }`}>
+            {exercises.length}
+          </span>
+        </button>
 
-      {/* BIO-RECOVERY & FATIGUE GAUGE (Fitbod Calibre) */}
-      <MuscleRecoveryGauge
-        primaryMuscles={activePlan.focus || []}
-        totalSetsToday={totalSetsCount}
-        onOpenPro={onOpenPro || (() => {})}
-        language={language}
-      />
+        <button
+          type="button"
+          onClick={() => setActiveArenaTab('recovery')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold font-roman transition-all ${
+            activeArenaTab === 'recovery'
+              ? 'bg-gradient-to-r from-cyan-500 to-teal-400 text-slate-950 shadow-md shadow-cyan-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+          }`}
+        >
+          <Activity className="w-4 h-4" />
+          <span>{t('tabs.bioRecovery', language)}</span>
+        </button>
 
-      {/* Live Gym Completion Progress Bar */}
-      {totalSetsCount > 0 && (
-        <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
-              <Award className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="text-sm font-bold text-white flex items-center gap-2">
-                {t('today.sessionProgress', language)}: <span className="mono-font text-emerald-400">{progressPercent}%</span>
+        <button
+          type="button"
+          onClick={() => setActiveArenaTab('ascension')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold font-roman transition-all ${
+            activeArenaTab === 'ascension'
+              ? 'bg-gradient-to-r from-purple-500 to-indigo-400 text-slate-950 shadow-md shadow-purple-500/20'
+              : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+          }`}
+        >
+          <Trophy className="w-4 h-4" />
+          <span>{t('tabs.gladiatorAscension', language)}</span>
+        </button>
+      </div>
+
+      {/* SEGMENT 1: WORKOUT LIFTS (Exercises, Sets, Reps, Live Progress) */}
+      {activeArenaTab === 'lifts' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          {/* Live Gym Completion Progress Bar */}
+          {totalSetsCount > 0 && (
+            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 shrink-0">
+                  <Award className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="text-sm font-bold text-white flex items-center gap-2">
+                    {t('today.sessionProgress', language)}: <span className="mono-font text-emerald-400">{progressPercent}%</span>
+                  </div>
+                  <div className="text-xs text-slate-400">
+                    {completedSetsCount} / {totalSetsCount} {t('today.setsCheckedOff', language)}
+                  </div>
+                </div>
               </div>
-              <div className="text-xs text-slate-400">
-                {completedSetsCount} / {totalSetsCount} {t('today.setsCheckedOff', language)}
+
+              <div className="w-full sm:w-64 h-3 bg-slate-800 rounded-full overflow-hidden p-0.5">
+                <div 
+                  className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-300"
+                  style={{ width: `${progressPercent}%` }}
+                />
               </div>
             </div>
-          </div>
-
-          <div className="w-full sm:w-64 h-3 bg-slate-800 rounded-full overflow-hidden p-0.5">
-            <div 
-              className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full transition-all duration-300"
-              style={{ width: `${progressPercent}%` }}
-            />
-          </div>
-        </div>
-      )}
+          )}
 
       {/* Warm-Up Section */}
       {activePlan.warmup && (
@@ -849,6 +873,33 @@ export const TodayWorkoutView: React.FC<TodayWorkoutViewProps> = ({
           <span>{t('today.finishWorkout', language)}</span>
         </button>
       </div>
+        </div>
+      )}
+
+      {/* SEGMENT 2: BIO-RECOVERY & CNS (Fitbod Calibre 2D/3D Anatomical Heatmap) */}
+      {activeArenaTab === 'recovery' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <MuscleRecoveryGauge
+            primaryMuscles={activePlan.focus || []}
+            totalSetsToday={totalSetsCount}
+            onOpenPro={onOpenPro || (() => {})}
+            language={language}
+          />
+        </div>
+      )}
+
+      {/* SEGMENT 3: GLADIATOR ASCENSION (Olympian Evolution Card & Ranks) */}
+      {activeArenaTab === 'ascension' && (
+        <div className="space-y-6 animate-in fade-in duration-200">
+          <OlympianEvolutionCard
+            totalTonnageKg={(lifetimeTonnageKg || 0) + totalTonnageKg}
+            completedSetsCount={completedSetsCount}
+            totalSetsCount={totalSetsCount}
+            onOpenGymTools={() => setGymTools({ isOpen: true, weight: 80 })}
+            language={language}
+          />
+        </div>
+      )}
 
       {/* Docked Floating Rest Timer (Non-intrusive Hevy & Strong style) */}
       <FloatingRestTimer

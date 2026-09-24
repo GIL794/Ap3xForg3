@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Activity, Sparkles, Layers, UserCheck, ShieldCheck, Flame, RotateCw, Zap, Target, Box } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
-import { translateMuscle, translateExerciseName } from '../logic/exerciseTranslations';
+import { translateMuscle, translateExerciseName, getTranslatedMuscleInfo } from '../logic/exerciseTranslations';
 import { ThreeAnatomicalModel } from './ThreeAnatomicalModel';
 
 interface MuscleRecoveryGaugeProps {
@@ -35,109 +35,109 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
   const [bodyOrientation, setBodyOrientation] = useState<'front' | 'back'>('front');
   const [selectedMuscleId, setSelectedMuscleId] = useState<string>('chest');
   const [hoveredMuscleId, setHoveredMuscleId] = useState<string | null>(null);
-  const [engineMode, setEngineMode] = useState<'3d_webgl' | '2d_svg'>('3d_webgl');
+  // Default to 2D Precision Anatomical SVG for authentic, visually aligned muscle structure
+  const [engineMode, setEngineMode] = useState<'3d_webgl' | '2d_svg'>('2d_svg');
 
-  // Dynamic calculation based on planned exercises and today's volume
+  const createMuscleEntry = (
+    id: string,
+    isTargeted: boolean,
+    targetedScore: number,
+    normalScore: number,
+    hours: number,
+    movements: string[]
+  ): MuscleStatus => {
+    const info = getTranslatedMuscleInfo(id, language);
+    const score = isTargeted ? targetedScore : normalScore;
+    const status: 'optimal' | 'recovering' | 'fatigued' =
+      score >= 90 ? 'optimal' : score >= 75 ? 'recovering' : 'fatigued';
+
+    return {
+      id,
+      name: info.name,
+      latinName: info.latinName,
+      recoveryPercentage: score,
+      status,
+      recommendation: info.recommendation,
+      hoursToFullRecovery: hours,
+      bestMovements: movements.map(m => translateExerciseName(m, language)),
+      functionLore: info.functionLore,
+    };
+  };
+
+  // Dynamic biological calculation based on planned exercises, kinetic chains and today's volume
   const muscleScores: Record<string, MuscleStatus> = {
-    chest: {
-      id: 'chest',
-      name: 'Pectorals (Chest)',
-      latinName: 'Pectoralis Major & Minor',
-      recoveryPercentage: primaryMuscles.some(m => m.toLowerCase().includes('chest')) ? 92 : 100,
-      status: 'optimal',
-      recommendation: 'Primed for high mechanical tension and compound barbell presses.',
-      hoursToFullRecovery: 0,
-      bestMovements: ['Barbell Bench Press', 'Incline DB Press', 'Dips', 'Cable Flyes'],
-      functionLore: 'Horizontal adduction & shoulder flexion. High fast-twitch density.',
-    },
-    deltoids: {
-      id: 'deltoids',
-      name: 'Deltoids (Shoulders)',
-      latinName: 'Deltoideus (Anterior, Lateral, Posterior)',
-      recoveryPercentage: primaryMuscles.some(m => m.toLowerCase().includes('shoulder')) ? 88 : 96,
-      status: 'optimal',
-      recommendation: 'Full scapular stability available. Target overhead volume & lateral head.',
-      hoursToFullRecovery: 6,
-      bestMovements: ['Overhead Press', 'Lateral Raises', 'Face Pulls', 'Rear Delt Flyes'],
-      functionLore: 'Multi-pennate shoulder abductors. 3D cannonball symmetry.',
-    },
-    triceps: {
-      id: 'triceps',
-      name: 'Triceps Brachii',
-      latinName: 'Triceps Brachii (Caput Longum, Laterale, Mediale)',
-      recoveryPercentage: primaryMuscles.some(m => m.toLowerCase().includes('tricep') || m.toLowerCase().includes('push')) ? 82 : 98,
-      status: 'recovering',
-      recommendation: 'Moderate neural fatigue. Focus on controlled eccentric tempo.',
-      hoursToFullRecovery: 14,
-      bestMovements: ['Rope Pushdowns', 'Skull Crushers', 'Weighted Dips'],
-      functionLore: 'Primary elbow extensor accounting for 60% of total arm mass.',
-    },
-    biceps: {
-      id: 'biceps',
-      name: 'Biceps & Forearms',
-      latinName: 'Biceps Brachii & Brachioradialis',
-      recoveryPercentage: primaryMuscles.some(m => m.toLowerCase().includes('bicep') || m.toLowerCase().includes('pull')) ? 86 : 98,
-      status: 'optimal',
-      recommendation: 'Full elbow flexion power ready for Supinated Curls.',
-      hoursToFullRecovery: 8,
-      bestMovements: ['Incline DB Curls', 'Barbell Curls', 'Hammer Curls'],
-      functionLore: 'Supination and forearm flexion. Vital for heavy pulling mechanics.',
-    },
-    back: {
-      id: 'back',
-      name: 'Latissimus & Trapezius',
-      latinName: 'Latissimus Dorsi, Trapezius & Rhomboidei',
-      recoveryPercentage: primaryMuscles.some(m => m.toLowerCase().includes('back') || m.toLowerCase().includes('pull')) ? 95 : 100,
-      status: 'optimal',
-      recommendation: 'Grip and lat motor recruitment fully regenerated for heavy pulls.',
-      hoursToFullRecovery: 0,
-      bestMovements: ['Lat Pulldown', 'Barbell Rows', 'Pull-ups', 'Face Pulls'],
-      functionLore: 'The colossal V-Taper wing expanse and scapular anchor of Olympian strength.',
-    },
-    quads: {
-      id: 'quads',
-      name: 'Quadriceps',
-      latinName: 'Quadriceps Femoris (Vastus Medialis, Lateralis, Rectus)',
-      recoveryPercentage: primaryMuscles.some(m => m.toLowerCase().includes('quad') || m.toLowerCase().includes('leg')) ? 78 : 95,
-      status: 'recovering',
-      recommendation: 'Deep tissue recovery underway from preceding squat session.',
-      hoursToFullRecovery: 18,
-      bestMovements: ['Barbell Squat', 'Leg Press', 'Bulgarian Split Squat', 'Leg Extensions'],
-      functionLore: 'Massive knee extensors featuring the iconic vastus medialis teardrop.',
-    },
-    hamstrings: {
-      id: 'hamstrings',
-      name: 'Hamstrings & Glutes',
-      latinName: 'Biceps Femoris, Semitendinosus & Gluteus Maximus',
-      recoveryPercentage: primaryMuscles.some(m => m.toLowerCase().includes('ham') || m.toLowerCase().includes('glute')) ? 80 : 94,
-      status: 'recovering',
-      recommendation: 'Posterior chain primed for hinge patterns and controlled extension.',
-      hoursToFullRecovery: 12,
-      bestMovements: ['Romanian Deadlift', 'Lying Leg Curls', 'Barbell Hip Thrusts'],
-      functionLore: 'The athletic posterior engine driving hip extension and sprint locomotion.',
-    },
-    core: {
-      id: 'core',
-      name: 'Rectus Abdominis & Obliques',
-      latinName: 'Rectus Abdominis & Obliquus Externus',
-      recoveryPercentage: 96,
-      status: 'optimal',
-      recommendation: 'Intra-abdominal bracing and spinal stabilization at peak capacity.',
-      hoursToFullRecovery: 0,
-      bestMovements: ['Cable Crunches', 'Hanging Leg Raises', 'Ab Wheel Rollouts'],
-      functionLore: 'The segmented marble armor protecting visceral organs and anchoring compound loads.',
-    },
-    calves: {
-      id: 'calves',
-      name: 'Calves (Gastrocnemius & Soleus)',
-      latinName: 'Gastrocnemius & Soleus',
-      recoveryPercentage: 98,
-      status: 'optimal',
-      recommendation: 'High-frequency endurance tissue ready for explosive plyometrics & heavy calf raises.',
-      hoursToFullRecovery: 0,
-      bestMovements: ['Standing Calf Raises', 'Seated Calf Raises', 'Donkey Calf Raises'],
-      functionLore: 'Dense diamond plantar flexors built for unyielding resilience under high frequency.',
-    },
+    chest: createMuscleEntry(
+      'chest',
+      primaryMuscles.some(m => m.toLowerCase().includes('chest')),
+      92,
+      100,
+      0,
+      ['Barbell Bench Press', 'Incline DB Press', 'Dips', 'Cable Flyes']
+    ),
+    deltoids: createMuscleEntry(
+      'deltoids',
+      primaryMuscles.some(m => m.toLowerCase().includes('shoulder')),
+      88,
+      96,
+      6,
+      ['Overhead Press', 'Lateral Raises', 'Face Pulls', 'Rear Delt Flyes']
+    ),
+    triceps: createMuscleEntry(
+      'triceps',
+      primaryMuscles.some(m => m.toLowerCase().includes('tricep') || m.toLowerCase().includes('push')),
+      82,
+      98,
+      14,
+      ['Rope Pushdowns', 'Skull Crushers', 'Weighted Dips']
+    ),
+    biceps: createMuscleEntry(
+      'biceps',
+      primaryMuscles.some(m => m.toLowerCase().includes('bicep') || m.toLowerCase().includes('pull')),
+      86,
+      98,
+      8,
+      ['Incline DB Curls', 'Barbell Curls', 'Hammer Curls']
+    ),
+    back: createMuscleEntry(
+      'back',
+      primaryMuscles.some(m => m.toLowerCase().includes('back') || m.toLowerCase().includes('pull')),
+      95,
+      100,
+      0,
+      ['Lat Pulldown', 'Barbell Rows', 'Pull-ups', 'Face Pulls']
+    ),
+    quads: createMuscleEntry(
+      'quads',
+      primaryMuscles.some(m => m.toLowerCase().includes('quad') || m.toLowerCase().includes('leg')),
+      78,
+      95,
+      18,
+      ['Barbell Squat', 'Leg Press', 'Bulgarian Split Squat', 'Leg Extensions']
+    ),
+    hamstrings: createMuscleEntry(
+      'hamstrings',
+      primaryMuscles.some(m => m.toLowerCase().includes('ham') || m.toLowerCase().includes('glute')),
+      80,
+      94,
+      12,
+      ['Romanian Deadlift', 'Lying Leg Curls', 'Barbell Hip Thrusts']
+    ),
+    core: createMuscleEntry(
+      'core',
+      false,
+      96,
+      96,
+      0,
+      ['Cable Crunches', 'Hanging Leg Raises', 'Ab Wheel Rollouts']
+    ),
+    calves: createMuscleEntry(
+      'calves',
+      false,
+      98,
+      98,
+      0,
+      ['Standing Calf Raises', 'Seated Calf Raises', 'Donkey Calf Raises']
+    ),
   };
 
   const selectedMuscle = muscleScores[selectedMuscleId] || muscleScores['chest'];
@@ -291,7 +291,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                     }`}
                   >
                     <Box className="w-3.5 h-3.5" />
-                    <span>3D WebGL Model</span>
+                    <span>{t('recovery.engine3d', language)}</span>
                   </button>
                   <button
                     onClick={() => setEngineMode('2d_svg')}
@@ -302,7 +302,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                     }`}
                   >
                     <Layers className="w-3.5 h-3.5" />
-                    <span>2D Chart</span>
+                    <span>{t('recovery.engine2d', language)}</span>
                   </button>
                 </div>
 
@@ -319,6 +319,7 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                     selectedMuscleId={selectedMuscleId}
                     onSelectMuscle={setSelectedMuscleId}
                     orientation={bodyOrientation}
+                    language={language}
                   />
                 </div>
               ) : (
@@ -1054,12 +1055,12 @@ export const MuscleRecoveryGauge: React.FC<MuscleRecoveryGaugeProps> = ({
                 {selectedMuscle.hoursToFullRecovery > 0 ? (
                   <div className="text-xs text-amber-300/90 flex items-center gap-2 p-2 rounded-xl bg-amber-950/20 border border-amber-900/40 font-mono">
                     <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping shrink-0" />
-                    <span>~{selectedMuscle.hoursToFullRecovery}h until full structural supercompensation</span>
+                    <span>{t('recovery.hoursUntil', language).replace('{hours}', String(selectedMuscle.hoursToFullRecovery))}</span>
                   </div>
                 ) : (
                   <div className="text-xs text-emerald-400 flex items-center gap-2 p-2 rounded-xl bg-emerald-950/20 border border-emerald-900/40 font-mono">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
-                    <span>Fully regenerated. Maximum motor unit recruitment threshold ready</span>
+                    <span>{t('recovery.fullyRegenerated', language)}</span>
                   </div>
                 )}
 

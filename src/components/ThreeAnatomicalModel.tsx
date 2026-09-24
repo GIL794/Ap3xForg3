@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { SupportedLanguage, t } from '../logic/i18n';
+import { getTranslatedMuscleInfo } from '../logic/exerciseTranslations';
 
 export interface MuscleRecoveryData {
   id: string;
@@ -13,6 +15,7 @@ interface ThreeAnatomicalModelProps {
   selectedMuscleId: string;
   onSelectMuscle: (muscleId: string) => void;
   orientation?: 'front' | 'back';
+  language?: SupportedLanguage;
 }
 
 export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
@@ -20,9 +23,12 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
   selectedMuscleId,
   onSelectMuscle,
   orientation = 'front',
+  language = 'en',
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
-  const [isRotating, setIsRotating] = useState(true);
+  const [isRotating, setIsRotating] = useState(false);
+  const isRotatingRef = useRef(false);
+  const [currentFacing, setCurrentFacing] = useState<'front' | 'back' | 'custom'>('front');
   const [isWireframe, setIsWireframe] = useState(false);
   const [hoveredMuscle, setHoveredMuscle] = useState<string | null>(null);
 
@@ -315,6 +321,7 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
     const onMouseDown = (e: MouseEvent) => {
       isDraggingRef.current = true;
       previousMousePositionRef.current = { x: e.clientX, y: e.clientY };
+      setCurrentFacing('custom');
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -371,6 +378,7 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
       if (e.touches.length === 1) {
         isDraggingRef.current = true;
         previousMousePositionRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        setCurrentFacing('custom');
       }
     };
 
@@ -405,8 +413,8 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
       const delta = clock.getDelta();
       const elapsed = clock.getElapsedTime();
 
-      // Gentle auto-rotation when user is not manually dragging
-      if (isRotating && !isDraggingRef.current && humanoidGroupRef.current) {
+      // Gentle auto-rotation ONLY if explicitly enabled and not dragging
+      if (isRotatingRef.current && !isDraggingRef.current && humanoidGroupRef.current) {
         humanoidGroupRef.current.rotation.y += delta * 0.45;
       }
 
@@ -499,18 +507,44 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
   }, [selectedMuscleId, muscleScores, isWireframe]);
 
   const handleOrientationToggle = (dir: 'front' | 'back') => {
+    // 1. Halt any rotation immediately
+    isRotatingRef.current = false;
+    setIsRotating(false);
+    setCurrentFacing(dir);
+
+    // 2. Snap model facing cleanly to 0° (front) or 180° (back)
     if (humanoidGroupRef.current) {
-      humanoidGroupRef.current.rotation.y = dir === 'front' ? 0 : Math.PI;
+      humanoidGroupRef.current.rotation.set(0, dir === 'front' ? 0 : Math.PI, 0);
+    }
+
+    // 3. Reset camera view to default focus
+    if (cameraRef.current) {
+      cameraRef.current.position.set(0, 0.3, 3.8);
+      cameraRef.current.lookAt(0, 0, 0);
+    }
+  };
+
+  const toggleAutoRotation = () => {
+    const nextState = !isRotating;
+    isRotatingRef.current = nextState;
+    setIsRotating(nextState);
+    if (nextState) {
+      setCurrentFacing('custom');
     }
   };
 
   const handleResetCamera = () => {
+    isRotatingRef.current = false;
+    setIsRotating(false);
+    setCurrentFacing('front');
     if (cameraRef.current && humanoidGroupRef.current) {
       cameraRef.current.position.set(0, 0.3, 3.8);
       cameraRef.current.lookAt(0, 0, 0);
       humanoidGroupRef.current.rotation.set(0, 0, 0);
     }
   };
+
+  const currentMuscleName = getTranslatedMuscleInfo(hoveredMuscle || selectedMuscleId, language).name;
 
   return (
     <div className="relative w-full h-[380px] sm:h-[420px] rounded-3xl overflow-hidden bg-gradient-to-b from-[#06080f] via-[#090d16] to-[#04060a] border border-amber-500/20 shadow-2xl flex flex-col items-center justify-center">
@@ -528,10 +562,10 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
         {/* View Mode Controls */}
         <div className="flex items-center gap-1.5 pointer-events-auto">
           <button
-            onClick={() => setIsRotating(!isRotating)}
+            onClick={toggleAutoRotation}
             className={`px-2.5 py-1.5 rounded-xl text-[11px] font-bold transition-all border ${
               isRotating
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-sm'
                 : 'bg-slate-950/80 text-slate-400 border-slate-800 hover:text-white'
             }`}
             title="Toggle 360° Orbit Auto-Rotation"
@@ -554,18 +588,26 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
 
       {/* Bottom Floating Bar */}
       <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between pointer-events-none">
-        <div className="flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md p-1 rounded-xl border border-slate-800 pointer-events-auto">
+        <div className="flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md p-1 rounded-xl border border-slate-800 pointer-events-auto shadow-lg">
           <button
             onClick={() => handleOrientationToggle('front')}
-            className="px-3 py-1 rounded-lg text-xs font-bold font-roman text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+            className={`px-3 py-1 rounded-lg text-xs font-bold font-roman transition-all ${
+              currentFacing === 'front' && !isRotating
+                ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
           >
-            Anterior
+            {t('recovery.anterior', language)}
           </button>
           <button
             onClick={() => handleOrientationToggle('back')}
-            className="px-3 py-1 rounded-lg text-xs font-bold font-roman text-slate-300 hover:text-white hover:bg-slate-800 transition-all"
+            className={`px-3 py-1 rounded-lg text-xs font-bold font-roman transition-all ${
+              currentFacing === 'back' && !isRotating
+                ? 'bg-amber-400 text-slate-950 font-black shadow-sm'
+                : 'text-slate-300 hover:text-white hover:bg-slate-800'
+            }`}
           >
-            Posterior
+            {t('recovery.posterior', language)}
           </button>
           <button
             onClick={handleResetCamera}
@@ -580,7 +622,7 @@ export const ThreeAnatomicalModel: React.FC<ThreeAnatomicalModelProps> = ({
         <div className="px-3 py-1.5 rounded-xl bg-slate-950/90 backdrop-blur-md border border-slate-800 text-xs flex items-center gap-2 pointer-events-auto shadow-lg">
           <span className="text-slate-400 font-roman">Target:</span>
           <span className="text-amber-300 font-bold capitalize">
-            {hoveredMuscle ? hoveredMuscle : selectedMuscleId}
+            {currentMuscleName}
           </span>
           <span className="font-mono text-emerald-400 text-[11px]">
             {muscleScores[hoveredMuscle || selectedMuscleId]?.recoveryPercentage || 100}%

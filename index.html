@@ -13,8 +13,16 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      /* Keep Google Translate clean without intrusive banner frame shifts */
+      .goog-te-banner-frame { display: none !important; }
+      body { top: 0px !important; }
+      #google_translate_element { display: none; }
+      .skiptranslate { display: none !important; }
+    </style>
   </head>
   <body class="bg-[#08090d] text-slate-100 min-h-screen antialiased selection:bg-amber-500 selection:text-slate-950 font-sans">
+    <div id="google_translate_element"></div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

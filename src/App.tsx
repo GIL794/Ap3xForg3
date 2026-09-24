@@ -35,6 +35,7 @@ import { WorkoutHistoryView } from './components/WorkoutHistoryView';
 import { Dumbbell, Sparkles, CheckCircle2, RefreshCw, BookOpen, ShieldCheck, Crown, Calendar, User, Calculator, History } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SupportedLanguage, getSavedLanguage, t } from './logic/i18n';
+import { initializeGoogleTranslate } from './logic/universalTranslator';
 
 export const App: React.FC = () => {
   // Check direct URL parameters for Google OAuth verification compliance (?page=privacy, ?page=terms, ?page=creed)
@@ -83,6 +84,11 @@ export const App: React.FC = () => {
   const [proWelcomeNotice, setProWelcomeNotice] = useState<string | null>(null);
   const [language, setLanguage] = useState<SupportedLanguage>(getSavedLanguage());
   const [activeTab, setActiveTab] = useState<'today' | 'weekly' | 'history' | 'profile'>('today');
+
+  // Synchronize Google Translate universal bridge on language change
+  useEffect(() => {
+    initializeGoogleTranslate(language);
+  }, [language]);
 
   // Modals state
   const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
