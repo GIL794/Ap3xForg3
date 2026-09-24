@@ -125,6 +125,109 @@ export async function copyWorkoutToClipboard(todayWorkout: TodayWorkout): Promis
 
 const HISTORY_STORAGE_KEY = 'homodevs_workout_history_v1';
 const NOTES_STORAGE_KEY = 'homodevs_exercise_notes_v1';
+const ACTIVE_DRAFT_KEY = 'homodevs_active_session_draft_v1';
+
+export interface ActiveSessionDraft {
+  userId?: string;
+  date: string; // YYYY-MM-DD
+  dayName: string;
+  workoutName: string;
+  durationMinutes: number;
+  completedSets: Record<string, boolean[]>;
+  exerciseWeights: Record<string, number>;
+  totalTonnageKg: number;
+  completedSetsCount: number;
+  exercises: {
+    id: string;
+    name: string;
+    category: import('../types').ExerciseCategory;
+    sets: import('../types').LoggedSetRecord[];
+  }[];
+  lastUpdated: string;
+}
+
+export function saveActiveSessionDraft(draft: ActiveSessionDraft): void {
+  try {
+    localStorage.setItem(ACTIVE_DRAFT_KEY, JSON.stringify(draft));
+  } catch (err) {
+    console.warn('Failed to save session draft:', err);
+  }
+}
+
+export function getActiveSessionDraft(): ActiveSessionDraft | null {
+  try {
+    const raw = localStorage.getItem(ACTIVE_DRAFT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function clearActiveSessionDraft(): void {
+  try {
+    localStorage.removeItem(ACTIVE_DRAFT_KEY);
+  } catch (err) {
+    console.warn('Failed to clear session draft:', err);
+  }
+}
+
+/**
+ * Automatically inspects active drafts from previous calendar days.
+ * If completed sets exist from an earlier date, archives them permanently into WorkoutHistorySession[].
+ */
+export function autoArchiveOrphanedSessions(): { 
+  archived: boolean; 
+  session?: import('../types').WorkoutHistorySession; 
+  tonnage: number; 
+  xp: number; 
+} {
+  try {
+    const draft = getActiveSessionDraft();
+    if (!draft || draft.completedSetsCount === 0) {
+      return { archived: false, tonnage: 0, xp: 0 };
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    // If draft is from an earlier calendar date (e.g. 1 or 2 days ago)
+    if (draft.date && draft.date < todayStr) {
+      const existing = getWorkoutHistory();
+      // Ensure we don't duplicate if already recorded on that date
+      const alreadyLogged = existing.some(s => s.date === draft.date && s.workoutName === draft.workoutName);
+      
+      if (!alreadyLogged) {
+        const session: import('../types').WorkoutHistorySession = {
+          id: `session_auto_${Date.now()}_${draft.date}`,
+          date: draft.date,
+          dayName: draft.dayName,
+          workoutName: draft.workoutName,
+          durationMinutes: draft.durationMinutes || 60,
+          totalTonnageKg: draft.totalTonnageKg || 0,
+          completedSetsCount: draft.completedSetsCount,
+          totalSetsCount: draft.exercises.reduce((acc, e) => acc + (e.sets?.length || 0), 0) || draft.completedSetsCount,
+          prCount: 1,
+          exercises: draft.exercises,
+        };
+
+        saveWorkoutSession(session);
+        clearActiveSessionDraft();
+
+        const xp = Math.round((session.totalTonnageKg * 0.05) + (session.completedSetsCount * 25) + 150);
+        return {
+          archived: true,
+          session,
+          tonnage: session.totalTonnageKg,
+          xp,
+        };
+      } else {
+        clearActiveSessionDraft();
+      }
+    }
+  } catch (err) {
+    console.error('Error during auto-archival of workout session:', err);
+  }
+
+  return { archived: false, tonnage: 0, xp: 0 };
+}
 
 export function saveWorkoutSession(session: import('../types').WorkoutHistorySession): void {
   try {
@@ -133,6 +236,16 @@ export function saveWorkoutSession(session: import('../types').WorkoutHistorySes
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
   } catch (err) {
     console.error('Failed to save workout session:', err);
+  }
+}
+
+export function deleteWorkoutSession(sessionId: string): void {
+  try {
+    const existing = getWorkoutHistory();
+    const updated = existing.filter(s => s.id !== sessionId);
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(updated));
+  } catch (err) {
+    console.error('Failed to delete workout session:', err);
   }
 }
 
@@ -166,4 +279,5 @@ export function getExerciseNote(exerciseId: string): string {
     return '';
   }
 }
+
 

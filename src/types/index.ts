@@ -197,6 +197,39 @@ export interface WorkoutHistorySession {
   }[];
 }
 
+export type PhysiqueGoalMode = 
+  | 'fat_loss_aggressive'
+  | 'fat_loss_moderate'
+  | 'recomp'
+  | 'lean_bulk'
+  | 'hypertrophy_aggressive';
+
+export interface NutritionTarget {
+  bmr: number;
+  tdee: number;
+  targetCalories: number;
+  calorieDelta: number; // e.g. -450 or +300
+  goalMode: PhysiqueGoalMode;
+  modeLabel: string;
+  weeklyRateKg: number; // e.g. -0.5 or +0.25
+  estimatedWeeks: number;
+  targetDate: string;
+  proteinGrams: number;
+  proteinPerKg: number;
+  carbsGrams: number;
+  fatsGrams: number;
+  waterLiters: number;
+  proteinKcal: number;
+  carbsKcal: number;
+  fatsKcal: number;
+  proAiDirectives: {
+    macroTiming: string[];
+    trainingCalibration: string[];
+    cardioNeat: string[];
+    recoverySupplements: string[];
+  };
+}
+
 export interface AppState {
   userId: string;
   userAccount: UserAccount;
@@ -213,5 +246,6 @@ export interface AppState {
   onboardingCompleted: boolean;
   loreRead: boolean;
   isProSubscriber?: boolean;
+  activeSessionDate?: string; // Tracks the calendar date (YYYY-MM-DD) of the active session
 }
 

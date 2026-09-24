@@ -13,6 +13,7 @@ import {
 import { generateWeeklyPlan, personalizeExercise } from './logic/planGenerator';
 import { resolveTodayWorkout } from './logic/todayDetector';
 import { parseSharedUrl } from './logic/supabase';
+import { autoArchiveOrphanedSessions } from './logic/storage';
 import { Header } from './components/Header';
 import { ProfileForm } from './components/ProfileForm';
 import { TodayWorkoutView } from './components/TodayWorkoutView';
@@ -109,6 +110,33 @@ export const App: React.FC = () => {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  // On app startup, detect and auto-archive any unsealed sessions from previous calendar days
+  useEffect(() => {
+    const res = autoArchiveOrphanedSessions();
+    if (res.archived && res.session) {
+      setAppState((prev) => {
+        const newTonnage = (prev.totalTonnageKg || 0) + res.tonnage;
+        const newXp = (prev.xp || 0) + res.xp;
+        const updated = {
+          ...prev,
+          totalTonnageKg: newTonnage,
+          xp: newXp,
+          profile: {
+            ...prev.profile,
+            lifetimeTonnageKg: newTonnage,
+          },
+        };
+        if (currentUserId) {
+          saveUserState(currentUserId, updated);
+        }
+        return updated;
+      });
+
+      setRegenNotification(`🏛️ Preserved and archived workout from ${res.session.date}! +${res.xp} XP permanently awarded.`);
+      setTimeout(() => setRegenNotification(null), 6000);
+    }
+  }, [currentUserId]);
 
   // Auto-persist changes strictly to the active user's partition when authenticated
   useEffect(() => {
@@ -256,6 +284,7 @@ export const App: React.FC = () => {
     setAppState((prev) => ({
       ...prev,
       completedSets: updatedSets,
+      activeSessionDate: prev.todayWorkout.date,
     }));
   };
 
@@ -513,6 +542,7 @@ export const App: React.FC = () => {
             <WorkoutHistoryView
               language={language}
               onOpenPro={() => setIsProModalOpen(true)}
+              onSessionLogged={handleWorkoutFinished}
             />
           </section>
         )}
@@ -531,6 +561,7 @@ export const App: React.FC = () => {
               onGeneratePlan={handleGeneratePlan}
               onResetDefaults={handleResetDefaults}
               language={language}
+              onOpenPro={() => setIsProModalOpen(true)}
             />
           </section>
         )}

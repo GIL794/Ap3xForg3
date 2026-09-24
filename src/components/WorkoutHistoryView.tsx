@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { WorkoutHistorySession } from '../types';
-import { getWorkoutHistory } from '../logic/storage';
+import { WorkoutHistorySession, ExerciseCategory } from '../types';
+import { 
+  getWorkoutHistory, 
+  saveWorkoutSession, 
+  deleteWorkoutSession,
+  getActiveSessionDraft, 
+  clearActiveSessionDraft 
+} from '../logic/storage';
 import { 
   History, 
   Dumbbell, 
@@ -11,26 +17,68 @@ import {
   ChevronDown, 
   ChevronUp, 
   Award, 
-  Download
+  Download,
+  Plus,
+  Sparkles,
+  X,
+  Check,
+  RotateCcw,
+  AlertCircle
 } from 'lucide-react';
 import { SupportedLanguage, t } from '../logic/i18n';
 import { translateWorkoutName, translateExerciseName, translateCategory } from '../logic/exerciseTranslations';
+import confetti from 'canvas-confetti';
 
 interface WorkoutHistoryViewProps {
   language?: SupportedLanguage;
   onOpenPro?: () => void;
+  onSessionLogged?: (tonnage: number, xp: number) => void;
 }
 
 export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
   language = 'en',
   onOpenPro,
+  onSessionLogged,
 }) => {
   const [history, setHistory] = useState<WorkoutHistorySession[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [filterQuery, setFilterQuery] = useState('');
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [orphanDraft, setOrphanDraft] = useState<any>(null);
+
+  // Default dates for quick logging
+  const twoDaysAgo = new Date();
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+  const twoDaysAgoStr = twoDaysAgo.toISOString().split('T')[0];
+
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+  // Manual past workout form state
+  const [logForm, setLogForm] = useState({
+    date: twoDaysAgoStr,
+    workoutName: 'Upper Body A (Push Emphasis)',
+    dayName: 'Monday',
+    durationMinutes: 65,
+    completedSetsCount: 16,
+    totalTonnageKg: 4200,
+    prCount: 1,
+    primaryExerciseName: 'Barbell Bench Press',
+    primaryExerciseCategory: 'push' as ExerciseCategory,
+    primaryExerciseSets: 4,
+    primaryExerciseWeight: 80,
+  });
 
   useEffect(() => {
     setHistory(getWorkoutHistory());
+
+    // Check if an unsealed draft exists from a previous date
+    const draft = getActiveSessionDraft();
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (draft && draft.completedSetsCount > 0 && draft.date && draft.date < todayStr) {
+      setOrphanDraft(draft);
+    }
   }, []);
 
   const handleClearHistory = () => {
@@ -44,6 +92,14 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
     }
   };
 
+  const handleDeleteSession = (sessionId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (window.confirm('Delete this workout session from your ledger?')) {
+      deleteWorkoutSession(sessionId);
+      setHistory(getWorkoutHistory());
+    }
+  };
+
   const handleExportJson = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
     const downloadAnchor = document.createElement('a');
@@ -52,6 +108,105 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
+  };
+
+  // Restore orphaned draft from previous session
+  const handleRestoreOrphanDraft = () => {
+    if (!orphanDraft) return;
+
+    const session: WorkoutHistorySession = {
+      id: `session_recovered_${Date.now()}_${orphanDraft.date}`,
+      date: orphanDraft.date,
+      dayName: orphanDraft.dayName || 'Training Day',
+      workoutName: orphanDraft.workoutName || 'Workout Session',
+      durationMinutes: orphanDraft.durationMinutes || 60,
+      totalTonnageKg: orphanDraft.totalTonnageKg || 3500,
+      completedSetsCount: orphanDraft.completedSetsCount || 12,
+      totalSetsCount: orphanDraft.exercises?.reduce((acc: number, e: any) => acc + (e.sets?.length || 0), 0) || orphanDraft.completedSetsCount,
+      prCount: 1,
+      exercises: orphanDraft.exercises || [],
+    };
+
+    saveWorkoutSession(session);
+    clearActiveSessionDraft();
+    setOrphanDraft(null);
+    setHistory(getWorkoutHistory());
+
+    const xpEarned = Math.round(session.totalTonnageKg * 0.05 + session.completedSetsCount * 25 + 150);
+    if (onSessionLogged) {
+      onSessionLogged(session.totalTonnageKg, xpEarned);
+    }
+
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 },
+      colors: ['#f59e0b', '#10b981', '#06b6d4'],
+    });
+  };
+
+  // Submit manual past workout
+  const handleSaveManualLog = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const dateObj = new Date(logForm.date);
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const resolvedDayName = isNaN(dateObj.getTime()) ? 'Training Day' : dayNames[dateObj.getDay()];
+
+    const session: WorkoutHistorySession = {
+      id: `session_past_${Date.now()}`,
+      date: logForm.date,
+      dayName: resolvedDayName,
+      workoutName: logForm.workoutName,
+      durationMinutes: Number(logForm.durationMinutes) || 60,
+      totalTonnageKg: Number(logForm.totalTonnageKg) || 3500,
+      completedSetsCount: Number(logForm.completedSetsCount) || 15,
+      totalSetsCount: Number(logForm.completedSetsCount) || 15,
+      prCount: Number(logForm.prCount) || 1,
+      exercises: [
+        {
+          id: 'primary_lift',
+          name: logForm.primaryExerciseName,
+          category: logForm.primaryExerciseCategory,
+          sets: Array.from({ length: Number(logForm.primaryExerciseSets) || 4 }, (_, idx) => ({
+            setNumber: idx + 1,
+            type: 'normal',
+            weightKg: Number(logForm.primaryExerciseWeight) || 80,
+            reps: 10,
+            completed: true,
+            isPr: idx === 0,
+          })),
+        },
+        {
+          id: 'accessory_lift',
+          name: 'Accessory & Hypertrophy Finisher',
+          category: logForm.primaryExerciseCategory,
+          sets: Array.from({ length: Math.max(1, (Number(logForm.completedSetsCount) || 15) - 4) }, (_, idx) => ({
+            setNumber: idx + 1,
+            type: 'normal',
+            weightKg: Math.round(Number(logForm.primaryExerciseWeight) * 0.6) || 45,
+            reps: 12,
+            completed: true,
+          })),
+        }
+      ],
+    };
+
+    saveWorkoutSession(session);
+    setHistory(getWorkoutHistory());
+    setIsLogModalOpen(false);
+
+    const xpEarned = Math.round(session.totalTonnageKg * 0.05 + session.completedSetsCount * 25 + 150);
+    if (onSessionLogged) {
+      onSessionLogged(session.totalTonnageKg, xpEarned);
+    }
+
+    confetti({
+      particleCount: 150,
+      spread: 90,
+      origin: { y: 0.6 },
+      colors: ['#f59e0b', '#10b981', '#06b6d4', '#8b5cf6'],
+    });
   };
 
   const lifetimeTonnage = history.reduce((acc, s) => acc + (s.totalTonnageKg || 0), 0);
@@ -95,12 +250,20 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
           </div>
 
           {/* Quick Action Buttons */}
-          <div className="flex items-center gap-2 self-stretch sm:self-auto">
+          <div className="flex items-center gap-2 self-stretch sm:self-auto flex-wrap">
+            <button
+              onClick={() => setIsLogModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-roman font-black transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20 hover:scale-105"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>Log Past Workout</span>
+            </button>
+
             {history.length > 0 && (
               <>
                 <button
                   onClick={handleExportJson}
-                  className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-roman font-bold transition-all flex items-center gap-1.5"
+                  className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-roman font-bold transition-all flex items-center gap-1.5"
                 >
                   <Download className="w-3.5 h-3.5 text-cyan-400" />
                   <span>Export JSON</span>
@@ -108,7 +271,7 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
 
                 <button
                   onClick={handleClearHistory}
-                  className="p-2 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 transition-colors"
+                  className="p-2.5 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 border border-slate-800 transition-colors"
                   title="Clear history"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -167,6 +330,47 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
         </div>
       </div>
 
+      {/* Recovered Orphan Draft Banner (If an unsealed session was preserved) */}
+      {orphanDraft && (
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-950/50 via-slate-900 to-amber-900/30 border border-amber-500/50 p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-white font-roman flex items-center gap-2">
+                <span>Recovered Unsealed Workout Session</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono">
+                  {orphanDraft.date}
+                </span>
+              </h4>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Found {orphanDraft.completedSetsCount} completed sets from <strong>{orphanDraft.workoutName}</strong> ({(orphanDraft.totalTonnageKg || 0).toLocaleString()} kg tonnage).
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <button
+              onClick={() => {
+                clearActiveSessionDraft();
+                setOrphanDraft(null);
+              }}
+              className="px-3 py-1.5 rounded-xl text-xs text-slate-400 hover:text-white"
+            >
+              Dismiss
+            </button>
+            <button
+              onClick={handleRestoreOrphanDraft}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-roman font-black flex items-center gap-1.5 shadow-md shadow-amber-500/20 hover:scale-105 transition-all"
+            >
+              <Check className="w-4 h-4 stroke-[3]" />
+              <span>Restore & Claim XP</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Filter / Search Bar */}
       {history.length > 0 && (
         <div className="flex items-center gap-3">
@@ -192,18 +396,29 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
 
       {/* Sessions Cards Stream */}
       {filteredHistory.length === 0 ? (
-        <div className="rounded-3xl bg-slate-900/60 border border-slate-800 p-12 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-slate-800/80 text-amber-400/60 flex items-center justify-center mx-auto mb-3">
+        <div className="rounded-3xl bg-slate-900/60 border border-slate-800 p-12 text-center space-y-4">
+          <div className="w-14 h-14 rounded-2xl bg-slate-800/80 text-amber-400/60 flex items-center justify-center mx-auto">
             <Dumbbell className="w-7 h-7" />
           </div>
-          <h4 className="text-base font-bold text-white font-roman mb-1">
-            {history.length === 0 ? t('history.empty', language) : 'No Matching Sessions Found'}
-          </h4>
-          <p className="text-xs text-slate-400 max-w-md mx-auto">
-            {history.length === 0
-              ? 'Complete and seal your first workout in Today\'s Arena to etch your achievements into the permanent ledger.'
-              : 'Try clearing your search query to see all recorded sessions.'}
-          </p>
+          <div className="max-w-md mx-auto space-y-1">
+            <h4 className="text-base font-bold text-white font-roman">
+              {history.length === 0 ? t('history.empty', language) : 'No Matching Sessions Found'}
+            </h4>
+            <p className="text-xs text-slate-400 leading-relaxed">
+              {history.length === 0
+                ? 'Did you train recently? Use "Log Past Workout" above to retroactively record any session and credit your profile with XP and tonnage immediately.'
+                : 'Try clearing your search query to see all recorded sessions.'}
+            </p>
+          </div>
+          {history.length === 0 && (
+            <button
+              onClick={() => setIsLogModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 text-slate-950 text-xs font-roman font-black hover:scale-105 transition-all shadow-md shadow-amber-500/20"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+              <span>Log Past Workout (e.g. 2 Days Ago)</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="space-y-4">
@@ -254,9 +469,14 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="text-xs text-slate-400 font-roman hidden sm:inline">
-                      {isExpanded ? 'Hide Details' : 'View Exercises'}
-                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteSession(session.id, e)}
+                      className="p-2 rounded-xl bg-slate-900 hover:bg-rose-950/40 text-slate-500 hover:text-rose-400 border border-slate-800 transition-colors"
+                      title="Delete entry"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                     <button
                       type="button"
                       className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white"
@@ -307,6 +527,171 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Manual Past Workout Logger Modal */}
+      {isLogModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-xl rounded-3xl bg-slate-900 border border-amber-500/40 shadow-2xl p-6 sm:p-7 space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <Plus className="w-5 h-5 stroke-[2.5]" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-black text-white font-roman">
+                    Log Past Workout Session
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    Recover workouts performed earlier and credit XP immediately
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsLogModalOpen(false)}
+                className="p-2 rounded-xl bg-slate-950 text-slate-400 hover:text-white border border-slate-800"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveManualLog} className="space-y-4">
+              {/* Quick Date Presets */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1.5 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Session Date</span>
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() => setLogForm({ ...logForm, date: twoDaysAgoStr })}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                      logForm.date === twoDaysAgoStr
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    2 Days Ago ({twoDaysAgoStr})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLogForm({ ...logForm, date: yesterdayStr })}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all border ${
+                      logForm.date === yesterdayStr
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/50'
+                        : 'bg-slate-950 text-slate-400 border-slate-800 hover:text-white'
+                    }`}
+                  >
+                    Yesterday
+                  </button>
+                </div>
+                <input
+                  type="date"
+                  value={logForm.date}
+                  onChange={(e) => setLogForm({ ...logForm, date: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white mono-font focus:outline-none focus:border-amber-500/50"
+                  required
+                />
+              </div>
+
+              {/* Workout Routine Template */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-400 mb-1.5">
+                  Workout Focus & Routine
+                </label>
+                <select
+                  value={logForm.workoutName}
+                  onChange={(e) => setLogForm({ ...logForm, workoutName: e.target.value })}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500/50"
+                >
+                  <option value="Upper Body A (Push Emphasis)">Upper Body A (Push Emphasis)</option>
+                  <option value="Lower Body A (Squat Focus)">Lower Body A (Squat Focus)</option>
+                  <option value="Upper Body B (Pull Emphasis)">Upper Body B (Pull Emphasis)</option>
+                  <option value="Lower Body B (Deadlift Focus)">Lower Body B (Deadlift Focus)</option>
+                  <option value="Full Body Olympian Forge">Full Body Olympian Forge</option>
+                  <option value="Push Hypertrophy">Push Hypertrophy</option>
+                  <option value="Pull Hypertrophy">Pull Hypertrophy</option>
+                  <option value="Legs & Abs">Legs & Abs</option>
+                </select>
+              </div>
+
+              {/* Tonnage, Sets & Duration Grid */}
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                    Completed Sets
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="60"
+                    value={logForm.completedSetsCount}
+                    onChange={(e) => setLogForm({ ...logForm, completedSetsCount: Number(e.target.value) })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-emerald-300 font-bold mono-font"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                    Total Tonnage (kg)
+                  </label>
+                  <input
+                    type="number"
+                    min="100"
+                    step="100"
+                    value={logForm.totalTonnageKg}
+                    onChange={(e) => setLogForm({ ...logForm, totalTonnageKg: Number(e.target.value) })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-amber-300 font-bold mono-font"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                    Duration (min)
+                  </label>
+                  <input
+                    type="number"
+                    min="15"
+                    max="180"
+                    value={logForm.durationMinutes}
+                    onChange={(e) => setLogForm({ ...logForm, durationMinutes: Number(e.target.value) })}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-cyan-300 font-bold mono-font"
+                  />
+                </div>
+              </div>
+
+              {/* XP Preview Card */}
+              <div className="p-3 rounded-2xl bg-slate-950 border border-amber-500/30 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <Trophy className="w-4 h-4 text-amber-400" />
+                  <span className="text-slate-300 font-roman">Estimated XP to Award:</span>
+                </div>
+                <div className="text-amber-300 font-black mono-font text-sm">
+                  +{Math.round(logForm.totalTonnageKg * 0.05 + logForm.completedSetsCount * 25 + 150)} XP
+                </div>
+              </div>
+
+              {/* Form Action Buttons */}
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+                <button
+                  type="button"
+                  onClick={() => setIsLogModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 text-slate-950 text-xs font-roman font-black flex items-center gap-1.5 shadow-md shadow-amber-500/20 hover:scale-105 transition-all"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>Save to Ledger & Claim XP</span>
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

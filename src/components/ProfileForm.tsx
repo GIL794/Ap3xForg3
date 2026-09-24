@@ -38,6 +38,7 @@ import {
   translateArchetype,
   translateDayName 
 } from '../logic/exerciseTranslations';
+import { PhysiqueTargetCard } from './PhysiqueTargetCard';
 
 interface ProfileFormProps {
   profile: UserProfile;
@@ -50,6 +51,7 @@ interface ProfileFormProps {
   onGeneratePlan: (updatedProfile: UserProfile) => void;
   onResetDefaults: () => void;
   language?: SupportedLanguage;
+  onOpenPro?: () => void;
 }
 
 export const ProfileForm: React.FC<ProfileFormProps> = ({
@@ -63,6 +65,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
   onGeneratePlan,
   onResetDefaults,
   language = 'en',
+  onOpenPro,
 }) => {
   const [formData, setFormData] = useState<UserProfile>(profile);
   const [isOpen, setIsOpen] = useState(isStandaloneView ? true : false);
@@ -550,6 +553,16 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   <span className="text-[10px] text-slate-500 ml-1">%</span>
                 </div>
               </div>
+            </div>
+
+            {/* Live Interactive Target Weight & Nutrition Calibration Engine */}
+            <div className="pt-2">
+              <PhysiqueTargetCard
+                profile={formData}
+                isProSubscriber={isProSubscriber}
+                onOpenPro={onOpenPro}
+                language={language}
+              />
             </div>
           </div>
 
