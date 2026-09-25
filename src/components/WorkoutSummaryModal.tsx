@@ -151,7 +151,7 @@ Workout: ${translateWorkoutName(workoutPlan.name, language)}
                 {durationMinutes} <span className="text-xs font-normal text-slate-400">min</span>
               </span>
               <span className="text-[10px] text-slate-400 block mt-1">
-                Active heart & neural output
+                {t('summary.heartNeural', language)}
               </span>
             </div>
 
@@ -163,7 +163,7 @@ Workout: ${translateWorkoutName(workoutPlan.name, language)}
                 {completedSetsCount}/{totalSetsCount}
               </span>
               <span className="text-[10px] text-emerald-300/80 block mt-1">
-                100% Target Met
+                {t('summary.targetMet', language)}
               </span>
             </div>
 
@@ -175,7 +175,7 @@ Workout: ${translateWorkoutName(workoutPlan.name, language)}
                 +{xpEarned} <span className="text-xs font-normal text-slate-400">XP</span>
               </span>
               <span className="text-[10px] text-amber-300 block mt-1 font-roman font-bold">
-                {currentTier.emoji} {currentTier.name} ({t('ascension.tier', language)} {currentTier.romanNumeral})
+                {currentTier.emoji} {currentTier.name} ({language === 'la' ? `Gradus ${currentTier.romanNumeral} / XIII` : `${t('ascension.level', language)} ${currentTier.tierNumber} / 13 • Tier ${currentTier.romanNumeral}`})
               </span>
             </div>
           </div>
@@ -184,7 +184,11 @@ Workout: ${translateWorkoutName(workoutPlan.name, language)}
           {prCount > 0 && (
             <div className="w-full p-3 rounded-2xl bg-gradient-to-r from-amber-500/20 via-yellow-500/20 to-amber-500/20 border border-amber-500/40 mb-6 flex items-center justify-center gap-2 text-xs text-amber-300 font-roman font-bold">
               <Award className="w-4 h-4 text-amber-400 shrink-0" />
-              <span>{prCount} Personal Record{prCount > 1 ? 's' : ''} established in this workout!</span>
+              <span>
+                {prCount === 1 
+                  ? t('summary.prRecord', language).replace('{count}', String(prCount))
+                  : t('summary.prRecords', language).replace('{count}', String(prCount))}
+              </span>
             </div>
           )}
 
@@ -197,12 +201,12 @@ Workout: ${translateWorkoutName(workoutPlan.name, language)}
               {shared ? (
                 <>
                   <Check className="w-4 h-4 text-emerald-400" />
-                  <span>Copied to Clipboard!</span>
+                  <span>{t('summary.copied', language)}</span>
                 </>
               ) : (
                 <>
                   <Share2 className="w-4 h-4 text-amber-400" />
-                  <span>Share Glory</span>
+                  <span>{t('summary.shareGlory', language)}</span>
                 </>
               )}
             </button>

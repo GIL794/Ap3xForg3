@@ -211,14 +211,18 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                   </span>
                 </div>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {userAccount?.email || 'gella94@gmail.com'} • {formData.location || 'London, UK'}
+                  {userAccount?.email || 'contact@kyrvynltd.co.uk'} • {formData.location || 'London, UK'}
                 </p>
                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                   <span className="text-[11px] font-bold text-amber-400 font-roman flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 px-2.5 py-0.5 rounded-full">
                     <span>{currentTier.emoji}</span>
                     <span>{currentTier.name}</span>
                     <span className="text-slate-500">•</span>
-                    <span className="text-amber-200">{t('ascension.tier', language)} {currentTier.romanNumeral}</span>
+                    <span className="text-amber-200">
+                      {language === 'la' 
+                        ? `Gradus ${currentTier.romanNumeral} / XIII` 
+                        : `${t('ascension.level', language)} ${currentTier.tierNumber} / 13 • Tier ${currentTier.romanNumeral}`}
+                    </span>
                     <span className="text-slate-500">•</span>
                     <span className="text-slate-300">{currentTier.badge}</span>
                   </span>

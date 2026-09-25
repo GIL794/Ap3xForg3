@@ -36,7 +36,7 @@ interface ImperivmProModalProps {
   language?: SupportedLanguage;
 }
 
-const AIRTM_RECIPIENT_EMAIL = 'gella94@gmail.com';
+const AIRTM_RECIPIENT_EMAIL = (import.meta.env.VITE_AIRTM_RECIPIENT_EMAIL as string) || 'contact@kyrvynltd.co.uk';
 
 export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   isOpen,
@@ -334,7 +334,11 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                         </span>
                       </h4>
                       <p className="text-[11px] text-slate-400">
-                        Send AirUSD or USD directly to the founder account
+                        {language === 'it' 
+                          ? 'Invia AirUSD o USD direttamente al conto verificato di Kyrvyn Ltd' 
+                          : language === 'es'
+                          ? 'Envía AirUSD o USD a la cuenta verificada de Kyrvyn Ltd'
+                          : 'Send AirUSD or USD directly to the Kyrvyn Ltd verified account'}
                       </p>
                     </div>
                   </div>
@@ -353,7 +357,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                 {/* Recipient Address Box */}
                 <div className="p-3.5 rounded-xl bg-black/60 border border-slate-800 space-y-2">
                   <span className="text-[10px] font-roman uppercase tracking-wider text-slate-400 font-bold block">
-                    Recipient AirTM Email:
+                    {language === 'it' ? 'Email Ricevente Kyrvyn Ltd (AirTM):' : 'Recipient AirTM Email (Kyrvyn Ltd):'}
                   </span>
                   <div className="flex items-center justify-between gap-2">
                     <code className="text-cyan-300 font-mono text-sm sm:text-base font-bold select-all break-all">

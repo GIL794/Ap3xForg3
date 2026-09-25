@@ -264,7 +264,7 @@ export const EvolutionRoadmapModal: React.FC<EvolutionRoadmapModalProps> = ({
                     <div>
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className="text-[10px] uppercase font-bold text-amber-500 font-roman tracking-wider">
-                          {language === 'la' ? `Gradus ${tier.romanNumeral}` : `${t('ascension.tier', language)} ${tier.tierNumber} / 13 • Tier ${tier.romanNumeral}`}
+                          {language === 'la' ? `Gradus ${tier.romanNumeral} / XIII` : `${t('ascension.level', language)} ${tier.tierNumber} / 13 • Tier ${tier.romanNumeral}`}
                         </span>
                         <h4 className="text-sm font-black text-white font-roman tracking-wide">
                           {tier.name}

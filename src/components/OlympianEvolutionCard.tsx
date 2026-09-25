@@ -54,7 +54,7 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
                 <span className="text-[10px] uppercase font-bold text-amber-500 font-roman tracking-wider">
                   {language === 'la' 
                     ? `Gradus ${currentRank.romanNumeral} / XIII` 
-                    : `${t('ascension.tier', language)} ${currentRank.tierNumber} / 13 • Tier ${currentRank.romanNumeral}`}
+                    : `${t('ascension.level', language)} ${currentRank.tierNumber} / 13 • Tier ${currentRank.romanNumeral}`}
                 </span>
                 <h3 className="text-lg font-black text-white font-roman flex items-center gap-1.5 tracking-wide">
                   {currentRank.name}
