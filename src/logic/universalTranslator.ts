@@ -49,6 +49,11 @@ export function setGoogleTranslateCookie(targetLang: SupportedLanguage): void {
 export function initializeGoogleTranslate(targetLang: SupportedLanguage): void {
   if (typeof window === 'undefined') return;
 
+  // Synchronize HTML root lang attribute with active language
+  if (typeof document !== 'undefined' && document.documentElement) {
+    document.documentElement.lang = targetLang;
+  }
+
   // Set the translation cookie immediately
   setGoogleTranslateCookie(targetLang);
 

@@ -4,6 +4,7 @@ import { DAY_NAMES_SHORT } from '../data/defaultProfile';
 import { ArrowRight, Check, Sparkles, Smartphone, Monitor, Apple, Download } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { SupportedLanguage, t } from '../logic/i18n';
+import { translateExperienceLevel } from '../logic/exerciseTranslations';
 
 interface OnboardingModalProps {
   isOpen: boolean;
@@ -48,11 +49,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
     { id: 'strength', label: language === 'en' ? 'Raw Strength (Colosseum Heavy Overload)' : t('onboarding.goal', language) + ' — Strength' },
   ] as const;
 
-  const EXPERIENCE_LABELS: Record<string, string> = {
-    Beginner: language === 'en' ? 'Beginner' : language === 'it' ? 'Principiante' : language === 'es' ? 'Principiante' : language === 'fr' ? 'Débutant' : language === 'de' ? 'Anfänger' : 'Tirocinium',
-    Intermediate: language === 'en' ? 'Intermediate' : language === 'it' ? 'Intermedio' : language === 'es' ? 'Intermedio' : language === 'fr' ? 'Intermédiaire' : language === 'de' ? 'Fortgeschritten' : 'Mediocris',
-    Advanced: language === 'en' ? 'Advanced' : language === 'it' ? 'Avanzato' : language === 'es' ? 'Avanzado' : language === 'fr' ? 'Avancé' : language === 'de' ? 'Erfahren' : 'Expertus',
-  };
+
 
   const handleToggleDay = (dayIdx: number) => {
     const exists = profile.availableDays.includes(dayIdx);
@@ -193,7 +190,7 @@ export const OnboardingModal: React.FC<OnboardingModalProps> = ({
                             : 'bg-slate-950 text-slate-400 border border-slate-800 hover:text-white'
                         }`}
                       >
-                        {EXPERIENCE_LABELS[lvl]}
+                        {translateExperienceLevel(lvl, language)}
                       </button>
                     ))}
                   </div>

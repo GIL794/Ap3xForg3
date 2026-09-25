@@ -36,7 +36,8 @@ import {
   translateSecondaryGoal, 
   translateEquipment, 
   translateArchetype,
-  translateDayName 
+  translateDayName,
+  translateExperienceLevel
 } from '../logic/exerciseTranslations';
 import { PhysiqueTargetCard } from './PhysiqueTargetCard';
 
@@ -325,7 +326,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                     {t('profile.title', language)}
                   </h3>
                   <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-medium">
-                    {formData.name} • {formData.experience}
+                    {formData.name} • {translateExperienceLevel(formData.experience, language)}
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
@@ -436,7 +437,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-500" /> Timezone
+                <Clock className="w-3.5 h-3.5 text-slate-500" /> {t('profile.timezone', language)}
               </label>
               <select
                 value={formData.timezone}
@@ -582,7 +583,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1">
-                Experience Level
+                {t('profile.experience', language)}
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {(['Beginner', 'Intermediate', 'Advanced'] as ExperienceLevel[]).map((level) => (
@@ -596,7 +597,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
                         : 'bg-slate-950 text-slate-400 hover:text-white border border-slate-800'
                     }`}
                   >
-                    {level}
+                    {translateExperienceLevel(level, language)}
                   </button>
                 ))}
               </div>
@@ -604,7 +605,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                <Target className="w-3.5 h-3.5 text-cyan-400" /> Primary Focus
+                <Target className="w-3.5 h-3.5 text-cyan-400" /> {t('profile.primaryFocus', language)}
               </label>
               <select
                 value={formData.primaryGoal}
@@ -619,7 +620,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-emerald-400" /> Target Gym Time Today
+                <Clock className="w-3.5 h-3.5 text-emerald-400" /> {t('profile.targetTime', language)}
               </label>
               <input
                 type="time"
@@ -634,7 +635,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-slate-500" />
-              Available Days per Week ({formData.availableDays.length} Selected)
+              {t('profile.daysAvailable', language)} ({formData.availableDays.length})
             </label>
             <div className="grid grid-cols-7 gap-2">
               {daysOrder.map((dayIdx) => {
@@ -665,7 +666,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
-                <Clock className="w-3.5 h-3.5 text-slate-500" /> Typical Session Duration
+                <Clock className="w-3.5 h-3.5 text-slate-500" /> {t('profile.sessionDuration', language)}
               </label>
               <div className="grid grid-cols-4 gap-2">
                 {[45, 60, 75, 90].map((mins) => (
@@ -687,7 +688,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-2">
-                Secondary Goals (Multi-select)
+                {t('profile.secondaryGoals', language)}
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {secondaryGoalOptions.map(sg => {
@@ -714,7 +715,7 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           {/* Row 5: Equipment Access */}
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
-              <Dumbbell className="w-3.5 h-3.5 text-slate-500" /> Equipment Access
+              <Dumbbell className="w-3.5 h-3.5 text-slate-500" /> {t('profile.equipment', language)}
             </label>
             <div className="flex flex-wrap gap-2">
               {equipmentOptions.map(eq => {
@@ -741,27 +742,27 @@ export const ProfileForm: React.FC<ProfileFormProps> = ({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> Injuries / Physical Limitations
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" /> {t('profile.injuries', language)}
               </label>
               <input
                 type="text"
                 value={formData.injuries}
                 onChange={(e) => setFormData({ ...formData, injuries: e.target.value })}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
-                placeholder="e.g. Left shoulder impingement, lower back stiffness"
+                placeholder={t('profile.injuriesHint', language)}
               />
             </div>
 
             <div>
               <label className="block text-xs font-semibold text-slate-400 mb-1 flex items-center gap-1.5">
-                <HeartHandshake className="w-3.5 h-3.5 text-slate-500" /> Training Preferences & Style
+                <HeartHandshake className="w-3.5 h-3.5 text-slate-500" /> {t('profile.preferences', language)}
               </label>
               <input
                 type="text"
                 value={formData.preferences}
                 onChange={(e) => setFormData({ ...formData, preferences: e.target.value })}
                 className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500"
-                placeholder="e.g. Likes compound lifts, progressive overload"
+                placeholder={t('profile.preferencesHint', language)}
               />
             </div>
           </div>

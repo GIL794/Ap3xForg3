@@ -1,5 +1,5 @@
 import { SupportedLanguage } from './i18n';
-import { BiomechanicalExecution, MythologicalArchetype, PrimaryGoal, SecondaryGoal, EquipmentType, ExerciseCategory } from '../types';
+import { BiomechanicalExecution, MythologicalArchetype, PrimaryGoal, SecondaryGoal, EquipmentType, ExerciseCategory, ExperienceLevel } from '../types';
 
 // ==========================================
 // 1. EXERCISE NAMES TRANSLATIONS
@@ -804,6 +804,37 @@ export const PRIMARY_GOALS: Record<PrimaryGoal, Record<SupportedLanguage, string
 
 export function translateGoal(goal: PrimaryGoal, lang: SupportedLanguage = 'en'): string {
   return PRIMARY_GOALS[goal]?.[lang] || PRIMARY_GOALS[goal]?.en || goal;
+}
+
+export const EXPERIENCE_LEVELS: Record<ExperienceLevel, Record<SupportedLanguage, string>> = {
+  Beginner: {
+    en: 'Beginner',
+    it: 'Principiante',
+    es: 'Principiante',
+    fr: 'Débutant',
+    de: 'Anfänger',
+    la: 'Tiro',
+  },
+  Intermediate: {
+    en: 'Intermediate',
+    it: 'Intermedio',
+    es: 'Intermedio',
+    fr: 'Intermédiaire',
+    de: 'Fortgeschritten',
+    la: 'Mediocris',
+  },
+  Advanced: {
+    en: 'Advanced',
+    it: 'Avanzato', // Strictly 'Avanzato' - NEVER 'assaggiato'
+    es: 'Avanzado',
+    fr: 'Avancé',
+    de: 'Erfahren',
+    la: 'Expertus',
+  },
+};
+
+export function translateExperienceLevel(level: ExperienceLevel, lang: SupportedLanguage = 'en'): string {
+  return EXPERIENCE_LEVELS[level]?.[lang] || EXPERIENCE_LEVELS[level]?.en || level;
 }
 
 export const SECONDARY_GOALS: Record<SecondaryGoal, Record<SupportedLanguage, string>> = {
