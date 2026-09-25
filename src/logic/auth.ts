@@ -102,23 +102,15 @@ export function isPasscodeUnlocked(): boolean {
 }
 
 /**
- * Validates Emperor secret passcodes for instant VIP unlock
+ * Validates Emperor secret passcodes for instant VIP unlock.
+ * Only 'C0D3T0UNL0CK' (and optional VITE_LIFETIME_PRO_CODE) are permitted.
+ * Existing Pro accounts and device unlocks remain completely preserved.
  */
 export function verifyEmperorPasscode(code: string): boolean {
   if (!code) return false;
   const clean = code.toUpperCase().trim();
   const validCodes = [
-    'IMPERATOR2026',
-    'OLYMPIAN',
-    'HOMODEUS',
-    'HOMODEVS',
-    'EMPEROR',
-    'IMPERATOR',
-    'GABRIELE',
-    'GELLA94',
-    'VIP',
-    'PRO',
-    'ADMIN',
+    'C0D3T0UNL0CK',
     (import.meta.env.VITE_LIFETIME_PRO_CODE || '').toUpperCase().trim(),
   ].filter(Boolean);
 
@@ -131,6 +123,27 @@ export function verifyEmperorPasscode(code: string): boolean {
     }
   }
   return isMatch;
+}
+
+/**
+ * Revokes Pro/VIP status from device storage and optionally a specific user account.
+ * Useful for testing free tiers or resetting access.
+ */
+export function revokeProAccess(userId?: string): void {
+  try {
+    localStorage.removeItem('homodevs_vip_passcode_unlocked');
+    if (userId) {
+      const storageKey = `homodevs_user_state_${userId}`;
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const state = JSON.parse(raw);
+        state.isProSubscriber = false;
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+    }
+  } catch (err) {
+    console.error('Failed to revoke Pro access:', err);
+  }
 }
 
 /**
