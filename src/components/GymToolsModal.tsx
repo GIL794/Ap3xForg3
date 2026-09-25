@@ -107,10 +107,10 @@ export const GymToolsModal: React.FC<GymToolsModalProps> = ({
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 {t('tools.plateCalc', language)} & {t('tools.oneRm', language)}
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Zero Paywall
+                  {t('tools.zeroPaywall', language)}
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">Essential gym floor tools—no subscription required</p>
+              <p className="text-xs text-slate-400">{t('tools.essential', language)}</p>
             </div>
           </div>
 
@@ -172,16 +172,16 @@ export const GymToolsModal: React.FC<GymToolsModalProps> = ({
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                    Barbell Type
+                    {t('tools.barbellType', language)}
                   </label>
                   <select
                     value={barWeight}
                     onChange={(e) => setBarWeight(Number(e.target.value))}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs font-semibold text-white focus:outline-none focus:border-cyan-500"
                   >
-                    <option value={20}>Standard Olympic Bar (20 kg)</option>
-                    <option value={15}>Technique / Women's Bar (15 kg)</option>
-                    <option value={10}>EZ-Curl / Swiss Bar (10 kg)</option>
+                    <option value={20}>{t('tools.barbellStandard', language)}</option>
+                    <option value={15}>{t('tools.barbellWomen', language)}</option>
+                    <option value={10}>{t('tools.barbellJunior', language)}</option>
                   </select>
                 </div>
               </div>

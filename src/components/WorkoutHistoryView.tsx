@@ -258,11 +258,11 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
                   {t('history.title', language)}
                 </h2>
                 <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30 font-roman">
-                  {history.length} Sessions
+                  {history.length} {t('history.sessions', language)}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1">
-                Verified training history, tonnage progression, and broken personal records
+                {t('history.sub', language)}
               </p>
             </div>
           </div>
@@ -274,7 +274,7 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
               className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 text-xs font-roman font-black transition-all flex items-center gap-1.5 shadow-md shadow-amber-500/20 hover:scale-105"
             >
               <Plus className="w-4 h-4 stroke-[3]" />
-              <span>Log Past Workout</span>
+              <span>{t('history.logPast', language)}</span>
             </button>
 
             {history.length > 0 && (
@@ -285,7 +285,7 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
                   title="Export Latest Session as Imperial Roman Workout Scroll (PDF)"
                 >
                   <FileText className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Imperial PDF Scroll</span>
+                  <span>{t('history.pdfScroll', language)}</span>
                 </button>
 
                 <button
@@ -294,7 +294,7 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
                   title="Export Encrypted Cloud & Local Ledger (AES-GCM-256 Web Crypto)"
                 >
                   <Lock className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Encrypted Ledger (.enc.json)</span>
+                  <span>{t('history.encLedger', language)}</span>
                 </button>
 
                 <button
@@ -302,7 +302,7 @@ export const WorkoutHistoryView: React.FC<WorkoutHistoryViewProps> = ({
                   className="px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700/80 text-xs font-roman font-bold transition-all flex items-center gap-1.5"
                 >
                   <Download className="w-3.5 h-3.5 text-cyan-400" />
-                  <span>Export JSON</span>
+                  <span>{t('nav.export', language)}</span>
                 </button>
 
                 <button

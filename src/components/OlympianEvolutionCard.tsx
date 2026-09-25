@@ -52,7 +52,9 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
             <div>
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <span className="text-[10px] uppercase font-bold text-amber-500 font-roman tracking-wider">
-                  {t('ascension.tier', language)} {currentRank.romanNumeral} / XIII
+                  {language === 'la' 
+                    ? `Gradus ${currentRank.romanNumeral} / XIII` 
+                    : `${t('ascension.tier', language)} ${currentRank.tierNumber} / 13 • Tier ${currentRank.romanNumeral}`}
                 </span>
                 <h3 className="text-lg font-black text-white font-roman flex items-center gap-1.5 tracking-wide">
                   {currentRank.name}
@@ -86,7 +88,7 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
               <button
                 onClick={() => setShowRoadmap(true)}
                 className="px-3.5 py-2 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-amber-200 text-xs font-roman font-bold transition-all flex items-center gap-1.5 border border-amber-500/30 shadow-sm"
-                title="View Full XIII Tiers of Ascension"
+                title={t('ascension.fullRoadmap', language)}
               >
                 <Map className="w-3.5 h-3.5 text-amber-400" />
                 <span>{t('ascension.pantheon', language)}</span>
@@ -131,6 +133,7 @@ export const OlympianEvolutionCard: React.FC<OlympianEvolutionCardProps> = ({
         isOpen={showRoadmap}
         onClose={() => setShowRoadmap(false)}
         totalTonnageKg={totalTonnageKg}
+        language={language}
       />
     </>
   );

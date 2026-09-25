@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Crown, Zap, Check, Lock, Shield, Sparkles } from 'lucide-react';
+import { SupportedLanguage, t } from '../logic/i18n';
 
 export interface AscensionTier {
   tierNumber: number;
@@ -191,12 +192,14 @@ interface EvolutionRoadmapModalProps {
   isOpen: boolean;
   onClose: () => void;
   totalTonnageKg: number;
+  language?: SupportedLanguage;
 }
 
 export const EvolutionRoadmapModal: React.FC<EvolutionRoadmapModalProps> = ({
   isOpen,
   onClose,
   totalTonnageKg,
+  language = 'en',
 }) => {
   if (!isOpen) return null;
 
@@ -216,14 +219,14 @@ export const EvolutionRoadmapModal: React.FC<EvolutionRoadmapModalProps> = ({
             </div>
             <div>
               <h3 className="text-lg font-black text-white font-roman tracking-wider flex items-center gap-2">
-                HOMO DEVS — XIII TIERS OF ASCENSION
+                {t('roadmap.title', language)}
               </h3>
               <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400 mt-0.5">
-                <span>Lifetime Iron: <strong className="text-amber-400 mono-font">{totalTonnageKg.toLocaleString()} kg</strong></span>
+                <span>{t('history.lifetimeTonnage', language)}: <strong className="text-amber-400 mono-font">{totalTonnageKg.toLocaleString()} kg</strong></span>
                 <span>•</span>
-                <span>🏺 <strong className="text-amber-300 mono-font">{romanAmphorae.toLocaleString()}</strong> Roman Amphorae</span>
+                <span>🏺 <strong className="text-amber-300 mono-font">{romanAmphorae.toLocaleString()}</strong> {t('ascension.amphorae', language)}</span>
                 <span>•</span>
-                <span className="text-emerald-400 font-semibold font-roman">Rank: {currentTier.name} ({currentTier.romanNumeral})</span>
+                <span className="text-emerald-400 font-semibold font-roman">{t('roadmap.rank', language)}: {currentTier.name} ({currentTier.romanNumeral})</span>
               </div>
             </div>
           </div>
@@ -261,7 +264,7 @@ export const EvolutionRoadmapModal: React.FC<EvolutionRoadmapModalProps> = ({
                     <div>
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <span className="text-[10px] uppercase font-bold text-amber-500 font-roman tracking-wider">
-                          Tier {tier.romanNumeral}
+                          {language === 'la' ? `Gradus ${tier.romanNumeral}` : `${t('ascension.tier', language)} ${tier.tierNumber} / 13 • Tier ${tier.romanNumeral}`}
                         </span>
                         <h4 className="text-sm font-black text-white font-roman tracking-wide">
                           {tier.name}
@@ -274,7 +277,7 @@ export const EvolutionRoadmapModal: React.FC<EvolutionRoadmapModalProps> = ({
                         </span>
                         {isCurrent && (
                           <span className="text-[10px] px-2.5 py-0.5 rounded-full font-black uppercase tracking-wider bg-amber-400 text-slate-950 animate-pulse font-roman">
-                            Current Standing
+                            {t('roadmap.currentStanding', language)}
                           </span>
                         )}
                       </div>
@@ -283,11 +286,11 @@ export const EvolutionRoadmapModal: React.FC<EvolutionRoadmapModalProps> = ({
                       </p>
                       <div className="flex items-center gap-3 text-[11px] font-bold text-slate-400 mono-font">
                         <span>
-                          Required Volume: {tier.minKg.toLocaleString()} kg {tier.maxKg !== Infinity ? `- ${tier.maxKg.toLocaleString()} kg` : '+'}
+                          {t('roadmap.requiredVolume', language)}: {tier.minKg.toLocaleString()} kg {tier.maxKg !== Infinity ? `- ${tier.maxKg.toLocaleString()} kg` : '+'}
                         </span>
                         <span>•</span>
                         <span className="text-amber-400/80">
-                          ~{Math.round(tier.minKg / 26).toLocaleString()} Amphorae
+                          ~{Math.round(tier.minKg / 26).toLocaleString()} {t('ascension.amphorae', language)}
                         </span>
                       </div>
                     </div>
@@ -311,15 +314,15 @@ export const EvolutionRoadmapModal: React.FC<EvolutionRoadmapModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-950 border-t border-slate-800/80 flex items-center justify-between">
-          <span className="text-xs text-slate-400 italic font-roman">
-            "Vincit qui se vincit" — He conquers who conquers himself
+        <div className="p-4 bg-slate-950 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <span className="text-xs text-slate-400 italic font-roman text-center sm:text-left">
+            {t('roadmap.vincit', language)}
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-roman font-bold text-xs shadow-md shadow-amber-500/20 transition-all"
+            className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-roman font-bold text-xs shadow-md shadow-amber-500/20 transition-all shrink-0"
           >
-            Close Pantheon
+            {t('roadmap.close', language)}
           </button>
         </div>
       </div>
