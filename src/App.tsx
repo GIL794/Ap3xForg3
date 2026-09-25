@@ -604,13 +604,17 @@ export const App: React.FC = () => {
       {/* Modern Romanvm Impervm Footer */}
       <footer className="border-t border-slate-800/80 bg-[#06070a] py-8 pb-24 md:pb-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <img src="/logo.png" alt="HOMO DEUS" className="w-5 h-5 rounded-md object-cover" />
             <span className="font-roman font-bold text-slate-300">{t('footer.engine', language)}</span>
             <span>•</span>
             <span className="text-amber-400 font-roman">Athlete: {appState.userAccount.name}</span>
+            <span className="hidden lg:inline text-slate-700">•</span>
+            <span className="hidden lg:inline text-slate-500 font-roman">
+              Product of <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-amber-300 underline font-semibold">Kyrvyn Ltd</a>
+            </span>
           </div>
-          <div className="flex items-center gap-4 text-slate-400 font-roman">
+          <div className="flex flex-wrap items-center gap-4 text-slate-400 font-roman">
             <button
               onClick={() => setIsLoreModalOpen(true)}
               className="hover:text-amber-400 flex items-center gap-1 transition-colors"
@@ -632,6 +636,15 @@ export const App: React.FC = () => {
             >
               {t('footer.terms', language)}
             </button>
+            <span>•</span>
+            <a
+              href="https://kyrvynltd.co.uk"
+              target="_blank"
+              rel="noreferrer"
+              className="hover:text-amber-400 text-amber-500/80 font-bold transition-colors"
+            >
+              Kyrvyn Ltd
+            </a>
             <span>•</span>
             <button
               onClick={() => setIsAiModalOpen(true)}

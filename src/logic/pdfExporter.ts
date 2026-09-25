@@ -130,11 +130,11 @@ function drawCaesarSeal(doc: jsPDF, pageWidth: number, pageHeight: number, label
   doc.text('• CAESAR SEAL •', sealX, sealY + 0.5, { align: 'center' });
   doc.text(label, sealX, sealY + 3.5, { align: 'center' });
 
-  // ISO 8000 Ledger Checksum
+  // ISO 8000 Ledger Checksum & Corporate Attribution
   doc.setFont('times', 'italic');
-  doc.setFontSize(6.5);
+  doc.setFontSize(6);
   doc.setTextColor(130, 130, 130);
-  const isoHash = `ISO/IEC 8000 VERIFIED • GLADIATORIAL CODEX • SHA256-${Math.abs(Date.now() ^ 0xabcdef).toString(16).toUpperCase().padStart(8, '0')}`;
+  const isoHash = `ISO/IEC 8000 VERIFIED • KYRVYN LTD ENGINEERING (kyrvynltd.co.uk) • SHA256-${Math.abs(Date.now() ^ 0xabcdef).toString(16).toUpperCase().padStart(8, '0')}`;
   doc.text(isoHash, pageWidth / 2, pageHeight - 10, { align: 'center' });
 }
 

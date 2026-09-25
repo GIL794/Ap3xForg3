@@ -429,41 +429,61 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </div>
       </section>
 
-      {/* Modern Footer with Google Compliance Links */}
+      {/* Modern Footer with Kyrvyn Ltd Ownership & Compliance Links */}
       <footer className="border-t border-slate-800 bg-[#06070a] py-10 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" alt="HOMO DEVS" className="w-6 h-6 rounded-md object-cover" />
-            <span className="font-roman font-bold text-slate-300">HOMO DEVS Engine</span>
-            <span>•</span>
-            <span className="text-amber-400 font-roman">Romanvm Impervm</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-3">
+              <img src="/logo.png" alt="HOMO DEUS" className="w-6 h-6 rounded-md object-cover" />
+              <span className="font-roman font-bold text-slate-300">HOMO DEUS Engine</span>
+              <span>•</span>
+              <span className="text-amber-400 font-roman">Romanvm Impervm</span>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-center gap-4 text-slate-400 font-roman">
+              <button onClick={onOpenPrivacy} className="hover:text-amber-300 transition-colors">
+                Privacy Policy
+              </button>
+              <span>•</span>
+              <button onClick={onOpenTerms} className="hover:text-amber-300 transition-colors">
+                Terms of Service
+              </button>
+              <span>•</span>
+              <button onClick={onOpenCreed} className="hover:text-amber-300 transition-colors">
+                The Mythos
+              </button>
+              <span>•</span>
+              <a
+                href="https://kyrvynltd.co.uk"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-300 text-amber-400/90 font-bold transition-colors"
+              >
+                Kyrvyn Ltd Engineering
+              </a>
+              <span>•</span>
+              <a
+                href="https://github.com/GIL794/HomoDevs"
+                target="_blank"
+                rel="noreferrer"
+                className="hover:text-amber-300 transition-colors"
+              >
+                GitHub
+              </a>
+            </div>
+
+            <div className="text-slate-500 text-[11px] font-roman">
+              Built by Athletes for Athletes • Google OAuth Compliant
+            </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-4 text-slate-400 font-roman">
-            <button onClick={onOpenPrivacy} className="hover:text-amber-300 transition-colors">
-              Privacy Policy
-            </button>
-            <span>•</span>
-            <button onClick={onOpenTerms} className="hover:text-amber-300 transition-colors">
-              Terms of Service
-            </button>
-            <span>•</span>
-            <button onClick={onOpenCreed} className="hover:text-amber-300 transition-colors">
-              The Mythos
-            </button>
-            <span>•</span>
-            <a
-              href="https://github.com/GIL794/HomoDevs"
-              target="_blank"
-              rel="noreferrer"
-              className="hover:text-amber-300 transition-colors"
-            >
-              GitHub Repository
-            </a>
-          </div>
-
-          <div className="text-slate-500 text-[11px] font-roman">
-            Built by Athletes for Athletes • Google OAuth Compliant
+          <div className="pt-4 border-t border-slate-900 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500 font-roman">
+            <span>
+              © 2026 <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-amber-300 underline font-semibold">Kyrvyn Ltd</a> (Company No. 17246800, England & Wales). All rights reserved.
+            </span>
+            <span className="text-slate-500">
+              HOMO DEUS is a proprietary fitness engineering product of Kyrvyn Ltd.
+            </span>
           </div>
         </div>
       </footer>

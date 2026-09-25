@@ -71,3 +71,10 @@ Before completing any task:
 1. Run `npm test` to verify Vitest suites.
 2. Run `npm run build` to verify TypeScript typing and bundle compilation.
 3. Validate browser behavior and responsiveness.
+
+---
+
+## 5. Corporate Ownership & Customer Inquiries (Kyrvyn Ltd)
+
+- **Ownership Authority**: HOMO DEUS is an engineering product owned and operated by **Kyrvyn Ltd** (Company No. 17246800, England & Wales, `kyrvynltd.co.uk`).
+- **Support & Inquiries Protocol**: Never direct athletes, users, or customers to "contact Gabriele" or any individual developer. All customer support, technical assistance, payment verifications, and legal notices must direct to **Kyrvyn Ltd** (`contact@kyrvynltd.co.uk`).

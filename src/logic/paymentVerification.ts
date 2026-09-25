@@ -361,7 +361,12 @@ export function generatePaymentReceiptPdf(receipt: PaymentReceipt): void {
   doc.setFont('times', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(212, 175, 55);
-  doc.text('DECRETUM IMPERIALE — VALETUDO ET VIRTUS', pageWidth / 2, pageHeight - 16, { align: 'center' });
+  doc.text('DECRETUM IMPERIALE — VALETUDO ET VIRTUS', pageWidth / 2, pageHeight - 18, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(156, 163, 175);
+  doc.text('HOMO DEUS is an engineering product of Kyrvyn Ltd (kyrvynltd.co.uk) • Company No. 17246800, England & Wales', pageWidth / 2, pageHeight - 13, { align: 'center' });
 
   // Save PDF
   doc.save(`HOMO_DEUS_RECEIPT_${receipt.receiptId}.pdf`);

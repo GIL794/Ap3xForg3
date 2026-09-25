@@ -10,3 +10,4 @@ Please adhere strictly to the engineering standards and quality codex outlined i
 5. **Anatomical Visualization**: 2D SVG precision map is the default view. 3D WebGL auto-rotation is OFF by default; orientation snapping (Anterior/Posterior) halts rotation immediately.
 6. **Universal i18n**: No hardcoded English strings. Synchronize `universalTranslator.ts` with localized dictionaries in `i18n.ts` and `exerciseTranslations.ts`.
 7. **Quality Gateways**: Ensure `npm test` and `npm run build` pass with zero errors before concluding any turn.
+8. **Corporate Ownership**: Proprietary product of Kyrvyn Ltd (kyrvynltd.co.uk). Never refer to 'Gabriele' in user-facing copy, support messages, or legal texts; always cite Kyrvyn Ltd (contact@kyrvynltd.co.uk).

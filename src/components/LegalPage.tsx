@@ -51,10 +51,10 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
             <div className="space-y-4 text-xs sm:text-sm text-slate-300 leading-relaxed">
               <section className="space-y-2">
                 <h3 className="text-sm sm:text-base font-bold text-white font-roman flex items-center gap-2">
-                  <Lock className="w-4 h-4 text-amber-400" /> 1. Commitment to Athlete Privacy
+                  <Lock className="w-4 h-4 text-amber-400" /> 1. Commitment to Athlete Privacy & Ownership
                 </h3>
                 <p>
-                  HOMO DEVS ("we", "our", or "the Service") is built to deliver world-class Olympian fitness programming while maintaining absolute privacy. This policy outlines how your information is handled across our mobile and web applications.
+                  HOMO DEUS ("we", "our", or "the Service") is a proprietary fitness engineering and progressive overload platform engineered, owned, and operated by <strong>Kyrvyn Ltd</strong> (Company No. 17246800, registered in England & Wales, <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-amber-400 underline">kyrvynltd.co.uk</a>). This policy outlines how athlete data is securely handled across our applications in full compliance with the UK GDPR and international data standards.
                 </p>
               </section>
 
@@ -99,9 +99,14 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
                 </p>
               </section>
 
-              <section className="pt-4 border-t border-slate-800 flex items-center gap-2 text-xs text-slate-400">
-                <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-                <span>Contact & Inquiries: <strong className="text-slate-200">privacy@homodevs.app</strong></span>
+              <section className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-400">
+                <div className="flex items-center gap-2">
+                  <Mail className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>Contact & Data Officer: <strong className="text-slate-200">contact@kyrvynltd.co.uk</strong></span>
+                </div>
+                <div>
+                  Corporate: <strong className="text-slate-300">Kyrvyn Ltd</strong> (kyrvynltd.co.uk)
+                </div>
               </section>
             </div>
           </div>
@@ -150,6 +155,13 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
                   Imperivm Pro passes (£4.99/month or £99.99 Lifetime) grant premium access to Live Oracle AI, 3D bio-recovery heatmaps, and cloud sync. Monthly passes may be canceled at any time prior to the next billing cycle.
                 </p>
               </section>
+
+              <section className="space-y-2">
+                <h3 className="text-sm sm:text-base font-bold text-white font-roman">4. Corporate Ownership & Governing Law</h3>
+                <p>
+                  HOMO DEUS is a proprietary software product engineered and owned by <strong>Kyrvyn Ltd</strong> (Company No. 17246800, England & Wales, <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-amber-400 underline">kyrvynltd.co.uk</a>). These Terms are governed by and construed in accordance with the laws of England and Wales. For business inquiries or support, contact <strong className="text-slate-200">contact@kyrvynltd.co.uk</strong>.
+                </p>
+              </section>
             </div>
           </div>
         )}
@@ -162,7 +174,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
               </div>
               <div>
                 <h2 className="text-xl sm:text-2xl font-black font-roman text-white tracking-wide">
-                  The HOMO DEVS Mythos: The Colosseum Crucible & Divine Ascension
+                  The HOMO DEUS Mythos: The Colosseum Crucible & Divine Ascension
                 </h2>
                 <p className="text-xs text-slate-400">The Philosophy of the Romanvm Impervm Engine</p>
               </div>
@@ -182,7 +194,7 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
               </p>
 
               <p className="text-white font-roman font-bold text-base">
-                They ascend to stand as the living sovereign of their own body: <span className="text-amber-400">HOMO DEVS</span>.
+                They ascend to stand as the living sovereign of their own body: <span className="text-amber-400">HOMO DEUS</span>.
               </p>
             </div>
           </div>
@@ -190,8 +202,11 @@ export const LegalPage: React.FC<LegalPageProps> = ({ pageType, onBackToHome }) 
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-500 font-roman">
-        HOMO DEVS • Romanvm Impervm • Built for Immortals
+      <footer className="border-t border-slate-800 py-6 text-center text-xs text-slate-500 font-roman space-y-1">
+        <div>HOMO DEUS • Romanvm Impervm • Built for Immortals</div>
+        <div>
+          Proprietary Engineering Product of <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-slate-400 hover:text-amber-300 underline font-semibold">Kyrvyn Ltd</a> (Company No. 17246800, England & Wales)
+        </div>
       </footer>
     </div>
   );

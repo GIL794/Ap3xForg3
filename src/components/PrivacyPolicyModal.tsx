@@ -39,10 +39,10 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
         <div className="flex-1 overflow-y-auto p-6 space-y-5 text-xs text-slate-300 leading-relaxed">
           <section className="space-y-1.5">
             <h4 className="text-sm font-bold text-white font-roman flex items-center gap-1.5">
-              <Lock className="w-4 h-4 text-amber-400" /> 1. Introduction & Scope
+              <Lock className="w-4 h-4 text-amber-400" /> 1. Introduction & Ownership
             </h4>
             <p>
-              HOMO DEVS ("we", "our", or "the App") respects your personal privacy. This policy outlines how we handle athlete information when you use our workout generator and progress tracking engine.
+              HOMO DEUS ("we", "our", or "the App") is an engineering product owned and operated by <strong>Kyrvyn Ltd</strong> (Company No. 17246800, England & Wales, <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-amber-400 underline">kyrvynltd.co.uk</a>). We respect your privacy and process all data in compliance with the UK GDPR and international data protection standards.
             </p>
           </section>
 
@@ -85,7 +85,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
 
           <section className="space-y-1.5 pt-2 border-t border-slate-800 flex items-center gap-2 text-slate-400">
             <Mail className="w-4 h-4 text-amber-400 shrink-0" />
-            <span>Privacy inquiries & Data Officer: <strong className="text-slate-200">privacy@homodevs.app</strong></span>
+            <span>Privacy inquiries & Data Officer: <strong className="text-slate-200">contact@kyrvynltd.co.uk</strong> (Kyrvyn Ltd)</span>
           </section>
         </div>
 

@@ -62,6 +62,13 @@ export const TermsModal: React.FC<TermsModalProps> = ({ isOpen, onClose }) => {
               Imperivm Pro subscriptions (£4.99/mo or £99.99 Lifetime) grant premium access to Live Oracle AI, 3D bio-recovery heatmaps, and cloud sync. Monthly passes may be canceled anytime.
             </p>
           </section>
+
+          <section className="space-y-1.5">
+            <h4 className="text-sm font-bold text-white font-roman">4. Corporate Ownership & Contact</h4>
+            <p>
+              HOMO DEUS is a proprietary fitness product of <strong>Kyrvyn Ltd</strong> (Company No. 17246800, England & Wales, <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-amber-400 underline">kyrvynltd.co.uk</a>). For all commercial, technical, and legal inquiries, contact <strong className="text-slate-200">contact@kyrvynltd.co.uk</strong>.
+            </p>
+          </section>
         </div>
 
         {/* Footer */}

@@ -76,7 +76,7 @@ This document serves as the authoritative architectural blueprint, standard of p
 | :--- | :--- |
 | `src/logic/cryptoStorage.ts` | Web Crypto AES-GCM-256 encryption engine & SHA-256 hashing |
 | `src/logic/paymentVerification.ts` | Authentic transaction verification, anti-replay guards & PDF decrees |
-| `src/logic/universalTranslator.ts` | Google Translate universal DOM bridge & cookie synchronizer |
+| `src/logic/universalTranslator.ts` | Universal DOM document language synchronizer & cookie purger |
 | `src/logic/i18n.ts` | Multilingual UI dictionaries across 6 languages |
 | `src/logic/exerciseTranslations.ts` | Biomechanical lore, exercise names, and muscle translations |
 | `src/logic/pdfExporter.ts` | Imperial Parchment PDF generator for daily, exercise, & weekly scrolls |
@@ -84,3 +84,12 @@ This document serves as the authoritative architectural blueprint, standard of p
 | `src/components/ThreeAnatomicalModel.tsx` | Three.js WebGL 3D anatomical model with orientation snap |
 | `src/components/MuscleRecoveryGauge.tsx` | Fitbod-calibre 2D/3D muscle readiness & recovery simulation |
 | `src/components/TodayWorkoutView.tsx` | Segmented workout arena (Lifts, Bio-Recovery, Ascension) |
+
+---
+
+## 6. Corporate Ownership & Entity Attribution
+
+- **Sole Owner & Operating Company**: **Kyrvyn Ltd** (Company No. 17246800, England & Wales).
+- **Official Web & Contact**: [kyrvynltd.co.uk](https://kyrvynltd.co.uk) • `contact@kyrvynltd.co.uk`.
+- **Zero Individual Attribution in User-Facing Copy**: Never direct athletes or customers to "contact Gabriele" or any individual developer. All customer support, business inquiries, payment issues, and terms of service must strictly cite **Kyrvyn Ltd**.
+

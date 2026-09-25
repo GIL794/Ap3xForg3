@@ -56,7 +56,10 @@ export const DEFAULT_GABRIELE_ACCOUNT: UserAccount = {
 export const DEFAULT_LIFETIME_VIP_EMAILS = [
   'gella94@gmail.com',
   'gabriele@homodevs.app',
+  'contact@kyrvynltd.co.uk',
+  'admin@kyrvynltd.co.uk',
   'athlete_gabriele_founder',
+  'athlete_kyrvyn_founder',
 ];
 
 /**
@@ -70,12 +73,15 @@ export function isLifetimeVipUser(account?: UserAccount | null): boolean {
   const id = (account.id || '').trim().toLowerCase();
   const name = (account.name || '').trim().toLowerCase();
 
-  // Founder accounts
+  // Founder & Kyrvyn Ltd entity accounts
   if (
     DEFAULT_LIFETIME_VIP_EMAILS.includes(email) || 
     DEFAULT_LIFETIME_VIP_EMAILS.includes(id) ||
     email === 'gella94@gmail.com' ||
-    name === 'gabriele'
+    email.endsWith('@kyrvynltd.co.uk') ||
+    name === 'gabriele' ||
+    name === 'kyrvyn' ||
+    name === 'kyrvyn ltd'
   ) {
     return true;
   }

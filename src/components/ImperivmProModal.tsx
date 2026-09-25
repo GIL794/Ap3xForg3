@@ -139,7 +139,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
         setPasscodeError(null);
         triggerCelebration(res.message || 'Emperor Passcode verified! Lifetime Emperor granted.');
       } else {
-        setPasscodeError(res.message || 'Invalid Emperor Passcode. Please check the code or contact Gabriele.');
+        setPasscodeError(res.message || 'Invalid Emperor Passcode. Please check the code or contact Kyrvyn Ltd at kyrvynltd.co.uk.');
       }
     } finally {
       setIsVerifyingPasscode(false);
@@ -583,11 +583,17 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
         </div>
 
         {/* Footer Guarantee */}
-        <div className="p-4 sm:p-5 bg-slate-950 border-t border-amber-500/20 flex items-center justify-between text-xs text-slate-400">
-          <span className="flex items-center gap-1.5">
-            <Shield className="w-4 h-4 text-emerald-400" />
-            <span>Encrypted payment • Instant access • 100% satisfaction</span>
-          </span>
+        <div className="p-4 sm:p-5 bg-slate-950 border-t border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+          <div className="flex flex-col sm:flex-row items-center gap-2">
+            <span className="flex items-center gap-1.5">
+              <Shield className="w-4 h-4 text-emerald-400" />
+              <span>Encrypted payment • Instant access • 100% satisfaction</span>
+            </span>
+            <span className="hidden sm:inline text-slate-600">•</span>
+            <span className="text-[11px] text-slate-500 font-roman">
+              Product of <a href="https://kyrvynltd.co.uk" target="_blank" rel="noreferrer" className="text-amber-400/80 hover:text-amber-300 underline">Kyrvyn Ltd</a>
+            </span>
+          </div>
 
           <button
             onClick={onClose}
