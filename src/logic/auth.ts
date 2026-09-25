@@ -112,7 +112,9 @@ export function verifyEmperorPasscode(code: string): boolean {
   const validCodes = [
     'C0D3T0UNL0CK',
     (import.meta.env.VITE_LIFETIME_PRO_CODE || '').toUpperCase().trim(),
-  ].filter(Boolean);
+  ]
+    .filter(Boolean)
+    .filter(c => c !== 'YOUR_NEW_SECRET_PASSCODE');
 
   const isMatch = validCodes.includes(clean);
   if (isMatch) {
@@ -233,6 +235,15 @@ export async function verifyEmperorPasscodeOnline(
       if (data.success) {
         try {
           localStorage.setItem('homodevs_vip_passcode_unlocked', 'true');
+          if (account?.id) {
+            const storageKey = `homodevs_user_state_${account.id}`;
+            const raw = localStorage.getItem(storageKey);
+            if (raw) {
+              const state = JSON.parse(raw);
+              state.isProSubscriber = true;
+              localStorage.setItem(storageKey, JSON.stringify(state));
+            }
+          }
         } catch {
           // ignore
         }
@@ -247,6 +258,19 @@ export async function verifyEmperorPasscodeOnline(
 
   // 2. Offline / local fallback
   const isMatch = verifyEmperorPasscode(code);
+  if (isMatch && account?.id) {
+    try {
+      const storageKey = `homodevs_user_state_${account.id}`;
+      const raw = localStorage.getItem(storageKey);
+      if (raw) {
+        const state = JSON.parse(raw);
+        state.isProSubscriber = true;
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      }
+    } catch {
+      // ignore
+    }
+  }
   return {
     success: isMatch,
     message: isMatch ? 'Passcode verified offline.' : 'Invalid Emperor Passcode.',

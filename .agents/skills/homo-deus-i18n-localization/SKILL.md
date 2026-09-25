@@ -22,14 +22,14 @@ The HOMO DEUS engine supports 6 official languages:
 
 ---
 
-## 2. Multi-Tier Translation Architecture
-
+## 2. 100% Native Translation Architecture
+ 
 ```
 User View (DOM)
-  ├── 1. Native Compile-Time Dictionaries (i18n.ts & exerciseTranslations.ts)
-  │      → Zero network latency, instant render, 100% offline accuracy
-  └── 2. Google Translate Universal Bridge (universalTranslator.ts)
-         → Automates full DOM translation for dynamic AI text, notes, & edge-case copy
+  └── Native Compile-Time Dictionaries (i18n.ts & exerciseTranslations.ts)
+         → Zero network latency, instant render, 100% offline accuracy
+         → Sports-science terminology verified (no machine translation artifacts)
+         → Synchronized via universalTranslator.ts (document.documentElement.lang)
 ```
 
 ---

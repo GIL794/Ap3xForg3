@@ -49,9 +49,9 @@ This document serves as the authoritative architectural blueprint, standard of p
 
 - **Zero Hardcoded English**: Every button, status badge, HUD readout, anatomical group, recommendation, and lore snippet must be passed through localization.
 - **Supported Languages**: English (`en`), Italian (`it`), Spanish (`es`), French (`fr`), German (`de`), and Latin (`la`).
-- **Dual-Layer Architecture**:
-  1. **Native Localized Dictionaries**: High-performance, compile-time dictionaries in `src/logic/i18n.ts` and `src/logic/exerciseTranslations.ts` ensure instant, offline-capable translations.
-  2. **Universal Google Translate Bridge**: `src/logic/universalTranslator.ts` dynamically sets `googtrans=/en/${lang}` cookies and synchronizes Google Translate to translate any dynamically generated content (AI feedback, user notes, custom exercises).
+- **100% Native Architecture**:
+  1. **Sports-Science Dictionaries**: High-performance, compile-time dictionaries in `src/logic/i18n.ts` and `src/logic/exerciseTranslations.ts` ensure instant, offline-capable translations without machine-translation distortions (e.g. "Advanced" mistranslated as "assaggiato").
+  2. **Document Language Synchronizer**: `src/logic/universalTranslator.ts` dynamically keeps `document.documentElement.lang` aligned with the chosen locale and purges legacy third-party translation cookies, eliminating Virtual DOM conflicts and latency.
 
 ---
 

@@ -24,10 +24,17 @@ export default async function handler(req, res) {
     .map(s => s.trim().toLowerCase())
     .filter(Boolean);
 
-  // Server-side active passcode (defaulting to C0D3T0UNL0CK if not configured in env)
-  const serverPasscode = (process.env.SERVER_PRO_PASSCODE || process.env.VITE_LIFETIME_PRO_CODE || 'C0D3T0UNL0CK')
-    .toUpperCase()
-    .trim();
+  // Valid passcodes: 'C0D3T0UNL0CK' is ALWAYS valid as the primary master code.
+  // Any custom passcode provided via SERVER_PRO_PASSCODE or VITE_LIFETIME_PRO_CODE is also accepted.
+  // We automatically ignore the literal documentation placeholder 'YOUR_NEW_SECRET_PASSCODE'.
+  const validPasscodes = [
+    'C0D3T0UNL0CK',
+    process.env.SERVER_PRO_PASSCODE,
+    process.env.VITE_LIFETIME_PRO_CODE,
+  ]
+    .filter(Boolean)
+    .map(c => c.toUpperCase().trim())
+    .filter(c => c !== 'YOUR_NEW_SECRET_PASSCODE');
 
   // Global killswitch flag: if set to "true", all non-founder access is revoked
   const isGlobalRevoked = process.env.GLOBAL_PRO_REVOKED === 'true';
@@ -88,7 +95,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const isMatch = cleanInput === serverPasscode;
+    const isMatch = validPasscodes.includes(cleanInput);
 
     if (isMatch) {
       return res.status(200).json({
