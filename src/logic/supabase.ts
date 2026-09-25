@@ -93,6 +93,9 @@ create table if not exists public.profiles (
   timezone text default 'Europe/London',
   experience text,
   primary_goal text,
+  is_pro boolean default false,
+  pro_tier text default 'free',
+  pro_revoked boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -111,8 +114,11 @@ alter table public.profiles enable row level security;
 alter table public.user_plans enable row level security;
 
 -- Policies
-create policy "Users can view and edit own profile" on public.profiles
-  for all using (auth.uid() = id);
+create policy "Users can view own profile" on public.profiles
+  for select using (auth.uid() = id);
+
+create policy "Users can update non-entitlement profile data" on public.profiles
+  for update using (auth.uid() = id);
 
 create policy "Users can view and edit own plans" on public.user_plans
   for all using (auth.uid() = user_id);

@@ -147,6 +147,113 @@ export function revokeProAccess(userId?: string): void {
 }
 
 /**
+ * Checks with the remote authority (/api/verify-license and Supabase)
+ * to determine if this athlete's Pro access has been remotely revoked.
+ * If revoked, it automatically wipes the local Pro tokens and returns { valid: false, revoked: true }.
+ */
+export async function checkRemoteEntitlement(
+  account?: UserAccount | null,
+  receiptId?: string
+): Promise<{ valid: boolean; revoked: boolean; reason?: string }> {
+  if (!account) {
+    return { valid: true, revoked: false };
+  }
+
+  // 1. Check Supabase profiles table if connected
+  if (supabase && !account.isGuest) {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_pro, pro_revoked')
+        .eq('id', account.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        if (data.pro_revoked === true) {
+          revokeProAccess(account.id);
+          return { valid: false, revoked: true, reason: 'Revoked in central database' };
+        }
+      }
+    } catch {
+      // offline / non-blocking
+    }
+  }
+
+  // 2. Query Vercel serverless /api/verify-license
+  try {
+    const params = new URLSearchParams({
+      userId: account.id || '',
+      email: account.email || '',
+      receiptId: receiptId || '',
+    });
+
+    const res = await fetch(`/api/verify-license?${params.toString()}`, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' },
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.revoked === true || data.valid === false) {
+        revokeProAccess(account.id);
+        return { valid: false, revoked: true, reason: data.reason || 'Revoked by administrator' };
+      }
+    }
+  } catch {
+    // Network offline: retain existing offline capabilities
+  }
+
+  return { valid: true, revoked: false };
+}
+
+/**
+ * Asynchronously verifies the passcode with the serverless authority (/api/verify-license)
+ * first. Falls back to local verification if completely offline.
+ */
+export async function verifyEmperorPasscodeOnline(
+  code: string,
+  account?: UserAccount | null
+): Promise<{ success: boolean; message?: string }> {
+  if (!code) return { success: false, message: 'Passcode is required.' };
+
+  // 1. Try server-side verification
+  try {
+    const res = await fetch('/api/verify-license', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        passcode: code,
+        userId: account?.id,
+        email: account?.email,
+      }),
+    });
+
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success) {
+        try {
+          localStorage.setItem('homodevs_vip_passcode_unlocked', 'true');
+        } catch {
+          // ignore
+        }
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, message: data.message || 'Invalid Emperor Passcode.' };
+      }
+    }
+  } catch {
+    // Network unavailable, fallback to local check below
+  }
+
+  // 2. Offline / local fallback
+  const isMatch = verifyEmperorPasscode(code);
+  return {
+    success: isMatch,
+    message: isMatch ? 'Passcode verified offline.' : 'Invalid Emperor Passcode.',
+  };
+}
+
+/**
  * Retrieves list of all user accounts on this device
  */
 export function getAllUserAccounts(): UserAccount[] {

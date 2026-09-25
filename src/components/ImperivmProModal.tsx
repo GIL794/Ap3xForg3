@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { UserAccount } from '../types';
-import { isLifetimeVipUser, verifyEmperorPasscode } from '../logic/auth';
+import { isLifetimeVipUser, verifyEmperorPasscode, verifyEmperorPasscodeOnline } from '../logic/auth';
 import { SupportedLanguage, t } from '../logic/i18n';
 import { 
   verifyPaymentTransaction, 
@@ -53,6 +53,7 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
   const [copiedEmail, setCopiedEmail] = useState<boolean>(false);
   const [passcode, setPasscode] = useState<string>('');
   const [passcodeError, setPasscodeError] = useState<string | null>(null);
+  const [isVerifyingPasscode, setIsVerifyingPasscode] = useState<boolean>(false);
 
   // Authentic Payment Verification State
   const [txIdInput, setTxIdInput] = useState<string>('');
@@ -128,13 +129,20 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
     setSuccessMessage(res.message);
   };
 
-  const handlePasscodeSubmit = (e: React.FormEvent) => {
+  const handlePasscodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (verifyEmperorPasscode(passcode)) {
-      setPasscodeError(null);
-      triggerCelebration('Emperor Passcode verified! Lifetime Emperor granted.');
-    } else {
-      setPasscodeError('Invalid Emperor Passcode. Please check the code or contact Gabriele.');
+    setIsVerifyingPasscode(true);
+    setPasscodeError(null);
+    try {
+      const res = await verifyEmperorPasscodeOnline(passcode, currentUser);
+      if (res.success) {
+        setPasscodeError(null);
+        triggerCelebration(res.message || 'Emperor Passcode verified! Lifetime Emperor granted.');
+      } else {
+        setPasscodeError(res.message || 'Invalid Emperor Passcode. Please check the code or contact Gabriele.');
+      }
+    } finally {
+      setIsVerifyingPasscode(false);
     }
   };
 
@@ -519,9 +527,10 @@ export const ImperivmProModal: React.FC<ImperivmProModalProps> = ({
                   />
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-roman font-bold text-xs uppercase tracking-wider transition-colors shrink-0 shadow-sm"
+                    disabled={isVerifyingPasscode}
+                    className="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white font-roman font-bold text-xs uppercase tracking-wider transition-colors shrink-0 shadow-sm"
                   >
-                    Unlock
+                    {isVerifyingPasscode ? 'Verifying...' : 'Unlock'}
                   </button>
                 </div>
 

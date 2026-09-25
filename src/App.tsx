@@ -7,6 +7,7 @@ import {
   signOutAthlete,
   initSupabaseAuthListener,
   isLifetimeVipUser,
+  checkRemoteEntitlement,
   DEFAULT_GABRIELE_ACCOUNT,
   getAllUserAccounts 
 } from './logic/auth';
@@ -116,6 +117,23 @@ export const App: React.FC = () => {
       if (unsubscribe) unsubscribe();
     };
   }, []);
+
+  // Remote Entitlement & Revocation Heartbeat (ISO/IEC 27001)
+  // Queries serverless authority and Supabase to enforce remote revocations
+  useEffect(() => {
+    if (!appState.userAccount) return;
+    checkRemoteEntitlement(appState.userAccount).then((status) => {
+      if (status.revoked) {
+        setAppState((prev) => {
+          const updated = { ...prev, isProSubscriber: false };
+          if (prev.userId) {
+            saveUserState(prev.userId, updated);
+          }
+          return updated;
+        });
+      }
+    });
+  }, [appState.userAccount?.id]);
 
   // On app startup, detect and auto-archive any unsealed sessions from previous calendar days
   useEffect(() => {
